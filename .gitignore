@@ -1,14 +1,4 @@
-created by https://www.toptal.com/developers/gitignore/api/svelte
-# Edit at https://www.toptal.com/developers/gitignore?templates=svelte
-
-### Svelte ###
-# gitignore template for the SvelteKit, frontend web component framework
-# website: https://kit.svelte.dev/
-
-.svelte-kit/**
-package
-
-reated by https://www.toptal.com/developers/gitignore/api/svelte,node
+created by https://www.toptal.com/developers/gitignore/api/svelte,node
 # Edit at https://www.toptal.com/developers/gitignore?templates=svelte,node
 
 ### Node ###

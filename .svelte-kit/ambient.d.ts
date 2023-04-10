@@ -37,12 +37,10 @@ declare module '$env/static/private' {
 	export const OCAML_TOPLEVEL_PATH: string;
 	export const COLORTERM: string;
 	export const npm_config_cache: string;
-	export const npm_package_dev_optional: string;
 	export const XDG_SESSION_PATH: string;
 	export const FLY_API_TOKEN: string;
 	export const DATABASE_URL: string;
 	export const PKG_CONFIG_PATH: string;
-	export const npm_package_integrity: string;
 	export const HISTSIZE: string;
 	export const BASH_IT: string;
 	export const I3SOCK: string;
@@ -72,7 +70,6 @@ declare module '$env/static/private' {
 	export const XDG_SESSION_TYPE: string;
 	export const DSSI_PATH: string;
 	export const MANPATH: string;
-	export const npm_package_dev: string;
 	export const npm_config_init_module: string;
 	export const CXX: string;
 	export const _: string;
@@ -86,7 +83,6 @@ declare module '$env/static/private' {
 	export const GIT_HOSTING: string;
 	export const DB_USER: string;
 	export const HOME: string;
-	export const npm_package_peer: string;
 	export const LC_PAPER: string;
 	export const LANG: string;
 	export const VST_PATH: string;
@@ -95,7 +91,6 @@ declare module '$env/static/private' {
 	export const XDG_CURRENT_DESKTOP: string;
 	export const npm_package_version: string;
 	export const NIX_SSL_CERT_FILE: string;
-	export const npm_package_resolved: string;
 	export const KITTY_WINDOW_ID: string;
 	export const XDG_SEAT_PATH: string;
 	export const AWS_SECRET_ACCESS_KEY: string;
@@ -106,7 +101,6 @@ declare module '$env/static/private' {
 	export const POSTGRES_BIN: string;
 	export const npm_lifecycle_script: string;
 	export const NVM_DIR: string;
-	export const npm_package_optional: string;
 	export const XDG_SESSION_CLASS: string;
 	export const TERM: string;
 	export const TERMINFO: string;
@@ -160,9 +154,9 @@ declare module '$env/static/private' {
 	export const KITTY_INSTALLATION_DIR: string;
 	export const npm_node_execpath: string;
 	export const OLDPWD: string;
-	export const npm_package_engines_node: string;
 	export const LADSPA_PATH: string;
 	export const CADENCE_AUTO_STARTED: string;
+	export const NODE_ENV: string;
 }
 
 /**
@@ -203,12 +197,10 @@ declare module '$env/dynamic/private' {
 		OCAML_TOPLEVEL_PATH: string;
 		COLORTERM: string;
 		npm_config_cache: string;
-		npm_package_dev_optional: string;
 		XDG_SESSION_PATH: string;
 		FLY_API_TOKEN: string;
 		DATABASE_URL: string;
 		PKG_CONFIG_PATH: string;
-		npm_package_integrity: string;
 		HISTSIZE: string;
 		BASH_IT: string;
 		I3SOCK: string;
@@ -238,7 +230,6 @@ declare module '$env/dynamic/private' {
 		XDG_SESSION_TYPE: string;
 		DSSI_PATH: string;
 		MANPATH: string;
-		npm_package_dev: string;
 		npm_config_init_module: string;
 		CXX: string;
 		_: string;
@@ -252,7 +243,6 @@ declare module '$env/dynamic/private' {
 		GIT_HOSTING: string;
 		DB_USER: string;
 		HOME: string;
-		npm_package_peer: string;
 		LC_PAPER: string;
 		LANG: string;
 		VST_PATH: string;
@@ -261,7 +251,6 @@ declare module '$env/dynamic/private' {
 		XDG_CURRENT_DESKTOP: string;
 		npm_package_version: string;
 		NIX_SSL_CERT_FILE: string;
-		npm_package_resolved: string;
 		KITTY_WINDOW_ID: string;
 		XDG_SEAT_PATH: string;
 		AWS_SECRET_ACCESS_KEY: string;
@@ -272,7 +261,6 @@ declare module '$env/dynamic/private' {
 		POSTGRES_BIN: string;
 		npm_lifecycle_script: string;
 		NVM_DIR: string;
-		npm_package_optional: string;
 		XDG_SESSION_CLASS: string;
 		TERM: string;
 		TERMINFO: string;
@@ -326,9 +314,9 @@ declare module '$env/dynamic/private' {
 		KITTY_INSTALLATION_DIR: string;
 		npm_node_execpath: string;
 		OLDPWD: string;
-		npm_package_engines_node: string;
 		LADSPA_PATH: string;
 		CADENCE_AUTO_STARTED: string;
+		NODE_ENV: string;
 		[key: `PUBLIC_${string}`]: undefined;
 		[key: string]: string | undefined;
 	}
