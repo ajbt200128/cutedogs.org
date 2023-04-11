@@ -104,7 +104,7 @@
                 <Title order={2}>9 to 5</Title>
                 <Container size="sm">
                     <Text
-                        >Currently working as a program analyst <Anchor
+                        >Currently working as a fullstack engineer on the program analysis team at <Anchor
                             href="https://semgrep.dev"
                             external={true}>Semgrep, Inc</Anchor
                         >. Day to day I write OCaml, Python, and some
