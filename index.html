@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>cutedogs.org | Austin Theriault</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <link rel="stylesheet" href="./static/css/main.css">
+        <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+        <link rel="icon" type="image/png" href="./static/favicon.ico" />
+    </head>
+    <body class="bg-nord0">
+        <!--[if lt IE 8]>
+            <p class="browserupgrade">
+            You are using an <strong>outdated</strong> browser. Please
+            <a href="http://browsehappy.com/">upgrade your browser</a> to improve
+            your experience.
+            </p>
+        <![endif]-->
+        <br>
+        <div class="p-6 max-w-fit mx-auto bg-nord1 flex items-center space-x-10">
+            <div class="text-nord7 text-left font-mono">
+                <div class="text-sm font-light">================================================================================</div>
+                <p class="text-sm italic font-light text-nord3">//Welcome to my website! No cute dogs here</p>
+                <br>
+                <h1 class="text-lg font-medium text-nord14 text-center">Austin Theriault</h1>
+                <br>
+                <div class="text-md font-medium text-nord15 text-center">
+                    <a class="underline font-bold" href="https://github.com/ajbt200128">github</a> |
+                    <a class="underline font-bold" href="https://www.linkedin.com/in/austin-theriault-1648b2168/">linkedin</a> |
+                    <a class="underline font-bold" href="mailto:austin@cutedogs.org">email</a> |
+                    <a class="underline font-bold" href="https://paypal.me/austintheriault">paypal</a>
+                </div>
+                <br>
+                <br>
+                <div class="text-nord9 max-w-prose">
+                    <h2 class="text-md text-nord13">> 9 to 5 </h2>
+                    <p class="text-sm">
+                        Currently working as a fullstack engineer on the program analysis team at
+                        <a class="underline font-bold" href="https://semgrep.com">Semgrep, Inc.</a> Day to day I write OCaml, Python, and some Typescript, usually
+                        while hacking on our extension.
+                    </p>
+                    <h2 class="text-md text-nord13">> 6 to 10 </h2>
+                    <p class="text-sm">
+                        I spend too much time configuring Emacs and Linux. I
+                        like reading, food, skiing, biking, movies and music.
+                    </p>
+                </div>
+                <br>
+                <div class="text-nord11 font-bold animate-pulse">
+                    <span hx-trigger="load" hx-on="htmx:configRequest: event.detail.headers='';" hx-get="https://givemeguid.com"></span>
+                </div>
+                <div class="text-sm font-bold">================================================================================</div>
+            </div>
+        </div>
+
+    </body>
+</html>
