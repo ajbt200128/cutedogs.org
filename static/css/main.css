@@ -659,14 +659,8 @@ video {
   .md\:block {
     display: block;
   }
-}
 
-@media (min-width: 1024px) {
-  .lg\:block {
-    display: block;
-  }
-
-  .lg\:hidden {
+  .md\:hidden {
     display: none;
   }
 }
