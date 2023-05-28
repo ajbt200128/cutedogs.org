@@ -655,18 +655,18 @@ video {
   text-decoration-line: underline;
 }
 
-@media (min-width: 640px) {
-  .sm\:min-h-screen {
-    min-height: 100vh;
-  }
-}
-
 @media (min-width: 768px) {
   .md\:block {
     display: block;
   }
+}
 
-  .md\:hidden {
+@media (min-width: 1024px) {
+  .lg\:block {
+    display: block;
+  }
+
+  .lg\:hidden {
     display: none;
   }
 }
