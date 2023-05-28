@@ -20,18 +20,21 @@
             your experience.
             </p>
         <![endif]-->
+        <div class="hidden md:block">
         <br>
+        </div>
         <div class="p-6 max-w-fit mx-auto bg-nord1 flex items-center space-x-10">
             <div class="text-nord7 text-left font-mono">
-                <div class="text-sm font-light">================================================================================</div>
-                <p class="text-sm italic font-light text-nord3">//Welcome to my website! No cute dogs here</p>
+                <div class="hidden md:block text-sm font-light">================================================================================</div>
+                <div class="md:hidden text-sm font-light">========================================</div>
+                <p class="text-sm italic font-light text-nord3">// For actual cute dogs <a class="underline font-bold" href="https://httpstatusdogs.com/418">click here</a></p>
                 <br>
                 <h1 class="text-lg font-medium text-nord14 text-center">Austin Theriault</h1>
                 <br>
                 <div class="text-md font-medium text-nord15 text-center">
                     <a class="underline font-bold" href="https://github.com/ajbt200128">github</a> |
-                    <a class="underline font-bold" href="https://www.linkedin.com/in/austin-theriault-1648b2168/">linkedin</a> |
                     <a class="underline font-bold" href="mailto:austin+website@cutedogs.org">email</a> |
+                    <a class="underline font-bold" href="https://www.linkedin.com/in/austin-theriault-1648b2168/">linkedin</a> |
                     <a class="underline font-bold" href="https://paypal.me/austintheriault">paypal</a>
                 </div>
                 <br>
@@ -50,10 +53,11 @@
                     </p>
                 </div>
                 <br>
-                <div class="text-nord11 font-bold animate-pulse">
-                    <span hx-trigger="load" hx-on="htmx:configRequest: event.detail.headers='';" hx-get="https://givemeguid.com"></span>
+                <div class="text-sm text-nord11 font-bold animate-pulse">
+                    <span>^:</span><span hx-trigger="load" hx-on="htmx:configRequest: event.detail.headers='';" hx-get="https://givemeguid.com"></span>
                 </div>
-                <div class="text-sm font-bold">================================================================================</div>
+                <div class="md:hidden text-sm font-light">========================================</div>
+                <div class="hidden md:block text-sm font-light">================================================================================</div>
             </div>
         </div>
 
