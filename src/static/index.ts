@@ -46,6 +46,7 @@ let options: Options = {
         window.innerHeight > window.innerWidth ? "vertical" : "horizontal",
     showNavigator: true,
     showNavigationControl: false,
+    drawer: "canvas",
 };
 let viewer: Viewer = OpenSeadragon(options);
 let imagesOnCanvas = false;

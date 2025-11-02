@@ -13046,7 +13046,8 @@ var options = {
   crossOriginPolicy: "Anonymous",
   collectionLayout: window.innerHeight > window.innerWidth ? "vertical" : "horizontal",
   showNavigator: true,
-  showNavigationControl: false
+  showNavigationControl: false,
+  drawer: "canvas"
 };
 var viewer = import_openseadragon.default(options);
 var imagesOnCanvas = false;
