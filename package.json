@@ -1,0 +1,25 @@
+{
+  "name": "franz_collage",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^24.9.2",
+    "@types/openseadragon": "^5.0.1",
+    "wrangler": "^4.45.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "flickr-sdk": "^7.1.0",
+    "itty-router": "^5.0.22",
+    "openseadragon": "^5.0.1"
+  }
+}
