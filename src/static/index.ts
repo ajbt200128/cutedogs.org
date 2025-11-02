@@ -41,6 +41,9 @@ let options: Options = {
     collectionTileSize: 256,
     collectionTileMargin: 5,
     crossOriginPolicy: "Anonymous",
+    // vertial layout if we are on a narrow screen
+    collectionLayout:
+        window.innerHeight > window.innerWidth ? "vertical" : "horizontal",
     showNavigator: true,
     showNavigationControl: false,
 };

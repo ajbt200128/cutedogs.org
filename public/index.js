@@ -13044,6 +13044,7 @@ var options = {
   collectionTileSize: 256,
   collectionTileMargin: 5,
   crossOriginPolicy: "Anonymous",
+  collectionLayout: window.innerHeight > window.innerWidth ? "vertical" : "horizontal",
   showNavigator: true,
   showNavigationControl: false
 };
