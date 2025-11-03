@@ -4,6 +4,7 @@ import OpenSeadragon, {
     type Options,
 } from "openseadragon";
 import type { PhotosRequest, PhotosResponse } from "../shared/types";
+import { hideLoader } from "./util";
 
 const rough_max_image_pages = 1000 / 12; // assuming 9 images per page
 const random_page = Math.floor(Math.random() * rough_max_image_pages) + 1;
@@ -22,16 +23,6 @@ async function fetchPhotos() {
 
     const data: PhotosResponse = await resp.json();
     return data;
-}
-function hideLoader() {
-    const loader = document.getElementById("loader");
-    const canvas = document.getElementById("seadragon-viewer");
-    if (loader) {
-        loader.style.display = "none";
-    }
-    if (canvas) {
-        canvas.style.display = "block";
-    }
 }
 
 let options: Options = {

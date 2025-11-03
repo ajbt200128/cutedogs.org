@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "flickr-sdk": "^7.1.0",
+    "geotiff-tilesource": "^2.2.0",
     "itty-router": "^5.0.22",
     "openseadragon": "^5.0.1"
   }

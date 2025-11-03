@@ -5,6 +5,7 @@ export interface Env {
     router?: RouterType;
     FLICKR_KEY: string;
     FLICKR_SECRET: string;
+    PHOTO_BUCKET: R2Bucket;
     flickr?: Flickr;
 }
 
@@ -43,8 +44,6 @@ function buildRouter(env: Env): RouterType {
         let response = await searchFlickr(flickr, body.page);
 
         let photoInfos: any[] = [];
-        // while (response.photos.photo.length > 0) {
-        // find next photo w/ date taken after minTakenDate
         for (const photo of response.photos.photo) {
             console.log(photo);
             photoInfos.push(photo);
@@ -57,6 +56,21 @@ function buildRouter(env: Env): RouterType {
         });
         return Response.json({ photos });
     });
+    router.get("/api/collection/:collectionId", async (request) => {
+        // list all objects in the PHOTO_BUCKET with prefix collectionId/
+        const { collectionId } = request.params;
+        const prefix = `${collectionId}/`;
+        const listResponse = await env.PHOTO_BUCKET.list({
+            prefix: prefix,
+        });
+        const photoUrls = listResponse.objects
+            .filter((obj) => !obj.key.endsWith("/"))
+            .map((obj) => {
+                return `https:///live.cutedogs.org/` + obj.key;
+            });
+        return Response.json(photoUrls);
+    });
+
     router.all("*", () => new Response("Not Found.", { status: 404 }));
     return router;
 }

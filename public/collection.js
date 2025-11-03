@@ -13018,8 +13018,5832 @@ var require_openseadragon = __commonJS((exports, module) => {
   })(OpenSeadragon);
 });
 
-// src/static/index.ts
+// node_modules/geotiff-tilesource/dist/basedecoder-DHcBySSe.js
+function l(o, n) {
+  let t = o.length - n, r = 0;
+  do {
+    for (let a = n;a > 0; a--)
+      o[r + n] += o[r], r++;
+    t -= n;
+  } while (t > 0);
+}
+function d(o, n, t) {
+  let r = 0, a = o.length;
+  const i = a / t;
+  for (;a > n; ) {
+    for (let e = n;e > 0; --e)
+      o[r + n] += o[r], ++r;
+    a -= n;
+  }
+  const s = o.slice();
+  for (let e = 0;e < i; ++e)
+    for (let c = 0;c < t; ++c)
+      o[t * e + c] = s[(t - c - 1) * i + e];
+}
+function f(o, n, t, r, a, i) {
+  if (!n || n === 1)
+    return o;
+  for (let c = 0;c < a.length; ++c) {
+    if (a[c] % 8 !== 0)
+      throw new Error("When decoding with predictor, only multiple of 8 bits are supported.");
+    if (a[c] !== a[0])
+      throw new Error("When decoding with predictor, all samples must have the same size.");
+  }
+  const s = a[0] / 8, e = i === 2 ? 1 : a.length;
+  for (let c = 0;c < r && !(c * e * t * s >= o.byteLength); ++c) {
+    let h;
+    if (n === 2) {
+      switch (a[0]) {
+        case 8:
+          h = new Uint8Array(o, c * e * t * s, e * t * s);
+          break;
+        case 16:
+          h = new Uint16Array(o, c * e * t * s, e * t * s / 2);
+          break;
+        case 32:
+          h = new Uint32Array(o, c * e * t * s, e * t * s / 4);
+          break;
+        default:
+          throw new Error(`Predictor 2 not allowed with ${a[0]} bits per sample.`);
+      }
+      l(h, e);
+    } else
+      n === 3 && (h = new Uint8Array(o, c * e * t * s, e * t * s), d(h, e, s));
+  }
+  return o;
+}
+
+class g {
+  async decode(n, t) {
+    const r = await this.decodeBlock(t), a = n.Predictor || 1;
+    if (a !== 1) {
+      const i = !n.StripOffsets, s = i ? n.TileWidth : n.ImageWidth, e = i ? n.TileLength : n.RowsPerStrip || n.ImageLength;
+      return f(r, a, s, e, n.BitsPerSample, n.PlanarConfiguration);
+    }
+    return r;
+  }
+}
+var init_basedecoder_DHcBySSe = () => {};
+
+// node_modules/geotiff-tilesource/dist/raw-CMGvRjfu.js
+var exports_raw_CMGvRjfu = {};
+__export(exports_raw_CMGvRjfu, {
+  default: () => d2
+});
+var d2;
+var init_raw_CMGvRjfu = __esm(() => {
+  init_basedecoder_DHcBySSe();
+  d2 = class d2 extends g {
+    decodeBlock(e) {
+      return e;
+    }
+  };
+});
+
+// node_modules/geotiff-tilesource/dist/lzw-LAGDNbSC.js
+var exports_lzw_LAGDNbSC = {};
+__export(exports_lzw_LAGDNbSC, {
+  default: () => m
+});
+function x(c, o, r) {
+  const i = o % 8, n = Math.floor(o / 8), h = 8 - i, g2 = o + r - (n + 1) * 8;
+  let l2 = 8 * (n + 2) - (o + r);
+  const w = (n + 2) * 8 - o;
+  if (l2 = Math.max(0, l2), n >= c.length)
+    return console.warn("ran off the end of the buffer before finding EOI_CODE (end on input code)"), p;
+  let u = c[n] & 2 ** (8 - i) - 1;
+  u <<= r - h;
+  let s = u;
+  if (n + 1 < c.length) {
+    let f2 = c[n + 1] >>> l2;
+    f2 <<= Math.max(0, r - w), s += f2;
+  }
+  if (g2 > 8 && n + 2 < c.length) {
+    const f2 = (n + 3) * 8 - (o + r), t = c[n + 2] >>> f2;
+    s += t;
+  }
+  return s;
+}
+function D(c, o) {
+  for (let r = o.length - 1;r >= 0; r--)
+    c.push(o[r]);
+  return c;
+}
+function A(c) {
+  const o = new Uint16Array(4093), r = new Uint8Array(4093);
+  for (let e = 0;e <= 257; e++)
+    o[e] = 4096, r[e] = e;
+  let i = 258, n = B, h = 0;
+  function g2() {
+    i = 258, n = B;
+  }
+  function l2(e) {
+    const a = x(e, h, n);
+    return h += n, a;
+  }
+  function w(e, a) {
+    return r[i] = a, o[i] = e, i++, i - 1;
+  }
+  function u(e) {
+    const a = [];
+    for (let y = e;y !== 4096; y = o[y])
+      a.push(r[y]);
+    return a;
+  }
+  const s = [];
+  g2();
+  const f2 = new Uint8Array(c);
+  let t = l2(f2), d3;
+  for (;t !== p; ) {
+    if (t === E) {
+      for (g2(), t = l2(f2);t === E; )
+        t = l2(f2);
+      if (t === p)
+        break;
+      if (t > E)
+        throw new Error(`corrupted code at scanline ${t}`);
+      {
+        const e = u(t);
+        D(s, e), d3 = t;
+      }
+    } else if (t < i) {
+      const e = u(t);
+      D(s, e), w(d3, e[e.length - 1]), d3 = t;
+    } else {
+      const e = u(d3);
+      if (!e)
+        throw new Error(`Bogus entry. Not in dictionary, ${d3} / ${i}, position: ${h}`);
+      D(s, e), s.push(e[e.length - 1]), w(d3, e[e.length - 1]), d3 = t;
+    }
+    i + 1 >= 2 ** n && (n === k ? d3 = undefined : n++), t = l2(f2);
+  }
+  return new Uint8Array(s);
+}
+var B = 9, E = 256, p = 257, k = 12, m;
+var init_lzw_LAGDNbSC = __esm(() => {
+  init_basedecoder_DHcBySSe();
+  m = class m extends g {
+    decodeBlock(o) {
+      return A(o).buffer;
+    }
+  };
+});
+
+// node_modules/geotiff-tilesource/dist/jpeg-BAgeD1d3.js
+var exports_jpeg_BAgeD1d3 = {};
+__export(exports_jpeg_BAgeD1d3, {
+  default: () => fe
+});
+function ne(q, l2) {
+  let o = 0;
+  const u = [];
+  let T = 16;
+  for (;T > 0 && !q[T - 1]; )
+    --T;
+  u.push({ children: [], index: 0 });
+  let w = u[0], C;
+  for (let t = 0;t < T; t++) {
+    for (let h = 0;h < q[t]; h++) {
+      for (w = u.pop(), w.children[w.index] = l2[o];w.index > 0; )
+        w = u.pop();
+      for (w.index++, u.push(w);u.length <= t; )
+        u.push(C = { children: [], index: 0 }), w.children[w.index] = C.children, w = C;
+      o++;
+    }
+    t + 1 < T && (u.push(C = { children: [], index: 0 }), w.children[w.index] = C.children, w = C);
+  }
+  return u[0].children;
+}
+function ce(q, l2, o, u, T, w, C, t, h) {
+  const { mcusPerLine: F, progressive: c } = o, r = l2;
+  let b = l2, i = 0, d3 = 0;
+  function m2() {
+    if (d3 > 0)
+      return d3--, i >> d3 & 1;
+    if (i = q[b++], i === 255) {
+      const a = q[b++];
+      if (a)
+        throw new Error(`unexpected marker: ${(i << 8 | a).toString(16)}`);
+    }
+    return d3 = 7, i >>> 7;
+  }
+  function x2(a) {
+    let f2 = a, p2;
+    for (;(p2 = m2()) !== null; ) {
+      if (f2 = f2[p2], typeof f2 == "number")
+        return f2;
+      if (typeof f2 != "object")
+        throw new Error("invalid huffman sequence");
+    }
+    return null;
+  }
+  function E2(a) {
+    let f2 = a, p2 = 0;
+    for (;f2 > 0; ) {
+      const L = m2();
+      if (L === null)
+        return;
+      p2 = p2 << 1 | L, --f2;
+    }
+    return p2;
+  }
+  function k2(a) {
+    const f2 = E2(a);
+    return f2 >= 1 << a - 1 ? f2 : f2 + (-1 << a) + 1;
+  }
+  function A2(a, f2) {
+    const p2 = x2(a.huffmanTableDC), L = p2 === 0 ? 0 : k2(p2);
+    a.pred += L, f2[0] = a.pred;
+    let D2 = 1;
+    for (;D2 < 64; ) {
+      const P = x2(a.huffmanTableAC), y = P & 15, S = P >> 4;
+      if (y === 0) {
+        if (S < 15)
+          break;
+        D2 += 16;
+      } else {
+        D2 += S;
+        const I = O[D2];
+        f2[I] = k2(y), D2++;
+      }
+    }
+  }
+  function v(a, f2) {
+    const p2 = x2(a.huffmanTableDC), L = p2 === 0 ? 0 : k2(p2) << h;
+    a.pred += L, f2[0] = a.pred;
+  }
+  function s(a, f2) {
+    f2[0] |= m2() << h;
+  }
+  let n = 0;
+  function g2(a, f2) {
+    if (n > 0) {
+      n--;
+      return;
+    }
+    let p2 = w;
+    const L = C;
+    for (;p2 <= L; ) {
+      const D2 = x2(a.huffmanTableAC), P = D2 & 15, y = D2 >> 4;
+      if (P === 0) {
+        if (y < 15) {
+          n = E2(y) + (1 << y) - 1;
+          break;
+        }
+        p2 += 16;
+      } else {
+        p2 += y;
+        const S = O[p2];
+        f2[S] = k2(P) * (1 << h), p2++;
+      }
+    }
+  }
+  let e = 0, _;
+  function te(a, f2) {
+    let p2 = w;
+    const L = C;
+    let D2 = 0;
+    for (;p2 <= L; ) {
+      const P = O[p2], y = f2[P] < 0 ? -1 : 1;
+      switch (e) {
+        case 0: {
+          const S = x2(a.huffmanTableAC), I = S & 15;
+          if (D2 = S >> 4, I === 0)
+            D2 < 15 ? (n = E2(D2) + (1 << D2), e = 4) : (D2 = 16, e = 1);
+          else {
+            if (I !== 1)
+              throw new Error("invalid ACn encoding");
+            _ = k2(I), e = D2 ? 2 : 3;
+          }
+          continue;
+        }
+        case 1:
+        case 2:
+          f2[P] ? f2[P] += (m2() << h) * y : (D2--, D2 === 0 && (e = e === 2 ? 3 : 0));
+          break;
+        case 3:
+          f2[P] ? f2[P] += (m2() << h) * y : (f2[P] = _ << h, e = 0);
+          break;
+        case 4:
+          f2[P] && (f2[P] += (m2() << h) * y);
+          break;
+      }
+      p2++;
+    }
+    e === 4 && (n--, n === 0 && (e = 0));
+  }
+  function se(a, f2, p2, L, D2) {
+    const P = p2 / F | 0, y = p2 % F, S = P * a.v + L, I = y * a.h + D2;
+    f2(a, a.blocks[S][I]);
+  }
+  function oe(a, f2, p2) {
+    const L = p2 / a.blocksPerLine | 0, D2 = p2 % a.blocksPerLine;
+    f2(a, a.blocks[L][D2]);
+  }
+  const V = u.length;
+  let U, j, G, X, B2, H;
+  c ? w === 0 ? H = t === 0 ? v : s : H = t === 0 ? g2 : te : H = A2;
+  let M = 0, z, J;
+  V === 1 ? J = u[0].blocksPerLine * u[0].blocksPerColumn : J = F * o.mcusPerColumn;
+  const ee = T || J;
+  for (;M < J; ) {
+    for (j = 0;j < V; j++)
+      u[j].pred = 0;
+    if (n = 0, V === 1)
+      for (U = u[0], B2 = 0;B2 < ee; B2++)
+        oe(U, H, M), M++;
+    else
+      for (B2 = 0;B2 < ee; B2++) {
+        for (j = 0;j < V; j++) {
+          U = u[j];
+          const { h: a, v: f2 } = U;
+          for (G = 0;G < f2; G++)
+            for (X = 0;X < a; X++)
+              se(U, H, M, G, X);
+        }
+        if (M++, M === J)
+          break;
+      }
+    if (d3 = 0, z = q[b] << 8 | q[b + 1], z < 65280)
+      throw new Error("marker was not found");
+    if (z >= 65488 && z <= 65495)
+      b += 2;
+    else
+      break;
+  }
+  return b - r;
+}
+function ie(q, l2) {
+  const o = [], { blocksPerLine: u, blocksPerColumn: T } = l2, w = u << 3, C = new Int32Array(64), t = new Uint8Array(64);
+  function h(F, c, r) {
+    const b = l2.quantizationTable;
+    let i, d3, m2, x2, E2, k2, A2, v, s;
+    const n = r;
+    let g2;
+    for (g2 = 0;g2 < 64; g2++)
+      n[g2] = F[g2] * b[g2];
+    for (g2 = 0;g2 < 8; ++g2) {
+      const e = 8 * g2;
+      if (n[1 + e] === 0 && n[2 + e] === 0 && n[3 + e] === 0 && n[4 + e] === 0 && n[5 + e] === 0 && n[6 + e] === 0 && n[7 + e] === 0) {
+        s = R * n[0 + e] + 512 >> 10, n[0 + e] = s, n[1 + e] = s, n[2 + e] = s, n[3 + e] = s, n[4 + e] = s, n[5 + e] = s, n[6 + e] = s, n[7 + e] = s;
+        continue;
+      }
+      i = R * n[0 + e] + 128 >> 8, d3 = R * n[4 + e] + 128 >> 8, m2 = n[2 + e], x2 = n[6 + e], E2 = K * (n[1 + e] - n[7 + e]) + 128 >> 8, v = K * (n[1 + e] + n[7 + e]) + 128 >> 8, k2 = n[3 + e] << 4, A2 = n[5 + e] << 4, s = i - d3 + 1 >> 1, i = i + d3 + 1 >> 1, d3 = s, s = m2 * W + x2 * Q + 128 >> 8, m2 = m2 * Q - x2 * W + 128 >> 8, x2 = s, s = E2 - A2 + 1 >> 1, E2 = E2 + A2 + 1 >> 1, A2 = s, s = v + k2 + 1 >> 1, k2 = v - k2 + 1 >> 1, v = s, s = i - x2 + 1 >> 1, i = i + x2 + 1 >> 1, x2 = s, s = d3 - m2 + 1 >> 1, d3 = d3 + m2 + 1 >> 1, m2 = s, s = E2 * N + v * $ + 2048 >> 12, E2 = E2 * $ - v * N + 2048 >> 12, v = s, s = k2 * Z + A2 * Y + 2048 >> 12, k2 = k2 * Y - A2 * Z + 2048 >> 12, A2 = s, n[0 + e] = i + v, n[7 + e] = i - v, n[1 + e] = d3 + A2, n[6 + e] = d3 - A2, n[2 + e] = m2 + k2, n[5 + e] = m2 - k2, n[3 + e] = x2 + E2, n[4 + e] = x2 - E2;
+    }
+    for (g2 = 0;g2 < 8; ++g2) {
+      const e = g2;
+      if (n[1 * 8 + e] === 0 && n[2 * 8 + e] === 0 && n[3 * 8 + e] === 0 && n[4 * 8 + e] === 0 && n[5 * 8 + e] === 0 && n[6 * 8 + e] === 0 && n[7 * 8 + e] === 0) {
+        s = R * r[g2 + 0] + 8192 >> 14, n[0 * 8 + e] = s, n[1 * 8 + e] = s, n[2 * 8 + e] = s, n[3 * 8 + e] = s, n[4 * 8 + e] = s, n[5 * 8 + e] = s, n[6 * 8 + e] = s, n[7 * 8 + e] = s;
+        continue;
+      }
+      i = R * n[0 * 8 + e] + 2048 >> 12, d3 = R * n[4 * 8 + e] + 2048 >> 12, m2 = n[2 * 8 + e], x2 = n[6 * 8 + e], E2 = K * (n[1 * 8 + e] - n[7 * 8 + e]) + 2048 >> 12, v = K * (n[1 * 8 + e] + n[7 * 8 + e]) + 2048 >> 12, k2 = n[3 * 8 + e], A2 = n[5 * 8 + e], s = i - d3 + 1 >> 1, i = i + d3 + 1 >> 1, d3 = s, s = m2 * W + x2 * Q + 2048 >> 12, m2 = m2 * Q - x2 * W + 2048 >> 12, x2 = s, s = E2 - A2 + 1 >> 1, E2 = E2 + A2 + 1 >> 1, A2 = s, s = v + k2 + 1 >> 1, k2 = v - k2 + 1 >> 1, v = s, s = i - x2 + 1 >> 1, i = i + x2 + 1 >> 1, x2 = s, s = d3 - m2 + 1 >> 1, d3 = d3 + m2 + 1 >> 1, m2 = s, s = E2 * N + v * $ + 2048 >> 12, E2 = E2 * $ - v * N + 2048 >> 12, v = s, s = k2 * Z + A2 * Y + 2048 >> 12, k2 = k2 * Y - A2 * Z + 2048 >> 12, A2 = s, n[0 * 8 + e] = i + v, n[7 * 8 + e] = i - v, n[1 * 8 + e] = d3 + A2, n[6 * 8 + e] = d3 - A2, n[2 * 8 + e] = m2 + k2, n[5 * 8 + e] = m2 - k2, n[3 * 8 + e] = x2 + E2, n[4 * 8 + e] = x2 - E2;
+    }
+    for (g2 = 0;g2 < 64; ++g2) {
+      const e = 128 + (n[g2] + 8 >> 4);
+      e < 0 ? c[g2] = 0 : e > 255 ? c[g2] = 255 : c[g2] = e;
+    }
+  }
+  for (let F = 0;F < T; F++) {
+    const c = F << 3;
+    for (let r = 0;r < 8; r++)
+      o.push(new Uint8Array(w));
+    for (let r = 0;r < u; r++) {
+      h(l2.blocks[F][r], t, C);
+      let b = 0;
+      const i = r << 3;
+      for (let d3 = 0;d3 < 8; d3++) {
+        const m2 = o[c + d3];
+        for (let x2 = 0;x2 < 8; x2++)
+          m2[i + x2] = t[b++];
+      }
+    }
+  }
+  return o;
+}
+
+class le {
+  constructor() {
+    this.jfif = null, this.adobe = null, this.quantizationTables = [], this.huffmanTablesAC = [], this.huffmanTablesDC = [], this.resetFrames();
+  }
+  resetFrames() {
+    this.frames = [];
+  }
+  parse(l2) {
+    let o = 0;
+    function u() {
+      const t = l2[o] << 8 | l2[o + 1];
+      return o += 2, t;
+    }
+    function T() {
+      const t = u(), h = l2.subarray(o, o + t - 2);
+      return o += h.length, h;
+    }
+    function w(t) {
+      let h = 0, F = 0, c, r;
+      for (r in t.components)
+        t.components.hasOwnProperty(r) && (c = t.components[r], h < c.h && (h = c.h), F < c.v && (F = c.v));
+      const b = Math.ceil(t.samplesPerLine / 8 / h), i = Math.ceil(t.scanLines / 8 / F);
+      for (r in t.components)
+        if (t.components.hasOwnProperty(r)) {
+          c = t.components[r];
+          const d3 = Math.ceil(Math.ceil(t.samplesPerLine / 8) * c.h / h), m2 = Math.ceil(Math.ceil(t.scanLines / 8) * c.v / F), x2 = b * c.h, E2 = i * c.v, k2 = [];
+          for (let A2 = 0;A2 < E2; A2++) {
+            const v = [];
+            for (let s = 0;s < x2; s++)
+              v.push(new Int32Array(64));
+            k2.push(v);
+          }
+          c.blocksPerLine = d3, c.blocksPerColumn = m2, c.blocks = k2;
+        }
+      t.maxH = h, t.maxV = F, t.mcusPerLine = b, t.mcusPerColumn = i;
+    }
+    let C = u();
+    if (C !== 65496)
+      throw new Error("SOI not found");
+    for (C = u();C !== 65497; ) {
+      switch (C) {
+        case 65280:
+          break;
+        case 65504:
+        case 65505:
+        case 65506:
+        case 65507:
+        case 65508:
+        case 65509:
+        case 65510:
+        case 65511:
+        case 65512:
+        case 65513:
+        case 65514:
+        case 65515:
+        case 65516:
+        case 65517:
+        case 65518:
+        case 65519:
+        case 65534: {
+          const t = T();
+          C === 65504 && t[0] === 74 && t[1] === 70 && t[2] === 73 && t[3] === 70 && t[4] === 0 && (this.jfif = {
+            version: { major: t[5], minor: t[6] },
+            densityUnits: t[7],
+            xDensity: t[8] << 8 | t[9],
+            yDensity: t[10] << 8 | t[11],
+            thumbWidth: t[12],
+            thumbHeight: t[13],
+            thumbData: t.subarray(14, 14 + 3 * t[12] * t[13])
+          }), C === 65518 && t[0] === 65 && t[1] === 100 && t[2] === 111 && t[3] === 98 && t[4] === 101 && t[5] === 0 && (this.adobe = {
+            version: t[6],
+            flags0: t[7] << 8 | t[8],
+            flags1: t[9] << 8 | t[10],
+            transformCode: t[11]
+          });
+          break;
+        }
+        case 65499: {
+          const h = u() + o - 2;
+          for (;o < h; ) {
+            const F = l2[o++], c = new Int32Array(64);
+            if (F >> 4)
+              if (F >> 4 === 1)
+                for (let r = 0;r < 64; r++) {
+                  const b = O[r];
+                  c[b] = u();
+                }
+              else
+                throw new Error("DQT: invalid table spec");
+            else
+              for (let r = 0;r < 64; r++) {
+                const b = O[r];
+                c[b] = l2[o++];
+              }
+            this.quantizationTables[F & 15] = c;
+          }
+          break;
+        }
+        case 65472:
+        case 65473:
+        case 65474: {
+          u();
+          const t = {
+            extended: C === 65473,
+            progressive: C === 65474,
+            precision: l2[o++],
+            scanLines: u(),
+            samplesPerLine: u(),
+            components: {},
+            componentsOrder: []
+          }, h = l2[o++];
+          let F;
+          for (let c = 0;c < h; c++) {
+            F = l2[o];
+            const r = l2[o + 1] >> 4, b = l2[o + 1] & 15, i = l2[o + 2];
+            t.componentsOrder.push(F), t.components[F] = {
+              h: r,
+              v: b,
+              quantizationIdx: i
+            }, o += 3;
+          }
+          w(t), this.frames.push(t);
+          break;
+        }
+        case 65476: {
+          const t = u();
+          for (let h = 2;h < t; ) {
+            const F = l2[o++], c = new Uint8Array(16);
+            let r = 0;
+            for (let i = 0;i < 16; i++, o++)
+              c[i] = l2[o], r += c[i];
+            const b = new Uint8Array(r);
+            for (let i = 0;i < r; i++, o++)
+              b[i] = l2[o];
+            h += 17 + r, F >> 4 ? this.huffmanTablesAC[F & 15] = ne(c, b) : this.huffmanTablesDC[F & 15] = ne(c, b);
+          }
+          break;
+        }
+        case 65501:
+          u(), this.resetInterval = u();
+          break;
+        case 65498: {
+          u();
+          const t = l2[o++], h = [], F = this.frames[0];
+          for (let d3 = 0;d3 < t; d3++) {
+            const m2 = F.components[l2[o++]], x2 = l2[o++];
+            m2.huffmanTableDC = this.huffmanTablesDC[x2 >> 4], m2.huffmanTableAC = this.huffmanTablesAC[x2 & 15], h.push(m2);
+          }
+          const c = l2[o++], r = l2[o++], b = l2[o++], i = ce(l2, o, F, h, this.resetInterval, c, r, b >> 4, b & 15);
+          o += i;
+          break;
+        }
+        case 65535:
+          l2[o] !== 255 && o--;
+          break;
+        default:
+          if (l2[o - 3] === 255 && l2[o - 2] >= 192 && l2[o - 2] <= 254) {
+            o -= 3;
+            break;
+          }
+          throw new Error(`unknown JPEG marker ${C.toString(16)}`);
+      }
+      C = u();
+    }
+  }
+  getResult() {
+    const { frames: l2 } = this;
+    if (this.frames.length === 0)
+      throw new Error("no frames were decoded");
+    this.frames.length > 1 && console.warn("more than one frame is not supported");
+    for (let c = 0;c < this.frames.length; c++) {
+      const r = this.frames[c].components;
+      for (const b of Object.keys(r))
+        r[b].quantizationTable = this.quantizationTables[r[b].quantizationIdx], delete r[b].quantizationIdx;
+    }
+    const o = l2[0], { components: u, componentsOrder: T } = o, w = [], C = o.samplesPerLine, t = o.scanLines;
+    for (let c = 0;c < T.length; c++) {
+      const r = u[T[c]];
+      w.push({
+        lines: ie(o, r),
+        scaleX: r.h / o.maxH,
+        scaleY: r.v / o.maxV
+      });
+    }
+    const h = new Uint8Array(C * t * w.length);
+    let F = 0;
+    for (let c = 0;c < t; ++c)
+      for (let r = 0;r < C; ++r)
+        for (let b = 0;b < w.length; ++b) {
+          const i = w[b];
+          h[F] = i.lines[0 | c * i.scaleY][0 | r * i.scaleX], ++F;
+        }
+    return h;
+  }
+}
+var O, Y = 4017, Z = 799, $ = 3406, N = 2276, Q = 1567, W = 3784, R = 5793, K = 2896, fe;
+var init_jpeg_BAgeD1d3 = __esm(() => {
+  init_basedecoder_DHcBySSe();
+  O = new Int32Array([
+    0,
+    1,
+    8,
+    16,
+    9,
+    2,
+    3,
+    10,
+    17,
+    24,
+    32,
+    25,
+    18,
+    11,
+    4,
+    5,
+    12,
+    19,
+    26,
+    33,
+    40,
+    48,
+    41,
+    34,
+    27,
+    20,
+    13,
+    6,
+    7,
+    14,
+    21,
+    28,
+    35,
+    42,
+    49,
+    56,
+    57,
+    50,
+    43,
+    36,
+    29,
+    22,
+    15,
+    23,
+    30,
+    37,
+    44,
+    51,
+    58,
+    59,
+    52,
+    45,
+    38,
+    31,
+    39,
+    46,
+    53,
+    60,
+    61,
+    54,
+    47,
+    55,
+    62,
+    63
+  ]);
+  fe = class fe extends g {
+    constructor(l2) {
+      super(), this.reader = new le, l2.JPEGTables && this.reader.parse(l2.JPEGTables);
+    }
+    decodeBlock(l2) {
+      return this.reader.resetFrames(), this.reader.parse(new Uint8Array(l2)), this.reader.getResult().buffer;
+    }
+  };
+});
+
+// node_modules/geotiff-tilesource/dist/pako.esm-CB1uQYY0.js
+function he(e) {
+  let i = e.length;
+  for (;--i >= 0; )
+    e[i] = 0;
+}
+function Ye(e, i, t, n, r) {
+  this.static_tree = e, this.extra_bits = i, this.extra_base = t, this.elems = n, this.max_length = r, this.has_stree = e && e.length;
+}
+function Ge(e, i) {
+  this.dyn_tree = e, this.max_code = 0, this.stat_desc = i;
+}
+function F(e, i, t, n, r) {
+  this.good_length = e, this.max_lazy = i, this.nice_length = t, this.max_chain = n, this.func = r;
+}
+function Kn() {
+  this.strm = null, this.status = 0, this.pending_buf = null, this.pending_buf_size = 0, this.pending_out = 0, this.pending = 0, this.wrap = 0, this.gzhead = null, this.gzindex = 0, this.method = Be, this.last_flush = -1, this.w_size = 0, this.w_bits = 0, this.w_mask = 0, this.window = null, this.window_size = 0, this.prev = null, this.head = null, this.ins_h = 0, this.hash_size = 0, this.hash_bits = 0, this.hash_mask = 0, this.hash_shift = 0, this.block_start = 0, this.match_length = 0, this.prev_match = 0, this.match_available = 0, this.strstart = 0, this.match_start = 0, this.lookahead = 0, this.prev_length = 0, this.max_chain_length = 0, this.max_lazy_match = 0, this.level = 0, this.strategy = 0, this.good_match = 0, this.nice_match = 0, this.dyn_ltree = new Uint16Array(Nn * 2), this.dyn_dtree = new Uint16Array((2 * In + 1) * 2), this.bl_tree = new Uint16Array((2 * On + 1) * 2), Y2(this.dyn_ltree), Y2(this.dyn_dtree), Y2(this.bl_tree), this.l_desc = null, this.d_desc = null, this.bl_desc = null, this.bl_count = new Uint16Array(Ln + 1), this.heap = new Uint16Array(2 * ft + 1), Y2(this.heap), this.heap_len = 0, this.heap_max = 0, this.depth = new Uint16Array(2 * ft + 1), Y2(this.depth), this.sym_buf = 0, this.lit_bufsize = 0, this.sym_next = 0, this.sym_end = 0, this.opt_len = 0, this.static_len = 0, this.matches = 0, this.insert = 0, this.bi_buf = 0, this.bi_valid = 0;
+}
+function da() {
+  this.input = null, this.next_in = 0, this.avail_in = 0, this.total_in = 0, this.output = null, this.next_out = 0, this.avail_out = 0, this.total_out = 0, this.msg = "", this.state = null, this.data_type = 2, this.adler = 0;
+}
+function xt(e) {
+  this.options = Ke.assign({
+    level: ga,
+    method: xa,
+    chunkSize: 16384,
+    windowBits: 15,
+    memLevel: 8,
+    strategy: pa
+  }, e || {});
+  let i = this.options;
+  i.raw && i.windowBits > 0 ? i.windowBits = -i.windowBits : i.gzip && i.windowBits > 0 && i.windowBits < 16 && (i.windowBits += 16), this.err = 0, this.msg = "", this.ended = false, this.chunks = [], this.strm = new zi, this.strm.avail_out = 0;
+  let t = ge.deflateInit2(this.strm, i.level, i.method, i.windowBits, i.memLevel, i.strategy);
+  if (t !== Me)
+    throw new Error(oe[t]);
+  if (i.header && ge.deflateSetHeader(this.strm, i.header), i.dictionary) {
+    let n;
+    if (typeof i.dictionary == "string" ? n = Se.string2buf(i.dictionary) : Ti.call(i.dictionary) === "[object ArrayBuffer]" ? n = new Uint8Array(i.dictionary) : n = i.dictionary, t = ge.deflateSetDictionary(this.strm, n), t !== Me)
+      throw new Error(oe[t]);
+    this._dict_set = true;
+  }
+}
+function Ua() {
+  this.strm = null, this.mode = 0, this.last = false, this.wrap = 0, this.havedict = false, this.flags = 0, this.dmax = 0, this.check = 0, this.total = 0, this.head = null, this.wbits = 0, this.wsize = 0, this.whave = 0, this.wnext = 0, this.window = null, this.hold = 0, this.bits = 0, this.length = 0, this.offset = 0, this.extra = 0, this.lencode = null, this.distcode = null, this.lenbits = 0, this.distbits = 0, this.ncode = 0, this.nlen = 0, this.ndist = 0, this.have = 0, this.next = null, this.lens = new Uint16Array(320), this.work = new Uint16Array(288), this.lendyn = null, this.distdyn = null, this.sane = 0, this.back = 0, this.was = 0;
+}
+function qa() {
+  this.text = 0, this.time = 0, this.xflags = 0, this.os = 0, this.extra = null, this.extra_len = 0, this.name = "", this.comment = "", this.hcrc = 0, this.done = false;
+}
+function De(e) {
+  this.options = Ke.assign({
+    chunkSize: 1024 * 64,
+    windowBits: 15,
+    to: ""
+  }, e || {});
+  const i = this.options;
+  i.raw && i.windowBits >= 0 && i.windowBits < 16 && (i.windowBits = -i.windowBits, i.windowBits === 0 && (i.windowBits = -15)), i.windowBits >= 0 && i.windowBits < 16 && !(e && e.windowBits) && (i.windowBits += 32), i.windowBits > 15 && i.windowBits < 48 && (i.windowBits & 15 || (i.windowBits |= 15)), this.err = 0, this.msg = "", this.ended = false, this.chunks = [], this.strm = new zi, this.strm.avail_out = 0;
+  let t = X.inflateInit2(this.strm, i.windowBits);
+  if (t !== Ae)
+    throw new Error(oe[t]);
+  if (this.header = new er, X.inflateGetHeader(this.strm, this.header), i.dictionary && (typeof i.dictionary == "string" ? i.dictionary = Se.string2buf(i.dictionary) : Mi.call(i.dictionary) === "[object ArrayBuffer]" && (i.dictionary = new Uint8Array(i.dictionary)), i.raw && (t = X.inflateSetDictionary(this.strm, i.dictionary), t !== Ae)))
+    throw new Error(oe[t]);
+}
+function kt(e, i) {
+  const t = new De(i);
+  if (t.push(e), t.err)
+    throw t.msg || oe[t.err];
+  return t.result;
+}
+function rr(e, i) {
+  return i = i || {}, i.raw = true, kt(e, i);
+}
+var Hi = 0, li = 1, Bi = 2, Ki = 3, Pi = 258, ut = 29, ze = 256, xe, le2 = 30, wt = 19, oi, Q2 = 15, Xe = 16, Xi = 7, bt = 256, fi = 16, _i = 17, hi = 18, rt, $e, Yi, di, Gi = 512, P, be, ke, ve, gt, Fe, si, ci, ui, wi = (e) => e < 256 ? ke[e] : ke[256 + (e >>> 7)], Ee = (e, i) => {
+  e.pending_buf[e.pending++] = i & 255, e.pending_buf[e.pending++] = i >>> 8 & 255;
+}, N2 = (e, i, t) => {
+  e.bi_valid > Xe - t ? (e.bi_buf |= i << e.bi_valid & 65535, Ee(e, e.bi_buf), e.bi_buf = i >> Xe - e.bi_valid, e.bi_valid += t - Xe) : (e.bi_buf |= i << e.bi_valid & 65535, e.bi_valid += t);
+}, M = (e, i, t) => {
+  N2(e, t[i * 2], t[i * 2 + 1]);
+}, bi = (e, i) => {
+  let t = 0;
+  do
+    t |= e & 1, e >>>= 1, t <<= 1;
+  while (--i > 0);
+  return t >>> 1;
+}, ji = (e) => {
+  e.bi_valid === 16 ? (Ee(e, e.bi_buf), e.bi_buf = 0, e.bi_valid = 0) : e.bi_valid >= 8 && (e.pending_buf[e.pending++] = e.bi_buf & 255, e.bi_buf >>= 8, e.bi_valid -= 8);
+}, Wi = (e, i) => {
+  const { dyn_tree: t, max_code: n } = i, r = i.stat_desc.static_tree, a = i.stat_desc.has_stree, f2 = i.stat_desc.extra_bits, o = i.stat_desc.extra_base, c = i.stat_desc.max_length;
+  let l2, _, y, s, h, u, R2 = 0;
+  for (s = 0;s <= Q2; s++)
+    e.bl_count[s] = 0;
+  for (t[e.heap[e.heap_max] * 2 + 1] = 0, l2 = e.heap_max + 1;l2 < oi; l2++)
+    _ = e.heap[l2], s = t[t[_ * 2 + 1] * 2 + 1] + 1, s > c && (s = c, R2++), t[_ * 2 + 1] = s, !(_ > n) && (e.bl_count[s]++, h = 0, _ >= o && (h = f2[_ - o]), u = t[_ * 2], e.opt_len += u * (s + h), a && (e.static_len += u * (r[_ * 2 + 1] + h)));
+  if (R2 !== 0) {
+    do {
+      for (s = c - 1;e.bl_count[s] === 0; )
+        s--;
+      e.bl_count[s]--, e.bl_count[s + 1] += 2, e.bl_count[c]--, R2 -= 2;
+    } while (R2 > 0);
+    for (s = c;s !== 0; s--)
+      for (_ = e.bl_count[s];_ !== 0; )
+        y = e.heap[--l2], !(y > n) && (t[y * 2 + 1] !== s && (e.opt_len += (s - t[y * 2 + 1]) * t[y * 2], t[y * 2 + 1] = s), _--);
+  }
+}, gi = (e, i, t) => {
+  const n = new Array(Q2 + 1);
+  let r = 0, a, f2;
+  for (a = 1;a <= Q2; a++)
+    r = r + t[a - 1] << 1, n[a] = r;
+  for (f2 = 0;f2 <= i; f2++) {
+    let o = e[f2 * 2 + 1];
+    o !== 0 && (e[f2 * 2] = bi(n[o]++, o));
+  }
+}, Vi = () => {
+  let e, i, t, n, r;
+  const a = new Array(Q2 + 1);
+  for (t = 0, n = 0;n < ut - 1; n++)
+    for (gt[n] = t, e = 0;e < 1 << rt[n]; e++)
+      ve[t++] = n;
+  for (ve[t - 1] = n, r = 0, n = 0;n < 16; n++)
+    for (Fe[n] = r, e = 0;e < 1 << $e[n]; e++)
+      ke[r++] = n;
+  for (r >>= 7;n < le2; n++)
+    for (Fe[n] = r << 7, e = 0;e < 1 << $e[n] - 7; e++)
+      ke[256 + r++] = n;
+  for (i = 0;i <= Q2; i++)
+    a[i] = 0;
+  for (e = 0;e <= 143; )
+    P[e * 2 + 1] = 8, e++, a[8]++;
+  for (;e <= 255; )
+    P[e * 2 + 1] = 9, e++, a[9]++;
+  for (;e <= 279; )
+    P[e * 2 + 1] = 7, e++, a[7]++;
+  for (;e <= 287; )
+    P[e * 2 + 1] = 8, e++, a[8]++;
+  for (gi(P, xe + 1, a), e = 0;e < le2; e++)
+    be[e * 2 + 1] = 5, be[e * 2] = bi(e, 5);
+  si = new Ye(P, rt, ze + 1, xe, Q2), ci = new Ye(be, $e, 0, le2, Q2), ui = new Ye(new Array(0), Yi, 0, wt, Xi);
+}, pi = (e) => {
+  let i;
+  for (i = 0;i < xe; i++)
+    e.dyn_ltree[i * 2] = 0;
+  for (i = 0;i < le2; i++)
+    e.dyn_dtree[i * 2] = 0;
+  for (i = 0;i < wt; i++)
+    e.bl_tree[i * 2] = 0;
+  e.dyn_ltree[bt * 2] = 1, e.opt_len = e.static_len = 0, e.sym_next = e.matches = 0;
+}, xi = (e) => {
+  e.bi_valid > 8 ? Ee(e, e.bi_buf) : e.bi_valid > 0 && (e.pending_buf[e.pending++] = e.bi_buf), e.bi_buf = 0, e.bi_valid = 0;
+}, Et = (e, i, t, n) => {
+  const r = i * 2, a = t * 2;
+  return e[r] < e[a] || e[r] === e[a] && n[i] <= n[t];
+}, je = (e, i, t) => {
+  const n = e.heap[t];
+  let r = t << 1;
+  for (;r <= e.heap_len && (r < e.heap_len && Et(i, e.heap[r + 1], e.heap[r], e.depth) && r++, !Et(i, n, e.heap[r], e.depth)); )
+    e.heap[t] = e.heap[r], t = r, r <<= 1;
+  e.heap[t] = n;
+}, yt = (e, i, t) => {
+  let n, r, a = 0, f2, o;
+  if (e.sym_next !== 0)
+    do
+      n = e.pending_buf[e.sym_buf + a++] & 255, n += (e.pending_buf[e.sym_buf + a++] & 255) << 8, r = e.pending_buf[e.sym_buf + a++], n === 0 ? M(e, r, i) : (f2 = ve[r], M(e, f2 + ze + 1, i), o = rt[f2], o !== 0 && (r -= gt[f2], N2(e, r, o)), n--, f2 = wi(n), M(e, f2, t), o = $e[f2], o !== 0 && (n -= Fe[f2], N2(e, n, o)));
+    while (a < e.sym_next);
+  M(e, bt, i);
+}, lt = (e, i) => {
+  const t = i.dyn_tree, n = i.stat_desc.static_tree, r = i.stat_desc.has_stree, a = i.stat_desc.elems;
+  let f2, o, c = -1, l2;
+  for (e.heap_len = 0, e.heap_max = oi, f2 = 0;f2 < a; f2++)
+    t[f2 * 2] !== 0 ? (e.heap[++e.heap_len] = c = f2, e.depth[f2] = 0) : t[f2 * 2 + 1] = 0;
+  for (;e.heap_len < 2; )
+    l2 = e.heap[++e.heap_len] = c < 2 ? ++c : 0, t[l2 * 2] = 1, e.depth[l2] = 0, e.opt_len--, r && (e.static_len -= n[l2 * 2 + 1]);
+  for (i.max_code = c, f2 = e.heap_len >> 1;f2 >= 1; f2--)
+    je(e, t, f2);
+  l2 = a;
+  do
+    f2 = e.heap[1], e.heap[1] = e.heap[e.heap_len--], je(e, t, 1), o = e.heap[1], e.heap[--e.heap_max] = f2, e.heap[--e.heap_max] = o, t[l2 * 2] = t[f2 * 2] + t[o * 2], e.depth[l2] = (e.depth[f2] >= e.depth[o] ? e.depth[f2] : e.depth[o]) + 1, t[f2 * 2 + 1] = t[o * 2 + 1] = l2, e.heap[1] = l2++, je(e, t, 1);
+  while (e.heap_len >= 2);
+  e.heap[--e.heap_max] = e.heap[1], Wi(e, i), gi(t, c, e.bl_count);
+}, mt = (e, i, t) => {
+  let n, r = -1, a, f2 = i[0 * 2 + 1], o = 0, c = 7, l2 = 4;
+  for (f2 === 0 && (c = 138, l2 = 3), i[(t + 1) * 2 + 1] = 65535, n = 0;n <= t; n++)
+    a = f2, f2 = i[(n + 1) * 2 + 1], !(++o < c && a === f2) && (o < l2 ? e.bl_tree[a * 2] += o : a !== 0 ? (a !== r && e.bl_tree[a * 2]++, e.bl_tree[fi * 2]++) : o <= 10 ? e.bl_tree[_i * 2]++ : e.bl_tree[hi * 2]++, o = 0, r = a, f2 === 0 ? (c = 138, l2 = 3) : a === f2 ? (c = 6, l2 = 3) : (c = 7, l2 = 4));
+}, St = (e, i, t) => {
+  let n, r = -1, a, f2 = i[0 * 2 + 1], o = 0, c = 7, l2 = 4;
+  for (f2 === 0 && (c = 138, l2 = 3), n = 0;n <= t; n++)
+    if (a = f2, f2 = i[(n + 1) * 2 + 1], !(++o < c && a === f2)) {
+      if (o < l2)
+        do
+          M(e, a, e.bl_tree);
+        while (--o !== 0);
+      else
+        a !== 0 ? (a !== r && (M(e, a, e.bl_tree), o--), M(e, fi, e.bl_tree), N2(e, o - 3, 2)) : o <= 10 ? (M(e, _i, e.bl_tree), N2(e, o - 3, 3)) : (M(e, hi, e.bl_tree), N2(e, o - 11, 7));
+      o = 0, r = a, f2 === 0 ? (c = 138, l2 = 3) : a === f2 ? (c = 6, l2 = 3) : (c = 7, l2 = 4);
+    }
+}, Ji = (e) => {
+  let i;
+  for (mt(e, e.dyn_ltree, e.l_desc.max_code), mt(e, e.dyn_dtree, e.d_desc.max_code), lt(e, e.bl_desc), i = wt - 1;i >= 3 && e.bl_tree[di[i] * 2 + 1] === 0; i--)
+    ;
+  return e.opt_len += 3 * (i + 1) + 5 + 5 + 4, i;
+}, Qi = (e, i, t, n) => {
+  let r;
+  for (N2(e, i - 257, 5), N2(e, t - 1, 5), N2(e, n - 4, 4), r = 0;r < n; r++)
+    N2(e, e.bl_tree[di[r] * 2 + 1], 3);
+  St(e, e.dyn_ltree, i - 1), St(e, e.dyn_dtree, t - 1);
+}, qi = (e) => {
+  let i = 4093624447, t;
+  for (t = 0;t <= 31; t++, i >>>= 1)
+    if (i & 1 && e.dyn_ltree[t * 2] !== 0)
+      return 0;
+  if (e.dyn_ltree[9 * 2] !== 0 || e.dyn_ltree[10 * 2] !== 0 || e.dyn_ltree[13 * 2] !== 0)
+    return 1;
+  for (t = 32;t < ze; t++)
+    if (e.dyn_ltree[t * 2] !== 0)
+      return 1;
+  return 0;
+}, At = false, en = (e) => {
+  At || (Vi(), At = true), e.l_desc = new Ge(e.dyn_ltree, si), e.d_desc = new Ge(e.dyn_dtree, ci), e.bl_desc = new Ge(e.bl_tree, ui), e.bi_buf = 0, e.bi_valid = 0, pi(e);
+}, ki = (e, i, t, n) => {
+  N2(e, (Hi << 1) + (n ? 1 : 0), 3), xi(e), Ee(e, t), Ee(e, ~t), t && e.pending_buf.set(e.window.subarray(i, i + t), e.pending), e.pending += t;
+}, tn = (e) => {
+  N2(e, li << 1, 3), M(e, bt, P), ji(e);
+}, nn = (e, i, t, n) => {
+  let r, a, f2 = 0;
+  e.level > 0 ? (e.strm.data_type === 2 && (e.strm.data_type = qi(e)), lt(e, e.l_desc), lt(e, e.d_desc), f2 = Ji(e), r = e.opt_len + 3 + 7 >>> 3, a = e.static_len + 3 + 7 >>> 3, a <= r && (r = a)) : r = a = t + 5, t + 4 <= r && i !== -1 ? ki(e, i, t, n) : e.strategy === 4 || a === r ? (N2(e, (li << 1) + (n ? 1 : 0), 3), yt(e, P, be)) : (N2(e, (Bi << 1) + (n ? 1 : 0), 3), Qi(e, e.l_desc.max_code + 1, e.d_desc.max_code + 1, f2 + 1), yt(e, e.dyn_ltree, e.dyn_dtree)), pi(e), n && xi(e);
+}, an = (e, i, t) => (e.pending_buf[e.sym_buf + e.sym_next++] = i, e.pending_buf[e.sym_buf + e.sym_next++] = i >> 8, e.pending_buf[e.sym_buf + e.sym_next++] = t, i === 0 ? e.dyn_ltree[t * 2]++ : (e.matches++, i--, e.dyn_ltree[(ve[t] + ze + 1) * 2]++, e.dyn_dtree[wi(i) * 2]++), e.sym_next === e.sym_end), rn, ln, on, fn, _n, hn, dn = (e, i, t, n) => {
+  let r = e & 65535 | 0, a = e >>> 16 & 65535 | 0, f2 = 0;
+  for (;t !== 0; ) {
+    f2 = t > 2000 ? 2000 : t, t -= f2;
+    do
+      r = r + i[n++] | 0, a = a + r | 0;
+    while (--f2);
+    r %= 65521, a %= 65521;
+  }
+  return r | a << 16 | 0;
+}, ye, sn = () => {
+  let e, i = [];
+  for (var t = 0;t < 256; t++) {
+    e = t;
+    for (var n = 0;n < 8; n++)
+      e = e & 1 ? 3988292384 ^ e >>> 1 : e >>> 1;
+    i[t] = e;
+  }
+  return i;
+}, cn, un = (e, i, t, n) => {
+  const r = cn, a = n + t;
+  e ^= -1;
+  for (let f2 = n;f2 < a; f2++)
+    e = e >>> 8 ^ r[(e ^ i[f2]) & 255];
+  return e ^ -1;
+}, Z2, oe, Te, wn, ot, bn, j, gn, W2, pn, xn, C, zt, I, Tt, H, kn, We, vn, En, Oe, yn, mn, Sn, An, Be, zn = 9, Tn = 15, Rn = 8, Dn = 29, Zn = 256, ft, In = 30, On = 19, Nn, Ln = 15, k2 = 3, G = 258, B2, Un = 32, fe2 = 42, pt = 57, _t = 69, ht = 73, dt = 91, st = 103, q = 113, ue = 666, O2 = 1, de = 2, te = 3, se = 4, Cn = 3, ee = (e, i) => (e.msg = oe[i], i), Rt = (e) => e * 2 - (e > 4 ? 9 : 0), Y2 = (e) => {
+  let i = e.length;
+  for (;--i >= 0; )
+    e[i] = 0;
+}, $n = (e) => {
+  let i, t, n, r = e.w_size;
+  i = e.hash_size, n = i;
+  do
+    t = e.head[--n], e.head[n] = t >= r ? t - r : 0;
+  while (--i);
+  i = r, n = i;
+  do
+    t = e.prev[--n], e.prev[n] = t >= r ? t - r : 0;
+  while (--i);
+}, Fn = (e, i, t) => (i << e.hash_shift ^ t) & e.hash_mask, V, L = (e) => {
+  const i = e.state;
+  let t = i.pending;
+  t > e.avail_out && (t = e.avail_out), t !== 0 && (e.output.set(i.pending_buf.subarray(i.pending_out, i.pending_out + t), e.next_out), e.next_out += t, i.pending_out += t, e.total_out += t, e.avail_out -= t, i.pending -= t, i.pending === 0 && (i.pending_out = 0));
+}, U = (e, i) => {
+  bn(e, e.block_start >= 0 ? e.block_start : -1, e.strstart - e.block_start, i), e.block_start = e.strstart, L(e.strm);
+}, S = (e, i) => {
+  e.pending_buf[e.pending++] = i;
+}, ce2 = (e, i) => {
+  e.pending_buf[e.pending++] = i >>> 8 & 255, e.pending_buf[e.pending++] = i & 255;
+}, ct = (e, i, t, n) => {
+  let r = e.avail_in;
+  return r > n && (r = n), r === 0 ? 0 : (e.avail_in -= r, i.set(e.input.subarray(e.next_in, e.next_in + r), t), e.state.wrap === 1 ? e.adler = ye(e.adler, i, r, t) : e.state.wrap === 2 && (e.adler = Z2(e.adler, i, r, t)), e.next_in += r, e.total_in += r, r);
+}, vi = (e, i) => {
+  let { max_chain_length: t, strstart: n } = e, r, a, f2 = e.prev_length, o = e.nice_match;
+  const c = e.strstart > e.w_size - B2 ? e.strstart - (e.w_size - B2) : 0, l2 = e.window, _ = e.w_mask, y = e.prev, s = e.strstart + G;
+  let h = l2[n + f2 - 1], u = l2[n + f2];
+  e.prev_length >= e.good_match && (t >>= 2), o > e.lookahead && (o = e.lookahead);
+  do
+    if (r = i, !(l2[r + f2] !== u || l2[r + f2 - 1] !== h || l2[r] !== l2[n] || l2[++r] !== l2[n + 1])) {
+      n += 2, r++;
+      do
+        ;
+      while (l2[++n] === l2[++r] && l2[++n] === l2[++r] && l2[++n] === l2[++r] && l2[++n] === l2[++r] && l2[++n] === l2[++r] && l2[++n] === l2[++r] && l2[++n] === l2[++r] && l2[++n] === l2[++r] && n < s);
+      if (a = G - (s - n), n = s - G, a > f2) {
+        if (e.match_start = i, f2 = a, a >= o)
+          break;
+        h = l2[n + f2 - 1], u = l2[n + f2];
+      }
+    }
+  while ((i = y[i & _]) > c && --t !== 0);
+  return f2 <= e.lookahead ? f2 : e.lookahead;
+}, _e = (e) => {
+  const i = e.w_size;
+  let t, n, r;
+  do {
+    if (n = e.window_size - e.lookahead - e.strstart, e.strstart >= i + (i - B2) && (e.window.set(e.window.subarray(i, i + i - n), 0), e.match_start -= i, e.strstart -= i, e.block_start -= i, e.insert > e.strstart && (e.insert = e.strstart), $n(e), n += i), e.strm.avail_in === 0)
+      break;
+    if (t = ct(e.strm, e.window, e.strstart + e.lookahead, n), e.lookahead += t, e.lookahead + e.insert >= k2)
+      for (r = e.strstart - e.insert, e.ins_h = e.window[r], e.ins_h = V(e, e.ins_h, e.window[r + 1]);e.insert && (e.ins_h = V(e, e.ins_h, e.window[r + k2 - 1]), e.prev[r & e.w_mask] = e.head[e.ins_h], e.head[e.ins_h] = r, r++, e.insert--, !(e.lookahead + e.insert < k2)); )
+        ;
+  } while (e.lookahead < B2 && e.strm.avail_in !== 0);
+}, Ei = (e, i) => {
+  let t = e.pending_buf_size - 5 > e.w_size ? e.w_size : e.pending_buf_size - 5, n, r, a, f2 = 0, o = e.strm.avail_in;
+  do {
+    if (n = 65535, a = e.bi_valid + 42 >> 3, e.strm.avail_out < a || (a = e.strm.avail_out - a, r = e.strstart - e.block_start, n > r + e.strm.avail_in && (n = r + e.strm.avail_in), n > a && (n = a), n < t && (n === 0 && i !== C || i === W2 || n !== r + e.strm.avail_in)))
+      break;
+    f2 = i === C && n === r + e.strm.avail_in ? 1 : 0, ot(e, 0, 0, f2), e.pending_buf[e.pending - 4] = n, e.pending_buf[e.pending - 3] = n >> 8, e.pending_buf[e.pending - 2] = ~n, e.pending_buf[e.pending - 1] = ~n >> 8, L(e.strm), r && (r > n && (r = n), e.strm.output.set(e.window.subarray(e.block_start, e.block_start + r), e.strm.next_out), e.strm.next_out += r, e.strm.avail_out -= r, e.strm.total_out += r, e.block_start += r, n -= r), n && (ct(e.strm, e.strm.output, e.strm.next_out, n), e.strm.next_out += n, e.strm.avail_out -= n, e.strm.total_out += n);
+  } while (f2 === 0);
+  return o -= e.strm.avail_in, o && (o >= e.w_size ? (e.matches = 2, e.window.set(e.strm.input.subarray(e.strm.next_in - e.w_size, e.strm.next_in), 0), e.strstart = e.w_size, e.insert = e.strstart) : (e.window_size - e.strstart <= o && (e.strstart -= e.w_size, e.window.set(e.window.subarray(e.w_size, e.w_size + e.strstart), 0), e.matches < 2 && e.matches++, e.insert > e.strstart && (e.insert = e.strstart)), e.window.set(e.strm.input.subarray(e.strm.next_in - o, e.strm.next_in), e.strstart), e.strstart += o, e.insert += o > e.w_size - e.insert ? e.w_size - e.insert : o), e.block_start = e.strstart), e.high_water < e.strstart && (e.high_water = e.strstart), f2 ? se : i !== W2 && i !== C && e.strm.avail_in === 0 && e.strstart === e.block_start ? de : (a = e.window_size - e.strstart, e.strm.avail_in > a && e.block_start >= e.w_size && (e.block_start -= e.w_size, e.strstart -= e.w_size, e.window.set(e.window.subarray(e.w_size, e.w_size + e.strstart), 0), e.matches < 2 && e.matches++, a += e.w_size, e.insert > e.strstart && (e.insert = e.strstart)), a > e.strm.avail_in && (a = e.strm.avail_in), a && (ct(e.strm, e.window, e.strstart, a), e.strstart += a, e.insert += a > e.w_size - e.insert ? e.w_size - e.insert : a), e.high_water < e.strstart && (e.high_water = e.strstart), a = e.bi_valid + 42 >> 3, a = e.pending_buf_size - a > 65535 ? 65535 : e.pending_buf_size - a, t = a > e.w_size ? e.w_size : a, r = e.strstart - e.block_start, (r >= t || (r || i === C) && i !== W2 && e.strm.avail_in === 0 && r <= a) && (n = r > a ? a : r, f2 = i === C && e.strm.avail_in === 0 && n === r ? 1 : 0, ot(e, e.block_start, n, f2), e.block_start += n, L(e.strm)), f2 ? te : O2);
+}, Ve = (e, i) => {
+  let t, n;
+  for (;; ) {
+    if (e.lookahead < B2) {
+      if (_e(e), e.lookahead < B2 && i === W2)
+        return O2;
+      if (e.lookahead === 0)
+        break;
+    }
+    if (t = 0, e.lookahead >= k2 && (e.ins_h = V(e, e.ins_h, e.window[e.strstart + k2 - 1]), t = e.prev[e.strstart & e.w_mask] = e.head[e.ins_h], e.head[e.ins_h] = e.strstart), t !== 0 && e.strstart - t <= e.w_size - B2 && (e.match_length = vi(e, t)), e.match_length >= k2)
+      if (n = j(e, e.strstart - e.match_start, e.match_length - k2), e.lookahead -= e.match_length, e.match_length <= e.max_lazy_match && e.lookahead >= k2) {
+        e.match_length--;
+        do
+          e.strstart++, e.ins_h = V(e, e.ins_h, e.window[e.strstart + k2 - 1]), t = e.prev[e.strstart & e.w_mask] = e.head[e.ins_h], e.head[e.ins_h] = e.strstart;
+        while (--e.match_length !== 0);
+        e.strstart++;
+      } else
+        e.strstart += e.match_length, e.match_length = 0, e.ins_h = e.window[e.strstart], e.ins_h = V(e, e.ins_h, e.window[e.strstart + 1]);
+    else
+      n = j(e, 0, e.window[e.strstart]), e.lookahead--, e.strstart++;
+    if (n && (U(e, false), e.strm.avail_out === 0))
+      return O2;
+  }
+  return e.insert = e.strstart < k2 - 1 ? e.strstart : k2 - 1, i === C ? (U(e, true), e.strm.avail_out === 0 ? te : se) : e.sym_next && (U(e, false), e.strm.avail_out === 0) ? O2 : de;
+}, ae = (e, i) => {
+  let t, n, r;
+  for (;; ) {
+    if (e.lookahead < B2) {
+      if (_e(e), e.lookahead < B2 && i === W2)
+        return O2;
+      if (e.lookahead === 0)
+        break;
+    }
+    if (t = 0, e.lookahead >= k2 && (e.ins_h = V(e, e.ins_h, e.window[e.strstart + k2 - 1]), t = e.prev[e.strstart & e.w_mask] = e.head[e.ins_h], e.head[e.ins_h] = e.strstart), e.prev_length = e.match_length, e.prev_match = e.match_start, e.match_length = k2 - 1, t !== 0 && e.prev_length < e.max_lazy_match && e.strstart - t <= e.w_size - B2 && (e.match_length = vi(e, t), e.match_length <= 5 && (e.strategy === En || e.match_length === k2 && e.strstart - e.match_start > 4096) && (e.match_length = k2 - 1)), e.prev_length >= k2 && e.match_length <= e.prev_length) {
+      r = e.strstart + e.lookahead - k2, n = j(e, e.strstart - 1 - e.prev_match, e.prev_length - k2), e.lookahead -= e.prev_length - 1, e.prev_length -= 2;
+      do
+        ++e.strstart <= r && (e.ins_h = V(e, e.ins_h, e.window[e.strstart + k2 - 1]), t = e.prev[e.strstart & e.w_mask] = e.head[e.ins_h], e.head[e.ins_h] = e.strstart);
+      while (--e.prev_length !== 0);
+      if (e.match_available = 0, e.match_length = k2 - 1, e.strstart++, n && (U(e, false), e.strm.avail_out === 0))
+        return O2;
+    } else if (e.match_available) {
+      if (n = j(e, 0, e.window[e.strstart - 1]), n && U(e, false), e.strstart++, e.lookahead--, e.strm.avail_out === 0)
+        return O2;
+    } else
+      e.match_available = 1, e.strstart++, e.lookahead--;
+  }
+  return e.match_available && (n = j(e, 0, e.window[e.strstart - 1]), e.match_available = 0), e.insert = e.strstart < k2 - 1 ? e.strstart : k2 - 1, i === C ? (U(e, true), e.strm.avail_out === 0 ? te : se) : e.sym_next && (U(e, false), e.strm.avail_out === 0) ? O2 : de;
+}, Mn = (e, i) => {
+  let t, n, r, a;
+  const f2 = e.window;
+  for (;; ) {
+    if (e.lookahead <= G) {
+      if (_e(e), e.lookahead <= G && i === W2)
+        return O2;
+      if (e.lookahead === 0)
+        break;
+    }
+    if (e.match_length = 0, e.lookahead >= k2 && e.strstart > 0 && (r = e.strstart - 1, n = f2[r], n === f2[++r] && n === f2[++r] && n === f2[++r])) {
+      a = e.strstart + G;
+      do
+        ;
+      while (n === f2[++r] && n === f2[++r] && n === f2[++r] && n === f2[++r] && n === f2[++r] && n === f2[++r] && n === f2[++r] && n === f2[++r] && r < a);
+      e.match_length = G - (a - r), e.match_length > e.lookahead && (e.match_length = e.lookahead);
+    }
+    if (e.match_length >= k2 ? (t = j(e, 1, e.match_length - k2), e.lookahead -= e.match_length, e.strstart += e.match_length, e.match_length = 0) : (t = j(e, 0, e.window[e.strstart]), e.lookahead--, e.strstart++), t && (U(e, false), e.strm.avail_out === 0))
+      return O2;
+  }
+  return e.insert = 0, i === C ? (U(e, true), e.strm.avail_out === 0 ? te : se) : e.sym_next && (U(e, false), e.strm.avail_out === 0) ? O2 : de;
+}, Hn = (e, i) => {
+  let t;
+  for (;; ) {
+    if (e.lookahead === 0 && (_e(e), e.lookahead === 0)) {
+      if (i === W2)
+        return O2;
+      break;
+    }
+    if (e.match_length = 0, t = j(e, 0, e.window[e.strstart]), e.lookahead--, e.strstart++, t && (U(e, false), e.strm.avail_out === 0))
+      return O2;
+  }
+  return e.insert = 0, i === C ? (U(e, true), e.strm.avail_out === 0 ? te : se) : e.sym_next && (U(e, false), e.strm.avail_out === 0) ? O2 : de;
+}, we, Bn = (e) => {
+  e.window_size = 2 * e.w_size, Y2(e.head), e.max_lazy_match = we[e.level].max_lazy, e.good_match = we[e.level].good_length, e.nice_match = we[e.level].nice_length, e.max_chain_length = we[e.level].max_chain, e.strstart = 0, e.block_start = 0, e.lookahead = 0, e.insert = 0, e.match_length = e.prev_length = k2 - 1, e.match_available = 0, e.ins_h = 0;
+}, Re = (e) => {
+  if (!e)
+    return 1;
+  const i = e.state;
+  return !i || i.strm !== e || i.status !== fe2 && i.status !== pt && i.status !== _t && i.status !== ht && i.status !== dt && i.status !== st && i.status !== q && i.status !== ue ? 1 : 0;
+}, yi = (e) => {
+  if (Re(e))
+    return ee(e, H);
+  e.total_in = e.total_out = 0, e.data_type = An;
+  const i = e.state;
+  return i.pending = 0, i.pending_out = 0, i.wrap < 0 && (i.wrap = -i.wrap), i.status = i.wrap === 2 ? pt : i.wrap ? fe2 : q, e.adler = i.wrap === 2 ? 0 : 1, i.last_flush = -2, wn(i), I;
+}, mi = (e) => {
+  const i = yi(e);
+  return i === I && Bn(e.state), i;
+}, Pn = (e, i) => Re(e) || e.state.wrap !== 2 ? H : (e.state.gzhead = i, I), Si = (e, i, t, n, r, a) => {
+  if (!e)
+    return H;
+  let f2 = 1;
+  if (i === vn && (i = 6), n < 0 ? (f2 = 0, n = -n) : n > 15 && (f2 = 2, n -= 16), r < 1 || r > zn || t !== Be || n < 8 || n > 15 || i < 0 || i > 9 || a < 0 || a > mn || n === 8 && f2 !== 1)
+    return ee(e, H);
+  n === 8 && (n = 9);
+  const o = new Kn;
+  return e.state = o, o.strm = e, o.status = fe2, o.wrap = f2, o.gzhead = null, o.w_bits = n, o.w_size = 1 << o.w_bits, o.w_mask = o.w_size - 1, o.hash_bits = r + 7, o.hash_size = 1 << o.hash_bits, o.hash_mask = o.hash_size - 1, o.hash_shift = ~~((o.hash_bits + k2 - 1) / k2), o.window = new Uint8Array(o.w_size * 2), o.head = new Uint16Array(o.hash_size), o.prev = new Uint16Array(o.w_size), o.lit_bufsize = 1 << r + 6, o.pending_buf_size = o.lit_bufsize * 4, o.pending_buf = new Uint8Array(o.pending_buf_size), o.sym_buf = o.lit_bufsize, o.sym_end = (o.lit_bufsize - 1) * 3, o.level = i, o.strategy = a, o.method = t, mi(e);
+}, Xn = (e, i) => Si(e, i, Be, Tn, Rn, Sn), Yn = (e, i) => {
+  if (Re(e) || i > zt || i < 0)
+    return e ? ee(e, H) : H;
+  const t = e.state;
+  if (!e.output || e.avail_in !== 0 && !e.input || t.status === ue && i !== C)
+    return ee(e, e.avail_out === 0 ? We : H);
+  const n = t.last_flush;
+  if (t.last_flush = i, t.pending !== 0) {
+    if (L(e), e.avail_out === 0)
+      return t.last_flush = -1, I;
+  } else if (e.avail_in === 0 && Rt(i) <= Rt(n) && i !== C)
+    return ee(e, We);
+  if (t.status === ue && e.avail_in !== 0)
+    return ee(e, We);
+  if (t.status === fe2 && t.wrap === 0 && (t.status = q), t.status === fe2) {
+    let r = Be + (t.w_bits - 8 << 4) << 8, a = -1;
+    if (t.strategy >= Oe || t.level < 2 ? a = 0 : t.level < 6 ? a = 1 : t.level === 6 ? a = 2 : a = 3, r |= a << 6, t.strstart !== 0 && (r |= Un), r += 31 - r % 31, ce2(t, r), t.strstart !== 0 && (ce2(t, e.adler >>> 16), ce2(t, e.adler & 65535)), e.adler = 1, t.status = q, L(e), t.pending !== 0)
+      return t.last_flush = -1, I;
+  }
+  if (t.status === pt) {
+    if (e.adler = 0, S(t, 31), S(t, 139), S(t, 8), t.gzhead)
+      S(t, (t.gzhead.text ? 1 : 0) + (t.gzhead.hcrc ? 2 : 0) + (t.gzhead.extra ? 4 : 0) + (t.gzhead.name ? 8 : 0) + (t.gzhead.comment ? 16 : 0)), S(t, t.gzhead.time & 255), S(t, t.gzhead.time >> 8 & 255), S(t, t.gzhead.time >> 16 & 255), S(t, t.gzhead.time >> 24 & 255), S(t, t.level === 9 ? 2 : t.strategy >= Oe || t.level < 2 ? 4 : 0), S(t, t.gzhead.os & 255), t.gzhead.extra && t.gzhead.extra.length && (S(t, t.gzhead.extra.length & 255), S(t, t.gzhead.extra.length >> 8 & 255)), t.gzhead.hcrc && (e.adler = Z2(e.adler, t.pending_buf, t.pending, 0)), t.gzindex = 0, t.status = _t;
+    else if (S(t, 0), S(t, 0), S(t, 0), S(t, 0), S(t, 0), S(t, t.level === 9 ? 2 : t.strategy >= Oe || t.level < 2 ? 4 : 0), S(t, Cn), t.status = q, L(e), t.pending !== 0)
+      return t.last_flush = -1, I;
+  }
+  if (t.status === _t) {
+    if (t.gzhead.extra) {
+      let r = t.pending, a = (t.gzhead.extra.length & 65535) - t.gzindex;
+      for (;t.pending + a > t.pending_buf_size; ) {
+        let o = t.pending_buf_size - t.pending;
+        if (t.pending_buf.set(t.gzhead.extra.subarray(t.gzindex, t.gzindex + o), t.pending), t.pending = t.pending_buf_size, t.gzhead.hcrc && t.pending > r && (e.adler = Z2(e.adler, t.pending_buf, t.pending - r, r)), t.gzindex += o, L(e), t.pending !== 0)
+          return t.last_flush = -1, I;
+        r = 0, a -= o;
+      }
+      let f2 = new Uint8Array(t.gzhead.extra);
+      t.pending_buf.set(f2.subarray(t.gzindex, t.gzindex + a), t.pending), t.pending += a, t.gzhead.hcrc && t.pending > r && (e.adler = Z2(e.adler, t.pending_buf, t.pending - r, r)), t.gzindex = 0;
+    }
+    t.status = ht;
+  }
+  if (t.status === ht) {
+    if (t.gzhead.name) {
+      let r = t.pending, a;
+      do {
+        if (t.pending === t.pending_buf_size) {
+          if (t.gzhead.hcrc && t.pending > r && (e.adler = Z2(e.adler, t.pending_buf, t.pending - r, r)), L(e), t.pending !== 0)
+            return t.last_flush = -1, I;
+          r = 0;
+        }
+        t.gzindex < t.gzhead.name.length ? a = t.gzhead.name.charCodeAt(t.gzindex++) & 255 : a = 0, S(t, a);
+      } while (a !== 0);
+      t.gzhead.hcrc && t.pending > r && (e.adler = Z2(e.adler, t.pending_buf, t.pending - r, r)), t.gzindex = 0;
+    }
+    t.status = dt;
+  }
+  if (t.status === dt) {
+    if (t.gzhead.comment) {
+      let r = t.pending, a;
+      do {
+        if (t.pending === t.pending_buf_size) {
+          if (t.gzhead.hcrc && t.pending > r && (e.adler = Z2(e.adler, t.pending_buf, t.pending - r, r)), L(e), t.pending !== 0)
+            return t.last_flush = -1, I;
+          r = 0;
+        }
+        t.gzindex < t.gzhead.comment.length ? a = t.gzhead.comment.charCodeAt(t.gzindex++) & 255 : a = 0, S(t, a);
+      } while (a !== 0);
+      t.gzhead.hcrc && t.pending > r && (e.adler = Z2(e.adler, t.pending_buf, t.pending - r, r));
+    }
+    t.status = st;
+  }
+  if (t.status === st) {
+    if (t.gzhead.hcrc) {
+      if (t.pending + 2 > t.pending_buf_size && (L(e), t.pending !== 0))
+        return t.last_flush = -1, I;
+      S(t, e.adler & 255), S(t, e.adler >> 8 & 255), e.adler = 0;
+    }
+    if (t.status = q, L(e), t.pending !== 0)
+      return t.last_flush = -1, I;
+  }
+  if (e.avail_in !== 0 || t.lookahead !== 0 || i !== W2 && t.status !== ue) {
+    let r = t.level === 0 ? Ei(t, i) : t.strategy === Oe ? Hn(t, i) : t.strategy === yn ? Mn(t, i) : we[t.level].func(t, i);
+    if ((r === te || r === se) && (t.status = ue), r === O2 || r === te)
+      return e.avail_out === 0 && (t.last_flush = -1), I;
+    if (r === de && (i === pn ? gn(t) : i !== zt && (ot(t, 0, 0, false), i === xn && (Y2(t.head), t.lookahead === 0 && (t.strstart = 0, t.block_start = 0, t.insert = 0))), L(e), e.avail_out === 0))
+      return t.last_flush = -1, I;
+  }
+  return i !== C ? I : t.wrap <= 0 ? Tt : (t.wrap === 2 ? (S(t, e.adler & 255), S(t, e.adler >> 8 & 255), S(t, e.adler >> 16 & 255), S(t, e.adler >> 24 & 255), S(t, e.total_in & 255), S(t, e.total_in >> 8 & 255), S(t, e.total_in >> 16 & 255), S(t, e.total_in >> 24 & 255)) : (ce2(t, e.adler >>> 16), ce2(t, e.adler & 65535)), L(e), t.wrap > 0 && (t.wrap = -t.wrap), t.pending !== 0 ? I : Tt);
+}, Gn = (e) => {
+  if (Re(e))
+    return H;
+  const i = e.state.status;
+  return e.state = null, i === q ? ee(e, kn) : I;
+}, jn = (e, i) => {
+  let t = i.length;
+  if (Re(e))
+    return H;
+  const n = e.state, r = n.wrap;
+  if (r === 2 || r === 1 && n.status !== fe2 || n.lookahead)
+    return H;
+  if (r === 1 && (e.adler = ye(e.adler, i, t, 0)), n.wrap = 0, t >= n.w_size) {
+    r === 0 && (Y2(n.head), n.strstart = 0, n.block_start = 0, n.insert = 0);
+    let c = new Uint8Array(n.w_size);
+    c.set(i.subarray(t - n.w_size, t), 0), i = c, t = n.w_size;
+  }
+  const { avail_in: a, next_in: f2, input: o } = e;
+  for (e.avail_in = t, e.next_in = 0, e.input = i, _e(n);n.lookahead >= k2; ) {
+    let c = n.strstart, l2 = n.lookahead - (k2 - 1);
+    do
+      n.ins_h = V(n, n.ins_h, n.window[c + k2 - 1]), n.prev[c & n.w_mask] = n.head[n.ins_h], n.head[n.ins_h] = c, c++;
+    while (--l2);
+    n.strstart = c, n.lookahead = k2 - 1, _e(n);
+  }
+  return n.strstart += n.lookahead, n.block_start = n.strstart, n.insert = n.lookahead, n.lookahead = 0, n.match_length = n.prev_length = k2 - 1, n.match_available = 0, e.next_in = f2, e.input = o, e.avail_in = a, n.wrap = r, I;
+}, Wn, Vn, Jn, Qn, qn, ea, ta, ia, na = "pako deflate (from Nodeca project)", ge, aa = (e, i) => Object.prototype.hasOwnProperty.call(e, i), ra = function(e) {
+  const i = Array.prototype.slice.call(arguments, 1);
+  for (;i.length; ) {
+    const t = i.shift();
+    if (t) {
+      if (typeof t != "object")
+        throw new TypeError(t + "must be non-object");
+      for (const n in t)
+        aa(t, n) && (e[n] = t[n]);
+    }
+  }
+  return e;
+}, la = (e) => {
+  let i = 0;
+  for (let n = 0, r = e.length;n < r; n++)
+    i += e[n].length;
+  const t = new Uint8Array(i);
+  for (let n = 0, r = 0, a = e.length;n < a; n++) {
+    let f2 = e[n];
+    t.set(f2, r), r += f2.length;
+  }
+  return t;
+}, Ke, Ai = true, me, oa = (e) => {
+  if (typeof TextEncoder == "function" && TextEncoder.prototype.encode)
+    return new TextEncoder().encode(e);
+  let i, t, n, r, a, f2 = e.length, o = 0;
+  for (r = 0;r < f2; r++)
+    t = e.charCodeAt(r), (t & 64512) === 55296 && r + 1 < f2 && (n = e.charCodeAt(r + 1), (n & 64512) === 56320 && (t = 65536 + (t - 55296 << 10) + (n - 56320), r++)), o += t < 128 ? 1 : t < 2048 ? 2 : t < 65536 ? 3 : 4;
+  for (i = new Uint8Array(o), a = 0, r = 0;a < o; r++)
+    t = e.charCodeAt(r), (t & 64512) === 55296 && r + 1 < f2 && (n = e.charCodeAt(r + 1), (n & 64512) === 56320 && (t = 65536 + (t - 55296 << 10) + (n - 56320), r++)), t < 128 ? i[a++] = t : t < 2048 ? (i[a++] = 192 | t >>> 6, i[a++] = 128 | t & 63) : t < 65536 ? (i[a++] = 224 | t >>> 12, i[a++] = 128 | t >>> 6 & 63, i[a++] = 128 | t & 63) : (i[a++] = 240 | t >>> 18, i[a++] = 128 | t >>> 12 & 63, i[a++] = 128 | t >>> 6 & 63, i[a++] = 128 | t & 63);
+  return i;
+}, fa = (e, i) => {
+  if (i < 65534 && e.subarray && Ai)
+    return String.fromCharCode.apply(null, e.length === i ? e : e.subarray(0, i));
+  let t = "";
+  for (let n = 0;n < i; n++)
+    t += String.fromCharCode(e[n]);
+  return t;
+}, _a = (e, i) => {
+  const t = i || e.length;
+  if (typeof TextDecoder == "function" && TextDecoder.prototype.decode)
+    return new TextDecoder().decode(e.subarray(0, i));
+  let n, r;
+  const a = new Array(t * 2);
+  for (r = 0, n = 0;n < t; ) {
+    let f2 = e[n++];
+    if (f2 < 128) {
+      a[r++] = f2;
+      continue;
+    }
+    let o = me[f2];
+    if (o > 4) {
+      a[r++] = 65533, n += o - 1;
+      continue;
+    }
+    for (f2 &= o === 2 ? 31 : o === 3 ? 15 : 7;o > 1 && n < t; )
+      f2 = f2 << 6 | e[n++] & 63, o--;
+    if (o > 1) {
+      a[r++] = 65533;
+      continue;
+    }
+    f2 < 65536 ? a[r++] = f2 : (f2 -= 65536, a[r++] = 55296 | f2 >> 10 & 1023, a[r++] = 56320 | f2 & 1023);
+  }
+  return fa(a, r);
+}, ha = (e, i) => {
+  i = i || e.length, i > e.length && (i = e.length);
+  let t = i - 1;
+  for (;t >= 0 && (e[t] & 192) === 128; )
+    t--;
+  return t < 0 || t === 0 ? i : t + me[e[t]] > i ? t : i;
+}, Se, zi, Ti, sa, ca, ua, wa, Me, ba, ga, pa, xa, Ne = 16209, ka = 16191, va = function(i, t) {
+  let n, r, a, f2, o, c, l2, _, y, s, h, u, R2, v, g2, A2, p2, d3, m2, D2, w, z, E2, b;
+  const x2 = i.state;
+  n = i.next_in, E2 = i.input, r = n + (i.avail_in - 5), a = i.next_out, b = i.output, f2 = a - (t - i.avail_out), o = a + (i.avail_out - 257), c = x2.dmax, l2 = x2.wsize, _ = x2.whave, y = x2.wnext, s = x2.window, h = x2.hold, u = x2.bits, R2 = x2.lencode, v = x2.distcode, g2 = (1 << x2.lenbits) - 1, A2 = (1 << x2.distbits) - 1;
+  e:
+    do {
+      u < 15 && (h += E2[n++] << u, u += 8, h += E2[n++] << u, u += 8), p2 = R2[h & g2];
+      t:
+        for (;; ) {
+          if (d3 = p2 >>> 24, h >>>= d3, u -= d3, d3 = p2 >>> 16 & 255, d3 === 0)
+            b[a++] = p2 & 65535;
+          else if (d3 & 16) {
+            m2 = p2 & 65535, d3 &= 15, d3 && (u < d3 && (h += E2[n++] << u, u += 8), m2 += h & (1 << d3) - 1, h >>>= d3, u -= d3), u < 15 && (h += E2[n++] << u, u += 8, h += E2[n++] << u, u += 8), p2 = v[h & A2];
+            i:
+              for (;; ) {
+                if (d3 = p2 >>> 24, h >>>= d3, u -= d3, d3 = p2 >>> 16 & 255, d3 & 16) {
+                  if (D2 = p2 & 65535, d3 &= 15, u < d3 && (h += E2[n++] << u, u += 8, u < d3 && (h += E2[n++] << u, u += 8)), D2 += h & (1 << d3) - 1, D2 > c) {
+                    i.msg = "invalid distance too far back", x2.mode = Ne;
+                    break e;
+                  }
+                  if (h >>>= d3, u -= d3, d3 = a - f2, D2 > d3) {
+                    if (d3 = D2 - d3, d3 > _ && x2.sane) {
+                      i.msg = "invalid distance too far back", x2.mode = Ne;
+                      break e;
+                    }
+                    if (w = 0, z = s, y === 0) {
+                      if (w += l2 - d3, d3 < m2) {
+                        m2 -= d3;
+                        do
+                          b[a++] = s[w++];
+                        while (--d3);
+                        w = a - D2, z = b;
+                      }
+                    } else if (y < d3) {
+                      if (w += l2 + y - d3, d3 -= y, d3 < m2) {
+                        m2 -= d3;
+                        do
+                          b[a++] = s[w++];
+                        while (--d3);
+                        if (w = 0, y < m2) {
+                          d3 = y, m2 -= d3;
+                          do
+                            b[a++] = s[w++];
+                          while (--d3);
+                          w = a - D2, z = b;
+                        }
+                      }
+                    } else if (w += y - d3, d3 < m2) {
+                      m2 -= d3;
+                      do
+                        b[a++] = s[w++];
+                      while (--d3);
+                      w = a - D2, z = b;
+                    }
+                    for (;m2 > 2; )
+                      b[a++] = z[w++], b[a++] = z[w++], b[a++] = z[w++], m2 -= 3;
+                    m2 && (b[a++] = z[w++], m2 > 1 && (b[a++] = z[w++]));
+                  } else {
+                    w = a - D2;
+                    do
+                      b[a++] = b[w++], b[a++] = b[w++], b[a++] = b[w++], m2 -= 3;
+                    while (m2 > 2);
+                    m2 && (b[a++] = b[w++], m2 > 1 && (b[a++] = b[w++]));
+                  }
+                } else if (d3 & 64) {
+                  i.msg = "invalid distance code", x2.mode = Ne;
+                  break e;
+                } else {
+                  p2 = v[(p2 & 65535) + (h & (1 << d3) - 1)];
+                  continue i;
+                }
+                break;
+              }
+          } else if (d3 & 64)
+            if (d3 & 32) {
+              x2.mode = ka;
+              break e;
+            } else {
+              i.msg = "invalid literal/length code", x2.mode = Ne;
+              break e;
+            }
+          else {
+            p2 = R2[(p2 & 65535) + (h & (1 << d3) - 1)];
+            continue t;
+          }
+          break;
+        }
+    } while (n < r && a < o);
+  m2 = u >> 3, n -= m2, u -= m2 << 3, h &= (1 << u) - 1, i.next_in = n, i.next_out = a, i.avail_in = n < r ? 5 + (r - n) : 5 - (n - r), i.avail_out = a < o ? 257 + (o - a) : 257 - (a - o), x2.hold = h, x2.bits = u;
+}, re = 15, Dt = 852, Zt = 592, It = 0, Je = 1, Ot = 2, Ea, ya, ma, Sa, Aa = (e, i, t, n, r, a, f2, o) => {
+  const c = o.bits;
+  let l2 = 0, _ = 0, y = 0, s = 0, h = 0, u = 0, R2 = 0, v = 0, g2 = 0, A2 = 0, p2, d3, m2, D2, w, z = null, E2;
+  const b = new Uint16Array(re + 1), x2 = new Uint16Array(re + 1);
+  let J = null, vt, Ze, Ie;
+  for (l2 = 0;l2 <= re; l2++)
+    b[l2] = 0;
+  for (_ = 0;_ < n; _++)
+    b[i[t + _]]++;
+  for (h = c, s = re;s >= 1 && b[s] === 0; s--)
+    ;
+  if (h > s && (h = s), s === 0)
+    return r[a++] = 1 << 24 | 64 << 16 | 0, r[a++] = 1 << 24 | 64 << 16 | 0, o.bits = 1, 0;
+  for (y = 1;y < s && b[y] === 0; y++)
+    ;
+  for (h < y && (h = y), v = 1, l2 = 1;l2 <= re; l2++)
+    if (v <<= 1, v -= b[l2], v < 0)
+      return -1;
+  if (v > 0 && (e === It || s !== 1))
+    return -1;
+  for (x2[1] = 0, l2 = 1;l2 < re; l2++)
+    x2[l2 + 1] = x2[l2] + b[l2];
+  for (_ = 0;_ < n; _++)
+    i[t + _] !== 0 && (f2[x2[i[t + _]]++] = _);
+  if (e === It ? (z = J = f2, E2 = 20) : e === Je ? (z = Ea, J = ya, E2 = 257) : (z = ma, J = Sa, E2 = 0), A2 = 0, _ = 0, l2 = y, w = a, u = h, R2 = 0, m2 = -1, g2 = 1 << h, D2 = g2 - 1, e === Je && g2 > Dt || e === Ot && g2 > Zt)
+    return 1;
+  for (;; ) {
+    vt = l2 - R2, f2[_] + 1 < E2 ? (Ze = 0, Ie = f2[_]) : f2[_] >= E2 ? (Ze = J[f2[_] - E2], Ie = z[f2[_] - E2]) : (Ze = 96, Ie = 0), p2 = 1 << l2 - R2, d3 = 1 << u, y = d3;
+    do
+      d3 -= p2, r[w + (A2 >> R2) + d3] = vt << 24 | Ze << 16 | Ie | 0;
+    while (d3 !== 0);
+    for (p2 = 1 << l2 - 1;A2 & p2; )
+      p2 >>= 1;
+    if (p2 !== 0 ? (A2 &= p2 - 1, A2 += p2) : A2 = 0, _++, --b[l2] === 0) {
+      if (l2 === s)
+        break;
+      l2 = i[t + f2[_]];
+    }
+    if (l2 > h && (A2 & D2) !== m2) {
+      for (R2 === 0 && (R2 = h), w += y, u = l2 - R2, v = 1 << u;u + R2 < s && (v -= b[u + R2], !(v <= 0)); )
+        u++, v <<= 1;
+      if (g2 += 1 << u, e === Je && g2 > Dt || e === Ot && g2 > Zt)
+        return 1;
+      m2 = A2 & D2, r[m2] = h << 24 | u << 16 | w - a | 0;
+    }
+  }
+  return A2 !== 0 && (r[w + A2] = l2 - R2 << 24 | 64 << 16 | 0), o.bits = h, 0;
+}, pe, za = 0, Ri = 1, Di = 2, Nt, Ta, Le, ie2, Ra, Da, $2, Zi, Ii, Za, Lt, Pe = 16180, Ut = 16181, Ct = 16182, $t = 16183, Ft = 16184, Mt = 16185, Ht = 16186, Bt = 16187, Kt = 16188, Pt = 16189, He = 16190, K2 = 16191, Qe = 16192, Xt = 16193, qe = 16194, Yt = 16195, Gt = 16196, jt = 16197, Wt = 16198, Ue = 16199, Ce = 16200, Vt = 16201, Jt = 16202, Qt = 16203, qt = 16204, ei = 16205, et = 16206, ti = 16207, ii = 16208, T = 16209, Oi = 16210, Ni = 16211, Ia = 852, Oa = 592, Na = 15, La, ni = (e) => (e >>> 24 & 255) + (e >>> 8 & 65280) + ((e & 65280) << 8) + ((e & 255) << 24), ne2 = (e) => {
+  if (!e)
+    return 1;
+  const i = e.state;
+  return !i || i.strm !== e || i.mode < Pe || i.mode > Ni ? 1 : 0;
+}, Li = (e) => {
+  if (ne2(e))
+    return $2;
+  const i = e.state;
+  return e.total_in = e.total_out = i.total = 0, e.msg = "", i.wrap && (e.adler = i.wrap & 1), i.mode = Pe, i.last = 0, i.havedict = 0, i.flags = -1, i.dmax = 32768, i.head = null, i.hold = 0, i.bits = 0, i.lencode = i.lendyn = new Int32Array(Ia), i.distcode = i.distdyn = new Int32Array(Oa), i.sane = 1, i.back = -1, ie2;
+}, Ui = (e) => {
+  if (ne2(e))
+    return $2;
+  const i = e.state;
+  return i.wsize = 0, i.whave = 0, i.wnext = 0, Li(e);
+}, Ci = (e, i) => {
+  let t;
+  if (ne2(e))
+    return $2;
+  const n = e.state;
+  return i < 0 ? (t = 0, i = -i) : (t = (i >> 4) + 5, i < 48 && (i &= 15)), i && (i < 8 || i > 15) ? $2 : (n.window !== null && n.wbits !== i && (n.window = null), n.wrap = t, n.wbits = i, Ui(e));
+}, $i = (e, i) => {
+  if (!e)
+    return $2;
+  const t = new Ua;
+  e.state = t, t.strm = e, t.window = null, t.mode = Pe;
+  const n = Ci(e, i);
+  return n !== ie2 && (e.state = null), n;
+}, Ca = (e) => $i(e, La), ai = true, tt, it, $a = (e) => {
+  if (ai) {
+    tt = new Int32Array(512), it = new Int32Array(32);
+    let i = 0;
+    for (;i < 144; )
+      e.lens[i++] = 8;
+    for (;i < 256; )
+      e.lens[i++] = 9;
+    for (;i < 280; )
+      e.lens[i++] = 7;
+    for (;i < 288; )
+      e.lens[i++] = 8;
+    for (pe(Ri, e.lens, 0, 288, tt, 0, e.work, { bits: 9 }), i = 0;i < 32; )
+      e.lens[i++] = 5;
+    pe(Di, e.lens, 0, 32, it, 0, e.work, { bits: 5 }), ai = false;
+  }
+  e.lencode = tt, e.lenbits = 9, e.distcode = it, e.distbits = 5;
+}, Fi = (e, i, t, n) => {
+  let r;
+  const a = e.state;
+  return a.window === null && (a.wsize = 1 << a.wbits, a.wnext = 0, a.whave = 0, a.window = new Uint8Array(a.wsize)), n >= a.wsize ? (a.window.set(i.subarray(t - a.wsize, t), 0), a.wnext = 0, a.whave = a.wsize) : (r = a.wsize - a.wnext, r > n && (r = n), a.window.set(i.subarray(t - n, t - n + r), a.wnext), n -= r, n ? (a.window.set(i.subarray(t - n, t), 0), a.wnext = n, a.whave = a.wsize) : (a.wnext += r, a.wnext === a.wsize && (a.wnext = 0), a.whave < a.wsize && (a.whave += r))), 0;
+}, Fa = (e, i) => {
+  let t, n, r, a, f2, o, c, l2, _, y, s, h, u, R2, v = 0, g2, A2, p2, d3, m2, D2, w, z;
+  const E2 = new Uint8Array(4);
+  let b, x2;
+  const J = new Uint8Array([16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]);
+  if (ne2(e) || !e.output || !e.input && e.avail_in !== 0)
+    return $2;
+  t = e.state, t.mode === K2 && (t.mode = Qe), f2 = e.next_out, r = e.output, c = e.avail_out, a = e.next_in, n = e.input, o = e.avail_in, l2 = t.hold, _ = t.bits, y = o, s = c, z = ie2;
+  e:
+    for (;; )
+      switch (t.mode) {
+        case Pe:
+          if (t.wrap === 0) {
+            t.mode = Qe;
+            break;
+          }
+          for (;_ < 16; ) {
+            if (o === 0)
+              break e;
+            o--, l2 += n[a++] << _, _ += 8;
+          }
+          if (t.wrap & 2 && l2 === 35615) {
+            t.wbits === 0 && (t.wbits = 15), t.check = 0, E2[0] = l2 & 255, E2[1] = l2 >>> 8 & 255, t.check = Z2(t.check, E2, 2, 0), l2 = 0, _ = 0, t.mode = Ut;
+            break;
+          }
+          if (t.head && (t.head.done = false), !(t.wrap & 1) || (((l2 & 255) << 8) + (l2 >> 8)) % 31) {
+            e.msg = "incorrect header check", t.mode = T;
+            break;
+          }
+          if ((l2 & 15) !== Lt) {
+            e.msg = "unknown compression method", t.mode = T;
+            break;
+          }
+          if (l2 >>>= 4, _ -= 4, w = (l2 & 15) + 8, t.wbits === 0 && (t.wbits = w), w > 15 || w > t.wbits) {
+            e.msg = "invalid window size", t.mode = T;
+            break;
+          }
+          t.dmax = 1 << t.wbits, t.flags = 0, e.adler = t.check = 1, t.mode = l2 & 512 ? Pt : K2, l2 = 0, _ = 0;
+          break;
+        case Ut:
+          for (;_ < 16; ) {
+            if (o === 0)
+              break e;
+            o--, l2 += n[a++] << _, _ += 8;
+          }
+          if (t.flags = l2, (t.flags & 255) !== Lt) {
+            e.msg = "unknown compression method", t.mode = T;
+            break;
+          }
+          if (t.flags & 57344) {
+            e.msg = "unknown header flags set", t.mode = T;
+            break;
+          }
+          t.head && (t.head.text = l2 >> 8 & 1), t.flags & 512 && t.wrap & 4 && (E2[0] = l2 & 255, E2[1] = l2 >>> 8 & 255, t.check = Z2(t.check, E2, 2, 0)), l2 = 0, _ = 0, t.mode = Ct;
+        case Ct:
+          for (;_ < 32; ) {
+            if (o === 0)
+              break e;
+            o--, l2 += n[a++] << _, _ += 8;
+          }
+          t.head && (t.head.time = l2), t.flags & 512 && t.wrap & 4 && (E2[0] = l2 & 255, E2[1] = l2 >>> 8 & 255, E2[2] = l2 >>> 16 & 255, E2[3] = l2 >>> 24 & 255, t.check = Z2(t.check, E2, 4, 0)), l2 = 0, _ = 0, t.mode = $t;
+        case $t:
+          for (;_ < 16; ) {
+            if (o === 0)
+              break e;
+            o--, l2 += n[a++] << _, _ += 8;
+          }
+          t.head && (t.head.xflags = l2 & 255, t.head.os = l2 >> 8), t.flags & 512 && t.wrap & 4 && (E2[0] = l2 & 255, E2[1] = l2 >>> 8 & 255, t.check = Z2(t.check, E2, 2, 0)), l2 = 0, _ = 0, t.mode = Ft;
+        case Ft:
+          if (t.flags & 1024) {
+            for (;_ < 16; ) {
+              if (o === 0)
+                break e;
+              o--, l2 += n[a++] << _, _ += 8;
+            }
+            t.length = l2, t.head && (t.head.extra_len = l2), t.flags & 512 && t.wrap & 4 && (E2[0] = l2 & 255, E2[1] = l2 >>> 8 & 255, t.check = Z2(t.check, E2, 2, 0)), l2 = 0, _ = 0;
+          } else
+            t.head && (t.head.extra = null);
+          t.mode = Mt;
+        case Mt:
+          if (t.flags & 1024 && (h = t.length, h > o && (h = o), h && (t.head && (w = t.head.extra_len - t.length, t.head.extra || (t.head.extra = new Uint8Array(t.head.extra_len)), t.head.extra.set(n.subarray(a, a + h), w)), t.flags & 512 && t.wrap & 4 && (t.check = Z2(t.check, n, h, a)), o -= h, a += h, t.length -= h), t.length))
+            break e;
+          t.length = 0, t.mode = Ht;
+        case Ht:
+          if (t.flags & 2048) {
+            if (o === 0)
+              break e;
+            h = 0;
+            do
+              w = n[a + h++], t.head && w && t.length < 65536 && (t.head.name += String.fromCharCode(w));
+            while (w && h < o);
+            if (t.flags & 512 && t.wrap & 4 && (t.check = Z2(t.check, n, h, a)), o -= h, a += h, w)
+              break e;
+          } else
+            t.head && (t.head.name = null);
+          t.length = 0, t.mode = Bt;
+        case Bt:
+          if (t.flags & 4096) {
+            if (o === 0)
+              break e;
+            h = 0;
+            do
+              w = n[a + h++], t.head && w && t.length < 65536 && (t.head.comment += String.fromCharCode(w));
+            while (w && h < o);
+            if (t.flags & 512 && t.wrap & 4 && (t.check = Z2(t.check, n, h, a)), o -= h, a += h, w)
+              break e;
+          } else
+            t.head && (t.head.comment = null);
+          t.mode = Kt;
+        case Kt:
+          if (t.flags & 512) {
+            for (;_ < 16; ) {
+              if (o === 0)
+                break e;
+              o--, l2 += n[a++] << _, _ += 8;
+            }
+            if (t.wrap & 4 && l2 !== (t.check & 65535)) {
+              e.msg = "header crc mismatch", t.mode = T;
+              break;
+            }
+            l2 = 0, _ = 0;
+          }
+          t.head && (t.head.hcrc = t.flags >> 9 & 1, t.head.done = true), e.adler = t.check = 0, t.mode = K2;
+          break;
+        case Pt:
+          for (;_ < 32; ) {
+            if (o === 0)
+              break e;
+            o--, l2 += n[a++] << _, _ += 8;
+          }
+          e.adler = t.check = ni(l2), l2 = 0, _ = 0, t.mode = He;
+        case He:
+          if (t.havedict === 0)
+            return e.next_out = f2, e.avail_out = c, e.next_in = a, e.avail_in = o, t.hold = l2, t.bits = _, Da;
+          e.adler = t.check = 1, t.mode = K2;
+        case K2:
+          if (i === Ta || i === Le)
+            break e;
+        case Qe:
+          if (t.last) {
+            l2 >>>= _ & 7, _ -= _ & 7, t.mode = et;
+            break;
+          }
+          for (;_ < 3; ) {
+            if (o === 0)
+              break e;
+            o--, l2 += n[a++] << _, _ += 8;
+          }
+          switch (t.last = l2 & 1, l2 >>>= 1, _ -= 1, l2 & 3) {
+            case 0:
+              t.mode = Xt;
+              break;
+            case 1:
+              if ($a(t), t.mode = Ue, i === Le) {
+                l2 >>>= 2, _ -= 2;
+                break e;
+              }
+              break;
+            case 2:
+              t.mode = Gt;
+              break;
+            case 3:
+              e.msg = "invalid block type", t.mode = T;
+          }
+          l2 >>>= 2, _ -= 2;
+          break;
+        case Xt:
+          for (l2 >>>= _ & 7, _ -= _ & 7;_ < 32; ) {
+            if (o === 0)
+              break e;
+            o--, l2 += n[a++] << _, _ += 8;
+          }
+          if ((l2 & 65535) !== (l2 >>> 16 ^ 65535)) {
+            e.msg = "invalid stored block lengths", t.mode = T;
+            break;
+          }
+          if (t.length = l2 & 65535, l2 = 0, _ = 0, t.mode = qe, i === Le)
+            break e;
+        case qe:
+          t.mode = Yt;
+        case Yt:
+          if (h = t.length, h) {
+            if (h > o && (h = o), h > c && (h = c), h === 0)
+              break e;
+            r.set(n.subarray(a, a + h), f2), o -= h, a += h, c -= h, f2 += h, t.length -= h;
+            break;
+          }
+          t.mode = K2;
+          break;
+        case Gt:
+          for (;_ < 14; ) {
+            if (o === 0)
+              break e;
+            o--, l2 += n[a++] << _, _ += 8;
+          }
+          if (t.nlen = (l2 & 31) + 257, l2 >>>= 5, _ -= 5, t.ndist = (l2 & 31) + 1, l2 >>>= 5, _ -= 5, t.ncode = (l2 & 15) + 4, l2 >>>= 4, _ -= 4, t.nlen > 286 || t.ndist > 30) {
+            e.msg = "too many length or distance symbols", t.mode = T;
+            break;
+          }
+          t.have = 0, t.mode = jt;
+        case jt:
+          for (;t.have < t.ncode; ) {
+            for (;_ < 3; ) {
+              if (o === 0)
+                break e;
+              o--, l2 += n[a++] << _, _ += 8;
+            }
+            t.lens[J[t.have++]] = l2 & 7, l2 >>>= 3, _ -= 3;
+          }
+          for (;t.have < 19; )
+            t.lens[J[t.have++]] = 0;
+          if (t.lencode = t.lendyn, t.lenbits = 7, b = { bits: t.lenbits }, z = pe(za, t.lens, 0, 19, t.lencode, 0, t.work, b), t.lenbits = b.bits, z) {
+            e.msg = "invalid code lengths set", t.mode = T;
+            break;
+          }
+          t.have = 0, t.mode = Wt;
+        case Wt:
+          for (;t.have < t.nlen + t.ndist; ) {
+            for (;v = t.lencode[l2 & (1 << t.lenbits) - 1], g2 = v >>> 24, A2 = v >>> 16 & 255, p2 = v & 65535, !(g2 <= _); ) {
+              if (o === 0)
+                break e;
+              o--, l2 += n[a++] << _, _ += 8;
+            }
+            if (p2 < 16)
+              l2 >>>= g2, _ -= g2, t.lens[t.have++] = p2;
+            else {
+              if (p2 === 16) {
+                for (x2 = g2 + 2;_ < x2; ) {
+                  if (o === 0)
+                    break e;
+                  o--, l2 += n[a++] << _, _ += 8;
+                }
+                if (l2 >>>= g2, _ -= g2, t.have === 0) {
+                  e.msg = "invalid bit length repeat", t.mode = T;
+                  break;
+                }
+                w = t.lens[t.have - 1], h = 3 + (l2 & 3), l2 >>>= 2, _ -= 2;
+              } else if (p2 === 17) {
+                for (x2 = g2 + 3;_ < x2; ) {
+                  if (o === 0)
+                    break e;
+                  o--, l2 += n[a++] << _, _ += 8;
+                }
+                l2 >>>= g2, _ -= g2, w = 0, h = 3 + (l2 & 7), l2 >>>= 3, _ -= 3;
+              } else {
+                for (x2 = g2 + 7;_ < x2; ) {
+                  if (o === 0)
+                    break e;
+                  o--, l2 += n[a++] << _, _ += 8;
+                }
+                l2 >>>= g2, _ -= g2, w = 0, h = 11 + (l2 & 127), l2 >>>= 7, _ -= 7;
+              }
+              if (t.have + h > t.nlen + t.ndist) {
+                e.msg = "invalid bit length repeat", t.mode = T;
+                break;
+              }
+              for (;h--; )
+                t.lens[t.have++] = w;
+            }
+          }
+          if (t.mode === T)
+            break;
+          if (t.lens[256] === 0) {
+            e.msg = "invalid code -- missing end-of-block", t.mode = T;
+            break;
+          }
+          if (t.lenbits = 9, b = { bits: t.lenbits }, z = pe(Ri, t.lens, 0, t.nlen, t.lencode, 0, t.work, b), t.lenbits = b.bits, z) {
+            e.msg = "invalid literal/lengths set", t.mode = T;
+            break;
+          }
+          if (t.distbits = 6, t.distcode = t.distdyn, b = { bits: t.distbits }, z = pe(Di, t.lens, t.nlen, t.ndist, t.distcode, 0, t.work, b), t.distbits = b.bits, z) {
+            e.msg = "invalid distances set", t.mode = T;
+            break;
+          }
+          if (t.mode = Ue, i === Le)
+            break e;
+        case Ue:
+          t.mode = Ce;
+        case Ce:
+          if (o >= 6 && c >= 258) {
+            e.next_out = f2, e.avail_out = c, e.next_in = a, e.avail_in = o, t.hold = l2, t.bits = _, va(e, s), f2 = e.next_out, r = e.output, c = e.avail_out, a = e.next_in, n = e.input, o = e.avail_in, l2 = t.hold, _ = t.bits, t.mode === K2 && (t.back = -1);
+            break;
+          }
+          for (t.back = 0;v = t.lencode[l2 & (1 << t.lenbits) - 1], g2 = v >>> 24, A2 = v >>> 16 & 255, p2 = v & 65535, !(g2 <= _); ) {
+            if (o === 0)
+              break e;
+            o--, l2 += n[a++] << _, _ += 8;
+          }
+          if (A2 && !(A2 & 240)) {
+            for (d3 = g2, m2 = A2, D2 = p2;v = t.lencode[D2 + ((l2 & (1 << d3 + m2) - 1) >> d3)], g2 = v >>> 24, A2 = v >>> 16 & 255, p2 = v & 65535, !(d3 + g2 <= _); ) {
+              if (o === 0)
+                break e;
+              o--, l2 += n[a++] << _, _ += 8;
+            }
+            l2 >>>= d3, _ -= d3, t.back += d3;
+          }
+          if (l2 >>>= g2, _ -= g2, t.back += g2, t.length = p2, A2 === 0) {
+            t.mode = ei;
+            break;
+          }
+          if (A2 & 32) {
+            t.back = -1, t.mode = K2;
+            break;
+          }
+          if (A2 & 64) {
+            e.msg = "invalid literal/length code", t.mode = T;
+            break;
+          }
+          t.extra = A2 & 15, t.mode = Vt;
+        case Vt:
+          if (t.extra) {
+            for (x2 = t.extra;_ < x2; ) {
+              if (o === 0)
+                break e;
+              o--, l2 += n[a++] << _, _ += 8;
+            }
+            t.length += l2 & (1 << t.extra) - 1, l2 >>>= t.extra, _ -= t.extra, t.back += t.extra;
+          }
+          t.was = t.length, t.mode = Jt;
+        case Jt:
+          for (;v = t.distcode[l2 & (1 << t.distbits) - 1], g2 = v >>> 24, A2 = v >>> 16 & 255, p2 = v & 65535, !(g2 <= _); ) {
+            if (o === 0)
+              break e;
+            o--, l2 += n[a++] << _, _ += 8;
+          }
+          if (!(A2 & 240)) {
+            for (d3 = g2, m2 = A2, D2 = p2;v = t.distcode[D2 + ((l2 & (1 << d3 + m2) - 1) >> d3)], g2 = v >>> 24, A2 = v >>> 16 & 255, p2 = v & 65535, !(d3 + g2 <= _); ) {
+              if (o === 0)
+                break e;
+              o--, l2 += n[a++] << _, _ += 8;
+            }
+            l2 >>>= d3, _ -= d3, t.back += d3;
+          }
+          if (l2 >>>= g2, _ -= g2, t.back += g2, A2 & 64) {
+            e.msg = "invalid distance code", t.mode = T;
+            break;
+          }
+          t.offset = p2, t.extra = A2 & 15, t.mode = Qt;
+        case Qt:
+          if (t.extra) {
+            for (x2 = t.extra;_ < x2; ) {
+              if (o === 0)
+                break e;
+              o--, l2 += n[a++] << _, _ += 8;
+            }
+            t.offset += l2 & (1 << t.extra) - 1, l2 >>>= t.extra, _ -= t.extra, t.back += t.extra;
+          }
+          if (t.offset > t.dmax) {
+            e.msg = "invalid distance too far back", t.mode = T;
+            break;
+          }
+          t.mode = qt;
+        case qt:
+          if (c === 0)
+            break e;
+          if (h = s - c, t.offset > h) {
+            if (h = t.offset - h, h > t.whave && t.sane) {
+              e.msg = "invalid distance too far back", t.mode = T;
+              break;
+            }
+            h > t.wnext ? (h -= t.wnext, u = t.wsize - h) : u = t.wnext - h, h > t.length && (h = t.length), R2 = t.window;
+          } else
+            R2 = r, u = f2 - t.offset, h = t.length;
+          h > c && (h = c), c -= h, t.length -= h;
+          do
+            r[f2++] = R2[u++];
+          while (--h);
+          t.length === 0 && (t.mode = Ce);
+          break;
+        case ei:
+          if (c === 0)
+            break e;
+          r[f2++] = t.length, c--, t.mode = Ce;
+          break;
+        case et:
+          if (t.wrap) {
+            for (;_ < 32; ) {
+              if (o === 0)
+                break e;
+              o--, l2 |= n[a++] << _, _ += 8;
+            }
+            if (s -= c, e.total_out += s, t.total += s, t.wrap & 4 && s && (e.adler = t.check = t.flags ? Z2(t.check, r, s, f2 - s) : ye(t.check, r, s, f2 - s)), s = c, t.wrap & 4 && (t.flags ? l2 : ni(l2)) !== t.check) {
+              e.msg = "incorrect data check", t.mode = T;
+              break;
+            }
+            l2 = 0, _ = 0;
+          }
+          t.mode = ti;
+        case ti:
+          if (t.wrap && t.flags) {
+            for (;_ < 32; ) {
+              if (o === 0)
+                break e;
+              o--, l2 += n[a++] << _, _ += 8;
+            }
+            if (t.wrap & 4 && l2 !== (t.total & 4294967295)) {
+              e.msg = "incorrect length check", t.mode = T;
+              break;
+            }
+            l2 = 0, _ = 0;
+          }
+          t.mode = ii;
+        case ii:
+          z = Ra;
+          break e;
+        case T:
+          z = Zi;
+          break e;
+        case Oi:
+          return Ii;
+        case Ni:
+        default:
+          return $2;
+      }
+  return e.next_out = f2, e.avail_out = c, e.next_in = a, e.avail_in = o, t.hold = l2, t.bits = _, (t.wsize || s !== e.avail_out && t.mode < T && (t.mode < et || i !== Nt)) && Fi(e, e.output, e.next_out, s - e.avail_out), y -= e.avail_in, s -= e.avail_out, e.total_in += y, e.total_out += s, t.total += s, t.wrap & 4 && s && (e.adler = t.check = t.flags ? Z2(t.check, r, s, e.next_out - s) : ye(t.check, r, s, e.next_out - s)), e.data_type = t.bits + (t.last ? 64 : 0) + (t.mode === K2 ? 128 : 0) + (t.mode === Ue || t.mode === qe ? 256 : 0), (y === 0 && s === 0 || i === Nt) && z === ie2 && (z = Za), z;
+}, Ma = (e) => {
+  if (ne2(e))
+    return $2;
+  let i = e.state;
+  return i.window && (i.window = null), e.state = null, ie2;
+}, Ha = (e, i) => {
+  if (ne2(e))
+    return $2;
+  const t = e.state;
+  return t.wrap & 2 ? (t.head = i, i.done = false, ie2) : $2;
+}, Ba = (e, i) => {
+  const t = i.length;
+  let n, r, a;
+  return ne2(e) || (n = e.state, n.wrap !== 0 && n.mode !== He) ? $2 : n.mode === He && (r = 1, r = ye(r, i, t, 0), r !== n.check) ? Zi : (a = Fi(e, i, t, t), a ? (n.mode = Oi, Ii) : (n.havedict = 1, ie2));
+}, Ka, Pa, Xa, Ya, Ga, ja, Wa, Va, Ja, Qa = "pako inflate (from Nodeca project)", X, er, Mi, tr, ir, Ae, nt, at, nr, ri, ar, lr, or, fr, _r, hr, dr, cr, sr, ur, wr, br;
+var init_pako_esm_CB1uQYY0 = __esm(() => {
+  /*! pako 2.1.0 https://github.com/nodeca/pako @license (MIT AND Zlib) */
+  xe = ze + 1 + ut;
+  oi = 2 * xe + 1;
+  rt = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0]);
+  $e = new Uint8Array([0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13]);
+  Yi = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 7]);
+  di = new Uint8Array([16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]);
+  P = new Array((xe + 2) * 2);
+  he(P);
+  be = new Array(le2 * 2);
+  he(be);
+  ke = new Array(Gi);
+  he(ke);
+  ve = new Array(Pi - Ki + 1);
+  he(ve);
+  gt = new Array(ut);
+  he(gt);
+  Fe = new Array(le2);
+  he(Fe);
+  rn = en;
+  ln = ki;
+  on = nn;
+  fn = an;
+  _n = tn;
+  hn = {
+    _tr_init: rn,
+    _tr_stored_block: ln,
+    _tr_flush_block: on,
+    _tr_tally: fn,
+    _tr_align: _n
+  };
+  ye = dn;
+  cn = new Uint32Array(sn());
+  Z2 = un;
+  oe = {
+    2: "need dictionary",
+    1: "stream end",
+    0: "",
+    "-1": "file error",
+    "-2": "stream error",
+    "-3": "data error",
+    "-4": "insufficient memory",
+    "-5": "buffer error",
+    "-6": "incompatible version"
+  };
+  Te = {
+    Z_NO_FLUSH: 0,
+    Z_PARTIAL_FLUSH: 1,
+    Z_SYNC_FLUSH: 2,
+    Z_FULL_FLUSH: 3,
+    Z_FINISH: 4,
+    Z_BLOCK: 5,
+    Z_TREES: 6,
+    Z_OK: 0,
+    Z_STREAM_END: 1,
+    Z_NEED_DICT: 2,
+    Z_ERRNO: -1,
+    Z_STREAM_ERROR: -2,
+    Z_DATA_ERROR: -3,
+    Z_MEM_ERROR: -4,
+    Z_BUF_ERROR: -5,
+    Z_NO_COMPRESSION: 0,
+    Z_BEST_SPEED: 1,
+    Z_BEST_COMPRESSION: 9,
+    Z_DEFAULT_COMPRESSION: -1,
+    Z_FILTERED: 1,
+    Z_HUFFMAN_ONLY: 2,
+    Z_RLE: 3,
+    Z_FIXED: 4,
+    Z_DEFAULT_STRATEGY: 0,
+    Z_BINARY: 0,
+    Z_TEXT: 1,
+    Z_UNKNOWN: 2,
+    Z_DEFLATED: 8
+  };
+  ({ _tr_init: wn, _tr_stored_block: ot, _tr_flush_block: bn, _tr_tally: j, _tr_align: gn } = hn);
+  ({
+    Z_NO_FLUSH: W2,
+    Z_PARTIAL_FLUSH: pn,
+    Z_FULL_FLUSH: xn,
+    Z_FINISH: C,
+    Z_BLOCK: zt,
+    Z_OK: I,
+    Z_STREAM_END: Tt,
+    Z_STREAM_ERROR: H,
+    Z_DATA_ERROR: kn,
+    Z_BUF_ERROR: We,
+    Z_DEFAULT_COMPRESSION: vn,
+    Z_FILTERED: En,
+    Z_HUFFMAN_ONLY: Oe,
+    Z_RLE: yn,
+    Z_FIXED: mn,
+    Z_DEFAULT_STRATEGY: Sn,
+    Z_UNKNOWN: An,
+    Z_DEFLATED: Be
+  } = Te);
+  ft = Zn + 1 + Dn;
+  Nn = 2 * ft + 1;
+  B2 = G + k2 + 1;
+  V = Fn;
+  we = [
+    new F(0, 0, 0, 0, Ei),
+    new F(4, 4, 8, 4, Ve),
+    new F(4, 5, 16, 8, Ve),
+    new F(4, 6, 32, 32, Ve),
+    new F(4, 4, 16, 16, ae),
+    new F(8, 16, 32, 32, ae),
+    new F(8, 16, 128, 128, ae),
+    new F(8, 32, 128, 256, ae),
+    new F(32, 128, 258, 1024, ae),
+    new F(32, 258, 258, 4096, ae)
+  ];
+  Wn = Xn;
+  Vn = Si;
+  Jn = mi;
+  Qn = yi;
+  qn = Pn;
+  ea = Yn;
+  ta = Gn;
+  ia = jn;
+  ge = {
+    deflateInit: Wn,
+    deflateInit2: Vn,
+    deflateReset: Jn,
+    deflateResetKeep: Qn,
+    deflateSetHeader: qn,
+    deflate: ea,
+    deflateEnd: ta,
+    deflateSetDictionary: ia,
+    deflateInfo: na
+  };
+  Ke = {
+    assign: ra,
+    flattenChunks: la
+  };
+  try {
+    String.fromCharCode.apply(null, new Uint8Array(1));
+  } catch {
+    Ai = false;
+  }
+  me = new Uint8Array(256);
+  for (let e = 0;e < 256; e++)
+    me[e] = e >= 252 ? 6 : e >= 248 ? 5 : e >= 240 ? 4 : e >= 224 ? 3 : e >= 192 ? 2 : 1;
+  me[254] = me[254] = 1;
+  Se = {
+    string2buf: oa,
+    buf2string: _a,
+    utf8border: ha
+  };
+  zi = da;
+  Ti = Object.prototype.toString;
+  ({
+    Z_NO_FLUSH: sa,
+    Z_SYNC_FLUSH: ca,
+    Z_FULL_FLUSH: ua,
+    Z_FINISH: wa,
+    Z_OK: Me,
+    Z_STREAM_END: ba,
+    Z_DEFAULT_COMPRESSION: ga,
+    Z_DEFAULT_STRATEGY: pa,
+    Z_DEFLATED: xa
+  } = Te);
+  xt.prototype.push = function(e, i) {
+    const t = this.strm, n = this.options.chunkSize;
+    let r, a;
+    if (this.ended)
+      return false;
+    for (i === ~~i ? a = i : a = i === true ? wa : sa, typeof e == "string" ? t.input = Se.string2buf(e) : Ti.call(e) === "[object ArrayBuffer]" ? t.input = new Uint8Array(e) : t.input = e, t.next_in = 0, t.avail_in = t.input.length;; ) {
+      if (t.avail_out === 0 && (t.output = new Uint8Array(n), t.next_out = 0, t.avail_out = n), (a === ca || a === ua) && t.avail_out <= 6) {
+        this.onData(t.output.subarray(0, t.next_out)), t.avail_out = 0;
+        continue;
+      }
+      if (r = ge.deflate(t, a), r === ba)
+        return t.next_out > 0 && this.onData(t.output.subarray(0, t.next_out)), r = ge.deflateEnd(this.strm), this.onEnd(r), this.ended = true, r === Me;
+      if (t.avail_out === 0) {
+        this.onData(t.output);
+        continue;
+      }
+      if (a > 0 && t.next_out > 0) {
+        this.onData(t.output.subarray(0, t.next_out)), t.avail_out = 0;
+        continue;
+      }
+      if (t.avail_in === 0)
+        break;
+    }
+    return true;
+  };
+  xt.prototype.onData = function(e) {
+    this.chunks.push(e);
+  };
+  xt.prototype.onEnd = function(e) {
+    e === Me && (this.result = Ke.flattenChunks(this.chunks)), this.chunks = [], this.err = e, this.msg = this.strm.msg;
+  };
+  Ea = new Uint16Array([
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    13,
+    15,
+    17,
+    19,
+    23,
+    27,
+    31,
+    35,
+    43,
+    51,
+    59,
+    67,
+    83,
+    99,
+    115,
+    131,
+    163,
+    195,
+    227,
+    258,
+    0,
+    0
+  ]);
+  ya = new Uint8Array([
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    17,
+    17,
+    17,
+    17,
+    18,
+    18,
+    18,
+    18,
+    19,
+    19,
+    19,
+    19,
+    20,
+    20,
+    20,
+    20,
+    21,
+    21,
+    21,
+    21,
+    16,
+    72,
+    78
+  ]);
+  ma = new Uint16Array([
+    1,
+    2,
+    3,
+    4,
+    5,
+    7,
+    9,
+    13,
+    17,
+    25,
+    33,
+    49,
+    65,
+    97,
+    129,
+    193,
+    257,
+    385,
+    513,
+    769,
+    1025,
+    1537,
+    2049,
+    3073,
+    4097,
+    6145,
+    8193,
+    12289,
+    16385,
+    24577,
+    0,
+    0
+  ]);
+  Sa = new Uint8Array([
+    16,
+    16,
+    16,
+    16,
+    17,
+    17,
+    18,
+    18,
+    19,
+    19,
+    20,
+    20,
+    21,
+    21,
+    22,
+    22,
+    23,
+    23,
+    24,
+    24,
+    25,
+    25,
+    26,
+    26,
+    27,
+    27,
+    28,
+    28,
+    29,
+    29,
+    64,
+    64
+  ]);
+  pe = Aa;
+  ({
+    Z_FINISH: Nt,
+    Z_BLOCK: Ta,
+    Z_TREES: Le,
+    Z_OK: ie2,
+    Z_STREAM_END: Ra,
+    Z_NEED_DICT: Da,
+    Z_STREAM_ERROR: $2,
+    Z_DATA_ERROR: Zi,
+    Z_MEM_ERROR: Ii,
+    Z_BUF_ERROR: Za,
+    Z_DEFLATED: Lt
+  } = Te);
+  La = Na;
+  Ka = Ui;
+  Pa = Ci;
+  Xa = Li;
+  Ya = Ca;
+  Ga = $i;
+  ja = Fa;
+  Wa = Ma;
+  Va = Ha;
+  Ja = Ba;
+  X = {
+    inflateReset: Ka,
+    inflateReset2: Pa,
+    inflateResetKeep: Xa,
+    inflateInit: Ya,
+    inflateInit2: Ga,
+    inflate: ja,
+    inflateEnd: Wa,
+    inflateGetHeader: Va,
+    inflateSetDictionary: Ja,
+    inflateInfo: Qa
+  };
+  er = qa;
+  Mi = Object.prototype.toString;
+  ({
+    Z_NO_FLUSH: tr,
+    Z_FINISH: ir,
+    Z_OK: Ae,
+    Z_STREAM_END: nt,
+    Z_NEED_DICT: at,
+    Z_STREAM_ERROR: nr,
+    Z_DATA_ERROR: ri,
+    Z_MEM_ERROR: ar
+  } = Te);
+  De.prototype.push = function(e, i) {
+    const t = this.strm, n = this.options.chunkSize, r = this.options.dictionary;
+    let a, f2, o;
+    if (this.ended)
+      return false;
+    for (i === ~~i ? f2 = i : f2 = i === true ? ir : tr, Mi.call(e) === "[object ArrayBuffer]" ? t.input = new Uint8Array(e) : t.input = e, t.next_in = 0, t.avail_in = t.input.length;; ) {
+      for (t.avail_out === 0 && (t.output = new Uint8Array(n), t.next_out = 0, t.avail_out = n), a = X.inflate(t, f2), a === at && r && (a = X.inflateSetDictionary(t, r), a === Ae ? a = X.inflate(t, f2) : a === ri && (a = at));t.avail_in > 0 && a === nt && t.state.wrap > 0 && e[t.next_in] !== 0; )
+        X.inflateReset(t), a = X.inflate(t, f2);
+      switch (a) {
+        case nr:
+        case ri:
+        case at:
+        case ar:
+          return this.onEnd(a), this.ended = true, false;
+      }
+      if (o = t.avail_out, t.next_out && (t.avail_out === 0 || a === nt))
+        if (this.options.to === "string") {
+          let c = Se.utf8border(t.output, t.next_out), l2 = t.next_out - c, _ = Se.buf2string(t.output, c);
+          t.next_out = l2, t.avail_out = n - l2, l2 && t.output.set(t.output.subarray(c, c + l2), 0), this.onData(_);
+        } else
+          this.onData(t.output.length === t.next_out ? t.output : t.output.subarray(0, t.next_out));
+      if (!(a === Ae && o === 0)) {
+        if (a === nt)
+          return a = X.inflateEnd(this.strm), this.onEnd(a), this.ended = true, true;
+        if (t.avail_in === 0)
+          break;
+      }
+    }
+    return true;
+  };
+  De.prototype.onData = function(e) {
+    this.chunks.push(e);
+  };
+  De.prototype.onEnd = function(e) {
+    e === Ae && (this.options.to === "string" ? this.result = this.chunks.join("") : this.result = Ke.flattenChunks(this.chunks)), this.chunks = [], this.err = e, this.msg = this.strm.msg;
+  };
+  lr = De;
+  or = kt;
+  fr = rr;
+  _r = kt;
+  hr = Te;
+  dr = {
+    Inflate: lr,
+    inflate: or,
+    inflateRaw: fr,
+    ungzip: _r,
+    constants: hr
+  };
+  ({ Inflate: cr, inflate: sr, inflateRaw: ur, ungzip: wr } = dr);
+  br = sr;
+});
+
+// node_modules/geotiff-tilesource/dist/deflate-BXt-9JA_.js
+var exports_deflate_BXt_9JA_ = {};
+__export(exports_deflate_BXt_9JA_, {
+  default: () => s
+});
+var s;
+var init_deflate_BXt_9JA_ = __esm(() => {
+  init_pako_esm_CB1uQYY0();
+  init_basedecoder_DHcBySSe();
+  s = class s extends g {
+    decodeBlock(e) {
+      return br(new Uint8Array(e)).buffer;
+    }
+  };
+});
+
+// node_modules/geotiff-tilesource/dist/packbits-BlDR4Kj5.js
+var exports_packbits_BlDR4Kj5 = {};
+__export(exports_packbits_BlDR4Kj5, {
+  default: () => l2
+});
+var l2;
+var init_packbits_BlDR4Kj5 = __esm(() => {
+  init_basedecoder_DHcBySSe();
+  l2 = class l2 extends g {
+    decodeBlock(s2) {
+      const n = new DataView(s2), r = [];
+      for (let e = 0;e < s2.byteLength; ++e) {
+        let t = n.getInt8(e);
+        if (t < 0) {
+          const o = n.getUint8(e + 1);
+          t = -t;
+          for (let a = 0;a <= t; ++a)
+            r.push(o);
+          e += 1;
+        } else {
+          for (let o = 0;o <= t; ++o)
+            r.push(n.getUint8(e + o + 1));
+          e += t + 1;
+        }
+      }
+      return new Uint8Array(r).buffer;
+    }
+  };
+});
+
+// node_modules/geotiff-tilesource/dist/lerc-CoQvYJmm.js
+var exports_lerc_CoQvYJmm = {};
+__export(exports_lerc_CoQvYJmm, {
+  zstd: () => hA,
+  default: () => lA
+});
+
+class wA {
+  init() {
+    return _ || (typeof fetch < "u" ? _ = fetch("data:application/wasm;base64," + EA).then((J) => J.arrayBuffer()).then((J) => WebAssembly.instantiate(J, BA)).then(this._init) : _ = WebAssembly.instantiate(Buffer.from(EA, "base64"), BA).then(this._init), _);
+  }
+  _init(J) {
+    x2 = J.instance, BA.env.emscripten_notify_memory_growth(0);
+  }
+  decode(J, T2 = 0) {
+    if (!x2)
+      throw new Error("ZSTDDecoder: Await .init() before decoding.");
+    const Z3 = J.byteLength, X2 = x2.exports.malloc(Z3);
+    QA.set(J, X2), T2 = T2 || Number(x2.exports.ZSTD_findDecompressedSize(X2, Z3));
+    const u = x2.exports.malloc(T2), L2 = x2.exports.ZSTD_decompress(u, T2, X2, Z3), d3 = QA.slice(u, u + L2);
+    return x2.exports.free(X2), x2.exports.free(u), d3;
+  }
+}
+var iA, fA, tA, _, x2, QA, BA, EA = "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IAMNACAEQQNxBEADQCACRQ0FIAAgAkF/aiICaiIDIAEgAmotAAA6AAAgA0EDcQ0ACwsgAkEDTQ0AA0AgACACQXxqIgJqIAEgAmooAgA2AgAgAkEDSw0ACwsgAkUNAgNAIAAgAkF/aiICaiABIAJqLQAAOgAAIAINAAsMAgsgAkEDTQ0AIAIhBANAIAMgASgCADYCACABQQRqIQEgA0EEaiEDIARBfGoiBEEDSw0ACyACQQNxIQILIAJFDQADQCADIAEtAAA6AAAgA0EBaiEDIAFBAWohASACQX9qIgINAAsLIAAL8wICAn8BfgJAIAJFDQAgACACaiIDQX9qIAE6AAAgACABOgAAIAJBA0kNACADQX5qIAE6AAAgACABOgABIANBfWogAToAACAAIAE6AAIgAkEHSQ0AIANBfGogAToAACAAIAE6AAMgAkEJSQ0AIABBACAAa0EDcSIEaiIDIAFB/wFxQYGChAhsIgE2AgAgAyACIARrQXxxIgRqIgJBfGogATYCACAEQQlJDQAgAyABNgIIIAMgATYCBCACQXhqIAE2AgAgAkF0aiABNgIAIARBGUkNACADIAE2AhggAyABNgIUIAMgATYCECADIAE2AgwgAkFwaiABNgIAIAJBbGogATYCACACQWhqIAE2AgAgAkFkaiABNgIAIAQgA0EEcUEYciIEayICQSBJDQAgAa0iBUIghiAFhCEFIAMgBGohAQNAIAEgBTcDGCABIAU3AxAgASAFNwMIIAEgBTcDACABQSBqIQEgAkFgaiICQR9LDQALCyAACy8BAn8gACgCBCAAKAIAQQJ0aiICLQACIQMgACACLwEAIAEgAi0AAxAIajYCACADCy8BAn8gACgCBCAAKAIAQQJ0aiICLQACIQMgACACLwEAIAEgAi0AAxAFajYCACADCx8AIAAgASACKAIEEAg2AgAgARAEGiAAIAJBCGo2AgQLCAAgAGdBH3MLugUBDX8jAEEQayIKJAACfyAEQQNNBEAgCkEANgIMIApBDGogAyAEEAsaIAAgASACIApBDGpBBBAVIgBBbCAAEAMbIAAgACAESxsMAQsgAEEAIAEoAgBBAXRBAmoQECENQVQgAygAACIGQQ9xIgBBCksNABogAiAAQQVqNgIAIAMgBGoiAkF8aiEMIAJBeWohDiACQXtqIRAgAEEGaiELQQQhBSAGQQR2IQRBICAAdCIAQQFyIQkgASgCACEPQQAhAiADIQYCQANAIAlBAkggAiAPS3JFBEAgAiEHAkAgCARAA0AgBEH//wNxQf//A0YEQCAHQRhqIQcgBiAQSQR/IAZBAmoiBigAACAFdgUgBUEQaiEFIARBEHYLIQQMAQsLA0AgBEEDcSIIQQNGBEAgBUECaiEFIARBAnYhBCAHQQNqIQcMAQsLIAcgCGoiByAPSw0EIAVBAmohBQNAIAIgB0kEQCANIAJBAXRqQQA7AQAgAkEBaiECDAELCyAGIA5LQQAgBiAFQQN1aiIHIAxLG0UEQCAHKAAAIAVBB3EiBXYhBAwCCyAEQQJ2IQQLIAYhBwsCfyALQX9qIAQgAEF/anEiBiAAQQF0QX9qIgggCWsiEUkNABogBCAIcSIEQQAgESAEIABIG2shBiALCyEIIA0gAkEBdGogBkF/aiIEOwEAIAlBASAGayAEIAZBAUgbayEJA0AgCSAASARAIABBAXUhACALQX9qIQsMAQsLAn8gByAOS0EAIAcgBSAIaiIFQQN1aiIGIAxLG0UEQCAFQQdxDAELIAUgDCIGIAdrQQN0awshBSACQQFqIQIgBEUhCCAGKAAAIAVBH3F2IQQMAQsLQWwgCUEBRyAFQSBKcg0BGiABIAJBf2o2AgAgBiAFQQdqQQN1aiADawwBC0FQCyEAIApBEGokACAACwkAQQFBBSAAGwsMACAAIAEoAAA2AAALqgMBCn8jAEHwAGsiCiQAIAJBAWohDiAAQQhqIQtBgIAEIAVBf2p0QRB1IQxBACECQQEhBkEBIAV0IglBf2oiDyEIA0AgAiAORkUEQAJAIAEgAkEBdCINai8BACIHQf//A0YEQCALIAhBA3RqIAI2AgQgCEF/aiEIQQEhBwwBCyAGQQAgDCAHQRB0QRB1ShshBgsgCiANaiAHOwEAIAJBAWohAgwBCwsgACAFNgIEIAAgBjYCACAJQQN2IAlBAXZqQQNqIQxBACEAQQAhBkEAIQIDQCAGIA5GBEADQAJAIAAgCUYNACAKIAsgAEEDdGoiASgCBCIGQQF0aiICIAIvAQAiAkEBajsBACABIAUgAhAUayIIOgADIAEgAiAIQf8BcXQgCWs7AQAgASAEIAZBAnQiAmooAgA6AAIgASACIANqKAIANgIEIABBAWohAAwBCwsFIAEgBkEBdGouAQAhDUEAIQcDQCAHIA1ORQRAIAsgAkEDdGogBjYCBANAIAIgDGogD3EiAiAISw0ACyAHQQFqIQcMAQsLIAZBAWohBgwBCwsgCkHwAGokAAsjAEIAIAEQCSAAhUKHla+vmLbem55/fkLj3MqV/M7y9YV/fAsQACAAQn43AwggACABNgIACyQBAX8gAARAIAEoAgQiAgRAIAEoAgggACACEQEADwsgABAmCwsfACAAIAEgAi8BABAINgIAIAEQBBogACACQQRqNgIEC0oBAX9BoCAoAgAiASAAaiIAQX9MBEBBiCBBMDYCAEF/DwsCQCAAPwBBEHRNDQAgABBmDQBBiCBBMDYCAEF/DwtBoCAgADYCACABC9cBAQh/Qbp/IQoCQCACKAIEIgggAigCACIJaiIOIAEgAGtLDQBBbCEKIAkgBCADKAIAIgtrSw0AIAAgCWoiBCACKAIIIgxrIQ0gACABQWBqIg8gCyAJQQAQKSADIAkgC2o2AgACQAJAIAwgBCAFa00EQCANIQUMAQsgDCAEIAZrSw0CIAcgDSAFayIAaiIBIAhqIAdNBEAgBCABIAgQDxoMAgsgBCABQQAgAGsQDyEBIAIgACAIaiIINgIEIAEgAGshBAsgBCAPIAUgCEEBECkLIA4hCgsgCgubAgEBfyMAQYABayINJAAgDSADNgJ8AkAgAkEDSwRAQX8hCQwBCwJAAkACQAJAIAJBAWsOAwADAgELIAZFBEBBuH8hCQwEC0FsIQkgBS0AACICIANLDQMgACAHIAJBAnQiAmooAgAgAiAIaigCABA7IAEgADYCAEEBIQkMAwsgASAJNgIAQQAhCQwCCyAKRQRAQWwhCQwCC0EAIQkgC0UgDEEZSHINAUEIIAR0QQhqIQBBACECA0AgAiAATw0CIAJBQGshAgwAAAsAC0FsIQkgDSANQfwAaiANQfgAaiAFIAYQFSICEAMNACANKAJ4IgMgBEsNACAAIA0gDSgCfCAHIAggAxAYIAEgADYCACACIQkLIA1BgAFqJAAgCQsLACAAIAEgAhALGgsQACAALwAAIAAtAAJBEHRyCy8AAn9BuH8gAUEISQ0AGkFyIAAoAAQiAEF3Sw0AGkG4fyAAQQhqIgAgACABSxsLCwkAIAAgATsAAAsDAAELigYBBX8gACAAKAIAIgVBfnE2AgBBACAAIAVBAXZqQYQgKAIAIgQgAEYbIQECQAJAIAAoAgQiAkUNACACKAIAIgNBAXENACACQQhqIgUgA0EBdkF4aiIDQQggA0EISxtnQR9zQQJ0QYAfaiIDKAIARgRAIAMgAigCDDYCAAsgAigCCCIDBEAgAyACKAIMNgIECyACKAIMIgMEQCADIAIoAgg2AgALIAIgAigCACAAKAIAQX5xajYCAEGEICEAAkACQCABRQ0AIAEgAjYCBCABKAIAIgNBAXENASADQQF2QXhqIgNBCCADQQhLG2dBH3NBAnRBgB9qIgMoAgAgAUEIakYEQCADIAEoAgw2AgALIAEoAggiAwRAIAMgASgCDDYCBAsgASgCDCIDBEAgAyABKAIINgIAQYQgKAIAIQQLIAIgAigCACABKAIAQX5xajYCACABIARGDQAgASABKAIAQQF2akEEaiEACyAAIAI2AgALIAIoAgBBAXZBeGoiAEEIIABBCEsbZ0Efc0ECdEGAH2oiASgCACEAIAEgBTYCACACIAA2AgwgAkEANgIIIABFDQEgACAFNgIADwsCQCABRQ0AIAEoAgAiAkEBcQ0AIAJBAXZBeGoiAkEIIAJBCEsbZ0Efc0ECdEGAH2oiAigCACABQQhqRgRAIAIgASgCDDYCAAsgASgCCCICBEAgAiABKAIMNgIECyABKAIMIgIEQCACIAEoAgg2AgBBhCAoAgAhBAsgACAAKAIAIAEoAgBBfnFqIgI2AgACQCABIARHBEAgASABKAIAQQF2aiAANgIEIAAoAgAhAgwBC0GEICAANgIACyACQQF2QXhqIgFBCCABQQhLG2dBH3NBAnRBgB9qIgIoAgAhASACIABBCGoiAjYCACAAIAE2AgwgAEEANgIIIAFFDQEgASACNgIADwsgBUEBdkF4aiIBQQggAUEISxtnQR9zQQJ0QYAfaiICKAIAIQEgAiAAQQhqIgI2AgAgACABNgIMIABBADYCCCABRQ0AIAEgAjYCAAsLDgAgAARAIABBeGoQJQsLgAIBA38CQCAAQQ9qQXhxQYQgKAIAKAIAQQF2ayICEB1Bf0YNAAJAQYQgKAIAIgAoAgAiAUEBcQ0AIAFBAXZBeGoiAUEIIAFBCEsbZ0Efc0ECdEGAH2oiASgCACAAQQhqRgRAIAEgACgCDDYCAAsgACgCCCIBBEAgASAAKAIMNgIECyAAKAIMIgFFDQAgASAAKAIINgIAC0EBIQEgACAAKAIAIAJBAXRqIgI2AgAgAkEBcQ0AIAJBAXZBeGoiAkEIIAJBCEsbZ0Efc0ECdEGAH2oiAygCACECIAMgAEEIaiIDNgIAIAAgAjYCDCAAQQA2AgggAkUNACACIAM2AgALIAELtwIBA38CQAJAIABBASAAGyICEDgiAA0AAkACQEGEICgCACIARQ0AIAAoAgAiA0EBcQ0AIAAgA0EBcjYCACADQQF2QXhqIgFBCCABQQhLG2dBH3NBAnRBgB9qIgEoAgAgAEEIakYEQCABIAAoAgw2AgALIAAoAggiAQRAIAEgACgCDDYCBAsgACgCDCIBBEAgASAAKAIINgIACyACECchAkEAIQFBhCAoAgAhACACDQEgACAAKAIAQX5xNgIAQQAPCyACQQ9qQXhxIgMQHSICQX9GDQIgAkEHakF4cSIAIAJHBEAgACACaxAdQX9GDQMLAkBBhCAoAgAiAUUEQEGAICAANgIADAELIAAgATYCBAtBhCAgADYCACAAIANBAXRBAXI2AgAMAQsgAEUNAQsgAEEIaiEBCyABC7kDAQJ/IAAgA2ohBQJAIANBB0wEQANAIAAgBU8NAiAAIAItAAA6AAAgAEEBaiEAIAJBAWohAgwAAAsACyAEQQFGBEACQCAAIAJrIgZBB00EQCAAIAItAAA6AAAgACACLQABOgABIAAgAi0AAjoAAiAAIAItAAM6AAMgAEEEaiACIAZBAnQiBkHAHmooAgBqIgIQFyACIAZB4B5qKAIAayECDAELIAAgAhAMCyACQQhqIQIgAEEIaiEACwJAAkACQAJAIAUgAU0EQCAAIANqIQEgBEEBRyAAIAJrQQ9Kcg0BA0AgACACEAwgAkEIaiECIABBCGoiACABSQ0ACwwFCyAAIAFLBEAgACEBDAQLIARBAUcgACACa0EPSnINASAAIQMgAiEEA0AgAyAEEAwgBEEIaiEEIANBCGoiAyABSQ0ACwwCCwNAIAAgAhAHIAJBEGohAiAAQRBqIgAgAUkNAAsMAwsgACEDIAIhBANAIAMgBBAHIARBEGohBCADQRBqIgMgAUkNAAsLIAIgASAAa2ohAgsDQCABIAVPDQEgASACLQAAOgAAIAFBAWohASACQQFqIQIMAAALAAsLQQECfyAAIAAoArjgASIDNgLE4AEgACgCvOABIQQgACABNgK84AEgACABIAJqNgK44AEgACABIAQgA2tqNgLA4AELpgEBAX8gACAAKALs4QEQFjYCyOABIABCADcD+OABIABCADcDuOABIABBwOABakIANwMAIABBqNAAaiIBQYyAgOAANgIAIABBADYCmOIBIABCADcDiOEBIABCAzcDgOEBIABBrNABakHgEikCADcCACAAQbTQAWpB6BIoAgA2AgAgACABNgIMIAAgAEGYIGo2AgggACAAQaAwajYCBCAAIABBEGo2AgALYQEBf0G4fyEDAkAgAUEDSQ0AIAIgABAhIgFBA3YiADYCCCACIAFBAXE2AgQgAiABQQF2QQNxIgM2AgACQCADQX9qIgFBAksNAAJAIAFBAWsOAgEAAgtBbA8LIAAhAwsgAwsMACAAIAEgAkEAEC4LiAQCA38CfiADEBYhBCAAQQBBKBAQIQAgBCACSwRAIAQPCyABRQRAQX8PCwJAAkAgA0EBRg0AIAEoAAAiBkGo6r5pRg0AQXYhAyAGQXBxQdDUtMIBRw0BQQghAyACQQhJDQEgAEEAQSgQECEAIAEoAAQhASAAQQE2AhQgACABrTcDAEEADwsgASACIAMQLyIDIAJLDQAgACADNgIYQXIhAyABIARqIgVBf2otAAAiAkEIcQ0AIAJBIHEiBkUEQEFwIQMgBS0AACIFQacBSw0BIAVBB3GtQgEgBUEDdkEKaq2GIgdCA4h+IAd8IQggBEEBaiEECyACQQZ2IQMgAkECdiEFAkAgAkEDcUF/aiICQQJLBEBBACECDAELAkACQAJAIAJBAWsOAgECAAsgASAEai0AACECIARBAWohBAwCCyABIARqLwAAIQIgBEECaiEEDAELIAEgBGooAAAhAiAEQQRqIQQLIAVBAXEhBQJ+AkACQAJAIANBf2oiA0ECTQRAIANBAWsOAgIDAQtCfyAGRQ0DGiABIARqMQAADAMLIAEgBGovAACtQoACfAwCCyABIARqKAAArQwBCyABIARqKQAACyEHIAAgBTYCICAAIAI2AhwgACAHNwMAQQAhAyAAQQA2AhQgACAHIAggBhsiBzcDCCAAIAdCgIAIIAdCgIAIVBs+AhALIAMLWwEBf0G4fyEDIAIQFiICIAFNBH8gACACakF/ai0AACIAQQNxQQJ0QaAeaigC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C0Egak8NAQsgByAHKQNoNwMQIAcgBykDYDcDCCAEIA0gB0EIaiAHQdwAaiAPIA4gESAQEB4hCwwBCyACIARqIQggBCAKEAcgAkERTwRAIARBEGohAgNAIAIgCkEQaiIKEAcgAkEQaiICIAhJDQALCyAIIAlrIQIgByATNgJcIAkgCCAOa0sEQCAJIAggEWtLBEBBbCELDAILIBAgAiAOayICaiIKIANqIBBNBEAgCCAKIAMQDxoMAgsgCCAKQQAgAmsQDyEIIAcgAiADaiIDNgJkIAggAmshCCAOIQILIAlBEE8EQCADIAhqIQMDQCAIIAIQByACQRBqIQIgCEEQaiIIIANJDQALDAELAkAgCUEHTQRAIAggAi0AADoAACAIIAItAAE6AAEgCCACLQACOgACIAggAi0AAzoAAyAIQQRqIAIgCUECdCIDQcAeaigCAGoiAhAXIAIgA0HgHmooAgBrIQIgBygCZCEDDAELIAggAhAMCyADQQlJDQAgAyAIaiEDIAhBCGoiCCACQQhqIgJrQQ9MBEADQCAIIAIQDCACQQhqIQIgCEEIaiIIIANJDQAMAgALAAsDQCAIIAIQByACQRBqIQIgCEEQaiIIIANJDQALCyAHQRhqEAQaIAsgDCALEAMiAhshDCAEIAQgC2ogAhshBCAFQX9qIgUNAAsgDBADDQFBbCEMIAdBGGoQBEECSQ0BQQAhCANAIAhBA0cEQCAAIAhBAnQiAmpBrNABaiACIAdqKAJENgIAIAhBAWohCAwBCwsgBygCXCEIC0G6fyEMIA8gCGsiACANIARrSw0AIAQEfyAEIAggABALIABqBUEACyABayEMCyAHQfAAaiQAIAwLkRcCFn8FfiMAQdABayIHJAAgByAAKALw4QEiCDYCvAEgASACaiESIAggACgCgOIBaiETAkACQCAFRQRAIAEhAwwBCyAAKALE4AEhESAAKALA4AEhFSAAKAK84AEhDyAAQQE2AozhAUEAIQgDQCAIQQNHBEAgByAIQQJ0IgJqIAAgAmpBrNABaigCADYCVCAIQQFqIQgMAQsLIAcgETYCZCAHIA82AmAgByABIA9rNgJoQWwhECAHQShqIAMgBBAGEAMNASAFQQQgBUEESBshFyAHQTxqIAdBKGogACgCABATIAdBxABqIAdBKGogACgCCBATIAdBzABqIAdB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IAdB0AFqJAAgEAslACAAQgA3AgAgAEEAOwEIIABBADoACyAAIAE2AgwgACACOgAKC7QFAQN/IwBBMGsiBCQAIABB/wFqIgVBfWohBgJAIAMvAQIEQCAEQRhqIAEgAhAGIgIQAw0BIARBEGogBEEYaiADEBwgBEEIaiAEQRhqIAMQHCAAIQMDQAJAIARBGGoQBCADIAZPckUEQCADIARBEGogBEEYahASOgAAIAMgBEEIaiAEQRhqEBI6AAEgBEEYahAERQ0BIANBAmohAwsgBUF+aiEFAn8DQEG6fyECIAMiASAFSw0FIAEgBEEQaiAEQRhqEBI6AAAgAUEBaiEDIARBGGoQBEEDRgRAQQIhAiAEQQhqDAILIAMgBUsNBSABIARBCGogBEEYahASOgABIAFBAmohA0EDIQIgBEEYahAEQQNHDQALIARBEGoLIQUgAyAFIARBGGoQEjoAACABIAJqIABrIQIMAwsgAyAEQRBqIARBGGoQEjoAAiADIARBCGogBEEYahASOgADIANBBGohAwwAAAsACyAEQRhqIAEgAhAGIgIQAw0AIARBEGogBEEYaiADEBwgBEEIaiAEQRhqIAMQHCAAIQMDQAJAIARBGGoQBCADIAZPckUEQCADIARBEGogBEEYahAROgAAIAMgBEEIaiAEQRhqEBE6AAEgBEEYahAERQ0BIANBAmohAwsgBUF+aiEFAn8DQEG6fyECIAMiASAFSw0EIAEgBEEQaiAEQRhqEBE6AAAgAUEBaiEDIARBGGoQBEEDRgRAQQIhAiAEQQhqDAILIAMgBUsNBCABIARBCGogBEEYahAROgABIAFBAmohA0EDIQIgBEEYahAEQQNHDQALIARBEGoLIQUgAyAFIARBGGoQEToAACABIAJqIABrIQIMAgsgAyAEQRBqIARBGGoQEToAAiADIARBCGogBEEYahAROgADIANBBGohAwwAAAsACyAEQTBqJAAgAgtpAQF/An8CQAJAIAJBB00NACABKAAAQbfIwuF+Rw0AIAAgASgABDYCmOIBQWIgAEEQaiABIAIQPiIDEAMNAhogAEKBgICAEDcDiOEBIAAgASADaiACIANrECoMAQsgACABIAIQKgtBAAsLrQMBBn8jAEGAAWsiAyQAQWIhCAJAIAJBCUkNACAAQZjQAGogAUEIaiIEIAJBeGogAEGY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wOABCwutAgIEfwF+IwBBQGoiBCQAAkACQCACQQhJDQAgASgAAEFwcUHQ1LTCAUcNACABIAIQIiEBIABCADcDCCAAQQA2AgQgACABNgIADAELIARBGGogASACEC0iAxADBEAgACADEBoMAQsgAwRAIABBuH8QGgwBCyACIAQoAjAiA2shAiABIANqIQMDQAJAIAAgAyACIARBCGoQLCIFEAMEfyAFBSACIAVBA2oiBU8NAUG4fwsQGgwCCyAGQQFqIQYgAiAFayECIAMgBWohAyAEKAIMRQ0ACyAEKAI4BEAgAkEDTQRAIABBuH8QGgwCCyADQQRqIQMLIAQoAighAiAEKQMYIQcgAEEANgIEIAAgAyABazYCACAAIAIgBmytIAcgB0J/URs3AwgLIARBQGskAAslAQF/IwBBEGsiAiQAIAIgACABEFEgAigCACEAIAJBEGokACAAC30BBH8jAEGQBGsiBCQAIARB/wE2AggCQCAEQRBqIARBCGogBEEMaiABIAIQFSIGEAMEQCAGIQUMAQtBVCEFIAQoAgwiB0EGSw0AIAMgBEEQaiAEKAIIIAcQQSIFEAMNACAAIAEgBmogAiAGayADEDwhBQsgBEGQBGokACAFC4cBAgJ/An5BABAWIQMCQANAIAEgA08EQAJAIAAoAABBcHFB0NS0wgFGBEAgACABECIiAhADRQ0BQn4PCyAAIAEQVSIEQn1WDQMgBCAFfCIFIARUIQJCfiEEIAINAyAAIAEQUiICEAMNAwsgASACayEBIAAgAmohAAwBCwtCfiAFIAEbIQQLIAQLPwIBfwF+IwBBMGsiAiQAAn5CfiACQQhqIAAgARAtDQAaQgAgAigCHEEBRg0AGiACKQMICyEDIAJBMGokACADC40BAQJ/IwBBMGsiASQAAkAgAEUNACAAKAKI4gENACABIABB/OEBaigCADYCKCABIAApAvThATcDICAAEDAgACgCqOIBIQIgASABKAIoNgIYIAEgASkDIDcDECACIAFBEGoQGyAAQQA2AqjiASABIAEoAig2AgggASABKQMgNwMAIAAgARAbCyABQTBqJAALKgECfyMAQRBrIgAkACAAQQA2AgggAEIANwMAIAAQWCEBIABBEGokACABC4cBAQN/IwBBEGsiAiQAAkAgACgCAEUgACgCBEVzDQAgAiAAKAIINgIIIAIgACkCADcDAAJ/IAIoAgAiAQRAIAIoAghBqOMJIAERBQAMAQtBqOMJECgLIgFFDQAgASAAKQIANwL04QEgAUH84QFqIAAoAgg2AgAgARBZIAEhAwsgAkEQaiQAIAMLywEBAn8jAEEgayIBJAAgAEGBgIDAADYCtOIBIABBADYCiOIBIABBADYC7OEBIABCADcDkOIBIABBADYCpOMJIABBADYC3OIBIABCADcCzOIBIABBADYCvOIBIABBADYCxOABIABCADcCnOIBIABBpOIBakIANwIAIABBrOIBakEANgIAIAFCADcCECABQgA3AhggASABKQMYNwMIIAEgASkDEDcDACABKAIIQQh2QQFxIQIgAEEANgLg4gEgACACNgKM4gEgAUEgaiQAC3YBA38jAEEwayIBJAAgAARAIAEgAEHE0AFqIgIoAgA2AiggASAAKQK80AE3AyAgACgCACEDIAEgAigCADYCGCABIAApArzQATcDECADIAFBEGoQGyABIAEoAig2AgggASABKQMgNwMAIAAgARAbCyABQTBqJAALzAEBAX8gACABKAK00AE2ApjiASAAIAEoAgQiAjYCwOABIAAgAjYCvOABIAAgAiABKAIIaiICNgK44AEgACACNgLE4AEgASgCuNABBEAgAEKBgICAEDcDiOEBIAAgAUGk0ABqNgIMIAAgAUGUIGo2AgggACABQZwwajYCBCAAIAFBDGo2AgAgAEGs0AFqIAFBqNABaigCADYCACAAQbDQAWogAUGs0AFqKAIANgIAIABBtNABaiABQbDQAWooAgA2AgAPCyAAQgA3A4jhAQs7ACACRQRAQbp/DwsgBEUEQEFsDwsgAiAEEGAEQCAAIAEgAiADIAQgBRBhDwsgACABIAIgAyAEIAUQZQtGAQF/IwBBEGsiBSQAIAVBCGogBBAOAn8gBS0ACQRAIAAgASACIAMgBBAyDAELIAAgASACIAMgBBA0CyEAIAVBEGokACAACzQAIAAgAyAEIAUQNiIFEAMEQCAFDwsgBSAESQR/IAEgAiADIAVqIAQgBWsgABA1BUG4fwsLRgEBfyMAQRBrIgUkACAFQQhqIAQQDgJ/IAUtAAkEQCAAIAEgAiADIAQQYgwBCyAAIAEgAiADIAQQNQshACAFQRBqJAAgAAtZAQF/QQ8hAiABIABJBEAgAUEE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", hA, lA;
+var init_lerc_CoQvYJmm = __esm(() => {
+  init_pako_esm_CB1uQYY0();
+  init_main_8v7k2MJ1();
+  init_basedecoder_DHcBySSe();
+  iA = { exports: {} };
+  (function(j2) {
+    (function() {
+      var J = function() {
+        var u = {};
+        u.defaultNoDataValue = -340279993879014840000000000000000000000, u.decode = function(I2, a) {
+          a = a || {};
+          var Q3 = a.encodedMaskData || a.encodedMaskData === null, g2 = E2(I2, a.inputOffset || 0, Q3), D2 = a.noDataValue !== null ? a.noDataValue : u.defaultNoDataValue, B3 = L2(g2, a.pixelType || Float32Array, a.encodedMaskData, D2, a.returnMask), C2 = {
+            width: g2.width,
+            height: g2.height,
+            pixelData: B3.resultPixels,
+            minValue: B3.minValue,
+            maxValue: g2.pixels.maxValue,
+            noDataValue: D2
+          };
+          return B3.resultMask && (C2.maskData = B3.resultMask), a.returnEncodedMask && g2.mask && (C2.encodedMaskData = g2.mask.bitset ? g2.mask.bitset : null), a.returnFileInfo && (C2.fileInfo = d3(g2), a.computeUsedBitDepths && (C2.fileInfo.bitDepths = z(g2))), C2;
+        };
+        var L2 = function(I2, a, Q3, g2, D2) {
+          var B3 = 0, C2 = I2.pixels.numBlocksX, o = I2.pixels.numBlocksY, r = Math.floor(I2.width / C2), s2 = Math.floor(I2.height / o), f2 = 2 * I2.maxZError, e = Number.MAX_VALUE, i;
+          Q3 = Q3 || (I2.mask ? I2.mask.bitset : null);
+          var t, F2;
+          t = new a(I2.width * I2.height), D2 && Q3 && (F2 = new Uint8Array(I2.width * I2.height));
+          for (var S2 = new Float32Array(r * s2), h, U2, G2 = 0;G2 <= o; G2++) {
+            var R2 = G2 !== o ? s2 : I2.height % o;
+            if (R2 !== 0)
+              for (var w = 0;w <= C2; w++) {
+                var n = w !== C2 ? r : I2.width % C2;
+                if (n !== 0) {
+                  var l3 = G2 * I2.width * s2 + w * r, y = I2.width - n, k3 = I2.pixels.blocks[B3], M2, c, N3;
+                  k3.encoding < 2 ? (k3.encoding === 0 ? M2 = k3.rawData : (A2(k3.stuffedData, k3.bitsPerPixel, k3.numValidPixels, k3.offset, f2, S2, I2.pixels.maxValue), M2 = S2), c = 0) : k3.encoding === 2 ? N3 = 0 : N3 = k3.offset;
+                  var q2;
+                  if (Q3)
+                    for (U2 = 0;U2 < R2; U2++) {
+                      for (l3 & 7 && (q2 = Q3[l3 >> 3], q2 <<= l3 & 7), h = 0;h < n; h++)
+                        l3 & 7 || (q2 = Q3[l3 >> 3]), q2 & 128 ? (F2 && (F2[l3] = 1), i = k3.encoding < 2 ? M2[c++] : N3, e = e > i ? i : e, t[l3++] = i) : (F2 && (F2[l3] = 0), t[l3++] = g2), q2 <<= 1;
+                      l3 += y;
+                    }
+                  else if (k3.encoding < 2)
+                    for (U2 = 0;U2 < R2; U2++) {
+                      for (h = 0;h < n; h++)
+                        i = M2[c++], e = e > i ? i : e, t[l3++] = i;
+                      l3 += y;
+                    }
+                  else
+                    for (e = e > N3 ? N3 : e, U2 = 0;U2 < R2; U2++) {
+                      for (h = 0;h < n; h++)
+                        t[l3++] = N3;
+                      l3 += y;
+                    }
+                  if (k3.encoding === 1 && c !== k3.numValidPixels)
+                    throw "Block and Mask do not match";
+                  B3++;
+                }
+              }
+          }
+          return {
+            resultPixels: t,
+            resultMask: F2,
+            minValue: e
+          };
+        }, d3 = function(I2) {
+          return {
+            fileIdentifierString: I2.fileIdentifierString,
+            fileVersion: I2.fileVersion,
+            imageType: I2.imageType,
+            height: I2.height,
+            width: I2.width,
+            maxZError: I2.maxZError,
+            eofOffset: I2.eofOffset,
+            mask: I2.mask ? {
+              numBlocksX: I2.mask.numBlocksX,
+              numBlocksY: I2.mask.numBlocksY,
+              numBytes: I2.mask.numBytes,
+              maxValue: I2.mask.maxValue
+            } : null,
+            pixels: {
+              numBlocksX: I2.pixels.numBlocksX,
+              numBlocksY: I2.pixels.numBlocksY,
+              numBytes: I2.pixels.numBytes,
+              maxValue: I2.pixels.maxValue,
+              noDataValue: I2.noDataValue
+            }
+          };
+        }, z = function(I2) {
+          for (var a = I2.pixels.numBlocksX * I2.pixels.numBlocksY, Q3 = {}, g2 = 0;g2 < a; g2++) {
+            var D2 = I2.pixels.blocks[g2];
+            D2.encoding === 0 ? Q3.float32 = true : D2.encoding === 1 ? Q3[D2.bitsPerPixel] = true : Q3[0] = true;
+          }
+          return Object.keys(Q3);
+        }, E2 = function(I2, a, Q3) {
+          var g2 = {}, D2 = new Uint8Array(I2, a, 10);
+          if (g2.fileIdentifierString = String.fromCharCode.apply(null, D2), g2.fileIdentifierString.trim() !== "CntZImage")
+            throw "Unexpected file identifier string: " + g2.fileIdentifierString;
+          a += 10;
+          var B3 = new DataView(I2, a, 24);
+          if (g2.fileVersion = B3.getInt32(0, true), g2.imageType = B3.getInt32(4, true), g2.height = B3.getUint32(8, true), g2.width = B3.getUint32(12, true), g2.maxZError = B3.getFloat64(16, true), a += 24, !Q3)
+            if (B3 = new DataView(I2, a, 16), g2.mask = {}, g2.mask.numBlocksY = B3.getUint32(0, true), g2.mask.numBlocksX = B3.getUint32(4, true), g2.mask.numBytes = B3.getUint32(8, true), g2.mask.maxValue = B3.getFloat32(12, true), a += 16, g2.mask.numBytes > 0) {
+              var C2 = new Uint8Array(Math.ceil(g2.width * g2.height / 8));
+              B3 = new DataView(I2, a, g2.mask.numBytes);
+              var o = B3.getInt16(0, true), r = 2, s2 = 0;
+              do {
+                if (o > 0)
+                  for (;o--; )
+                    C2[s2++] = B3.getUint8(r++);
+                else {
+                  var f2 = B3.getUint8(r++);
+                  for (o = -o;o--; )
+                    C2[s2++] = f2;
+                }
+                o = B3.getInt16(r, true), r += 2;
+              } while (r < g2.mask.numBytes);
+              if (o !== -32768 || s2 < C2.length)
+                throw "Unexpected end of mask RLE encoding";
+              g2.mask.bitset = C2, a += g2.mask.numBytes;
+            } else
+              g2.mask.numBytes | g2.mask.numBlocksY | g2.mask.maxValue || (g2.mask.bitset = new Uint8Array(Math.ceil(g2.width * g2.height / 8)));
+          B3 = new DataView(I2, a, 16), g2.pixels = {}, g2.pixels.numBlocksY = B3.getUint32(0, true), g2.pixels.numBlocksX = B3.getUint32(4, true), g2.pixels.numBytes = B3.getUint32(8, true), g2.pixels.maxValue = B3.getFloat32(12, true), a += 16;
+          var e = g2.pixels.numBlocksX, i = g2.pixels.numBlocksY, t = e + (g2.width % e > 0 ? 1 : 0), F2 = i + (g2.height % i > 0 ? 1 : 0);
+          g2.pixels.blocks = new Array(t * F2);
+          for (var S2 = 0, h = 0;h < F2; h++)
+            for (var U2 = 0;U2 < t; U2++) {
+              var G2 = 0, R2 = I2.byteLength - a;
+              B3 = new DataView(I2, a, Math.min(10, R2));
+              var w = {};
+              g2.pixels.blocks[S2++] = w;
+              var n = B3.getUint8(0);
+              if (G2++, w.encoding = n & 63, w.encoding > 3)
+                throw "Invalid block encoding (" + w.encoding + ")";
+              if (w.encoding === 2) {
+                a++;
+                continue;
+              }
+              if (n !== 0 && n !== 2) {
+                if (n >>= 6, w.offsetType = n, n === 2)
+                  w.offset = B3.getInt8(1), G2++;
+                else if (n === 1)
+                  w.offset = B3.getInt16(1, true), G2 += 2;
+                else if (n === 0)
+                  w.offset = B3.getFloat32(1, true), G2 += 4;
+                else
+                  throw "Invalid block offset type";
+                if (w.encoding === 1)
+                  if (n = B3.getUint8(G2), G2++, w.bitsPerPixel = n & 63, n >>= 6, w.numValidPixelsType = n, n === 2)
+                    w.numValidPixels = B3.getUint8(G2), G2++;
+                  else if (n === 1)
+                    w.numValidPixels = B3.getUint16(G2, true), G2 += 2;
+                  else if (n === 0)
+                    w.numValidPixels = B3.getUint32(G2, true), G2 += 4;
+                  else
+                    throw "Invalid valid pixel count type";
+              }
+              if (a += G2, w.encoding !== 3) {
+                var l3, y;
+                if (w.encoding === 0) {
+                  var k3 = (g2.pixels.numBytes - 1) / 4;
+                  if (k3 !== Math.floor(k3))
+                    throw "uncompressed block has invalid length";
+                  l3 = new ArrayBuffer(k3 * 4), y = new Uint8Array(l3), y.set(new Uint8Array(I2, a, k3 * 4));
+                  var M2 = new Float32Array(l3);
+                  w.rawData = M2, a += k3 * 4;
+                } else if (w.encoding === 1) {
+                  var c = Math.ceil(w.numValidPixels * w.bitsPerPixel / 8), N3 = Math.ceil(c / 4);
+                  l3 = new ArrayBuffer(N3 * 4), y = new Uint8Array(l3), y.set(new Uint8Array(I2, a, c)), w.stuffedData = new Uint32Array(l3), a += c;
+                }
+              }
+            }
+          return g2.eofOffset = a, g2;
+        }, A2 = function(I2, a, Q3, g2, D2, B3, C2) {
+          var o = (1 << a) - 1, r = 0, s2, f2 = 0, e, i, t = Math.ceil((C2 - g2) / D2), F2 = I2.length * 4 - Math.ceil(a * Q3 / 8);
+          for (I2[I2.length - 1] <<= 8 * F2, s2 = 0;s2 < Q3; s2++) {
+            if (f2 === 0 && (i = I2[r++], f2 = 32), f2 >= a)
+              e = i >>> f2 - a & o, f2 -= a;
+            else {
+              var S2 = a - f2;
+              e = (i & o) << S2 & o, i = I2[r++], f2 = 32 - S2, e += i >>> f2;
+            }
+            B3[s2] = e < t ? g2 + e * D2 : C2;
+          }
+          return B3;
+        };
+        return u;
+      }(), T2 = /* @__PURE__ */ function() {
+        var u = {
+          unstuff: function(E2, A2, I2, a, Q3, g2, D2, B3) {
+            var C2 = (1 << I2) - 1, o = 0, r, s2 = 0, f2, e, i, t, F2 = E2.length * 4 - Math.ceil(I2 * a / 8);
+            if (E2[E2.length - 1] <<= 8 * F2, Q3)
+              for (r = 0;r < a; r++)
+                s2 === 0 && (e = E2[o++], s2 = 32), s2 >= I2 ? (f2 = e >>> s2 - I2 & C2, s2 -= I2) : (i = I2 - s2, f2 = (e & C2) << i & C2, e = E2[o++], s2 = 32 - i, f2 += e >>> s2), A2[r] = Q3[f2];
+            else
+              for (t = Math.ceil((B3 - g2) / D2), r = 0;r < a; r++)
+                s2 === 0 && (e = E2[o++], s2 = 32), s2 >= I2 ? (f2 = e >>> s2 - I2 & C2, s2 -= I2) : (i = I2 - s2, f2 = (e & C2) << i & C2, e = E2[o++], s2 = 32 - i, f2 += e >>> s2), A2[r] = f2 < t ? g2 + f2 * D2 : B3;
+          },
+          unstuffLUT: function(E2, A2, I2, a, Q3, g2) {
+            var D2 = (1 << A2) - 1, B3 = 0, C2 = 0, o = 0, r = 0, s2 = 0, f2, e = [], i = E2.length * 4 - Math.ceil(A2 * I2 / 8);
+            E2[E2.length - 1] <<= 8 * i;
+            var t = Math.ceil((g2 - a) / Q3);
+            for (C2 = 0;C2 < I2; C2++)
+              r === 0 && (f2 = E2[B3++], r = 32), r >= A2 ? (s2 = f2 >>> r - A2 & D2, r -= A2) : (o = A2 - r, s2 = (f2 & D2) << o & D2, f2 = E2[B3++], r = 32 - o, s2 += f2 >>> r), e[C2] = s2 < t ? a + s2 * Q3 : g2;
+            return e.unshift(a), e;
+          },
+          unstuff2: function(E2, A2, I2, a, Q3, g2, D2, B3) {
+            var C2 = (1 << I2) - 1, o = 0, r, s2 = 0, f2 = 0, e, i, t;
+            if (Q3)
+              for (r = 0;r < a; r++)
+                s2 === 0 && (i = E2[o++], s2 = 32, f2 = 0), s2 >= I2 ? (e = i >>> f2 & C2, s2 -= I2, f2 += I2) : (t = I2 - s2, e = i >>> f2 & C2, i = E2[o++], s2 = 32 - t, e |= (i & (1 << t) - 1) << I2 - t, f2 = t), A2[r] = Q3[e];
+            else {
+              var F2 = Math.ceil((B3 - g2) / D2);
+              for (r = 0;r < a; r++)
+                s2 === 0 && (i = E2[o++], s2 = 32, f2 = 0), s2 >= I2 ? (e = i >>> f2 & C2, s2 -= I2, f2 += I2) : (t = I2 - s2, e = i >>> f2 & C2, i = E2[o++], s2 = 32 - t, e |= (i & (1 << t) - 1) << I2 - t, f2 = t), A2[r] = e < F2 ? g2 + e * D2 : B3;
+            }
+            return A2;
+          },
+          unstuffLUT2: function(E2, A2, I2, a, Q3, g2) {
+            var D2 = (1 << A2) - 1, B3 = 0, C2 = 0, o = 0, r = 0, s2 = 0, f2 = 0, e, i = [], t = Math.ceil((g2 - a) / Q3);
+            for (C2 = 0;C2 < I2; C2++)
+              r === 0 && (e = E2[B3++], r = 32, f2 = 0), r >= A2 ? (s2 = e >>> f2 & D2, r -= A2, f2 += A2) : (o = A2 - r, s2 = e >>> f2 & D2, e = E2[B3++], r = 32 - o, s2 |= (e & (1 << o) - 1) << A2 - o, f2 = o), i[C2] = s2 < t ? a + s2 * Q3 : g2;
+            return i.unshift(a), i;
+          },
+          originalUnstuff: function(E2, A2, I2, a) {
+            var Q3 = (1 << I2) - 1, g2 = 0, D2, B3 = 0, C2, o, r, s2 = E2.length * 4 - Math.ceil(I2 * a / 8);
+            for (E2[E2.length - 1] <<= 8 * s2, D2 = 0;D2 < a; D2++)
+              B3 === 0 && (o = E2[g2++], B3 = 32), B3 >= I2 ? (C2 = o >>> B3 - I2 & Q3, B3 -= I2) : (r = I2 - B3, C2 = (o & Q3) << r & Q3, o = E2[g2++], B3 = 32 - r, C2 += o >>> B3), A2[D2] = C2;
+            return A2;
+          },
+          originalUnstuff2: function(E2, A2, I2, a) {
+            var Q3 = (1 << I2) - 1, g2 = 0, D2, B3 = 0, C2 = 0, o, r, s2;
+            for (D2 = 0;D2 < a; D2++)
+              B3 === 0 && (r = E2[g2++], B3 = 32, C2 = 0), B3 >= I2 ? (o = r >>> C2 & Q3, B3 -= I2, C2 += I2) : (s2 = I2 - B3, o = r >>> C2 & Q3, r = E2[g2++], B3 = 32 - s2, o |= (r & (1 << s2) - 1) << I2 - s2, C2 = s2), A2[D2] = o;
+            return A2;
+          }
+        }, L2 = {
+          HUFFMAN_LUT_BITS_MAX: 12,
+          computeChecksumFletcher32: function(E2) {
+            for (var A2 = 65535, I2 = 65535, a = E2.length, Q3 = Math.floor(a / 2), g2 = 0;Q3; ) {
+              var D2 = Q3 >= 359 ? 359 : Q3;
+              Q3 -= D2;
+              do
+                A2 += E2[g2++] << 8, I2 += A2 += E2[g2++];
+              while (--D2);
+              A2 = (A2 & 65535) + (A2 >>> 16), I2 = (I2 & 65535) + (I2 >>> 16);
+            }
+            return a & 1 && (I2 += A2 += E2[g2] << 8), A2 = (A2 & 65535) + (A2 >>> 16), I2 = (I2 & 65535) + (I2 >>> 16), (I2 << 16 | A2) >>> 0;
+          },
+          readHeaderInfo: function(E2, A2) {
+            var I2 = A2.ptr, a = new Uint8Array(E2, I2, 6), Q3 = {};
+            if (Q3.fileIdentifierString = String.fromCharCode.apply(null, a), Q3.fileIdentifierString.lastIndexOf("Lerc2", 0) !== 0)
+              throw "Unexpected file identifier string (expect Lerc2 ): " + Q3.fileIdentifierString;
+            I2 += 6;
+            var g2 = new DataView(E2, I2, 8), D2 = g2.getInt32(0, true);
+            Q3.fileVersion = D2, I2 += 4, D2 >= 3 && (Q3.checksum = g2.getUint32(4, true), I2 += 4), g2 = new DataView(E2, I2, 12), Q3.height = g2.getUint32(0, true), Q3.width = g2.getUint32(4, true), I2 += 8, D2 >= 4 ? (Q3.numDims = g2.getUint32(8, true), I2 += 4) : Q3.numDims = 1, g2 = new DataView(E2, I2, 40), Q3.numValidPixel = g2.getUint32(0, true), Q3.microBlockSize = g2.getInt32(4, true), Q3.blobSize = g2.getInt32(8, true), Q3.imageType = g2.getInt32(12, true), Q3.maxZError = g2.getFloat64(16, true), Q3.zMin = g2.getFloat64(24, true), Q3.zMax = g2.getFloat64(32, true), I2 += 40, A2.headerInfo = Q3, A2.ptr = I2;
+            var B3, C2;
+            if (D2 >= 3 && (C2 = D2 >= 4 ? 52 : 48, B3 = this.computeChecksumFletcher32(new Uint8Array(E2, I2 - C2, Q3.blobSize - 14)), B3 !== Q3.checksum))
+              throw "Checksum failed.";
+            return true;
+          },
+          checkMinMaxRanges: function(E2, A2) {
+            var I2 = A2.headerInfo, a = this.getDataTypeArray(I2.imageType), Q3 = I2.numDims * this.getDataTypeSize(I2.imageType), g2 = this.readSubArray(E2, A2.ptr, a, Q3), D2 = this.readSubArray(E2, A2.ptr + Q3, a, Q3);
+            A2.ptr += 2 * Q3;
+            var B3, C2 = true;
+            for (B3 = 0;B3 < I2.numDims; B3++)
+              if (g2[B3] !== D2[B3]) {
+                C2 = false;
+                break;
+              }
+            return I2.minValues = g2, I2.maxValues = D2, C2;
+          },
+          readSubArray: function(E2, A2, I2, a) {
+            var Q3;
+            if (I2 === Uint8Array)
+              Q3 = new Uint8Array(E2, A2, a);
+            else {
+              var g2 = new ArrayBuffer(a), D2 = new Uint8Array(g2);
+              D2.set(new Uint8Array(E2, A2, a)), Q3 = new I2(g2);
+            }
+            return Q3;
+          },
+          readMask: function(E2, A2) {
+            var { ptr: I2, headerInfo: a } = A2, Q3 = a.width * a.height, g2 = a.numValidPixel, D2 = new DataView(E2, I2, 4), B3 = {};
+            if (B3.numBytes = D2.getUint32(0, true), I2 += 4, (g2 === 0 || Q3 === g2) && B3.numBytes !== 0)
+              throw "invalid mask";
+            var C2, o;
+            if (g2 === 0)
+              C2 = new Uint8Array(Math.ceil(Q3 / 8)), B3.bitset = C2, o = new Uint8Array(Q3), A2.pixels.resultMask = o, I2 += B3.numBytes;
+            else if (B3.numBytes > 0) {
+              C2 = new Uint8Array(Math.ceil(Q3 / 8)), D2 = new DataView(E2, I2, B3.numBytes);
+              var r = D2.getInt16(0, true), s2 = 2, f2 = 0, e = 0;
+              do {
+                if (r > 0)
+                  for (;r--; )
+                    C2[f2++] = D2.getUint8(s2++);
+                else
+                  for (e = D2.getUint8(s2++), r = -r;r--; )
+                    C2[f2++] = e;
+                r = D2.getInt16(s2, true), s2 += 2;
+              } while (s2 < B3.numBytes);
+              if (r !== -32768 || f2 < C2.length)
+                throw "Unexpected end of mask RLE encoding";
+              o = new Uint8Array(Q3);
+              var i = 0, t = 0;
+              for (t = 0;t < Q3; t++)
+                t & 7 ? (i = C2[t >> 3], i <<= t & 7) : i = C2[t >> 3], i & 128 && (o[t] = 1);
+              A2.pixels.resultMask = o, B3.bitset = C2, I2 += B3.numBytes;
+            }
+            return A2.ptr = I2, A2.mask = B3, true;
+          },
+          readDataOneSweep: function(E2, A2, I2, a) {
+            var { ptr: Q3, headerInfo: g2 } = A2, D2 = g2.numDims, B3 = g2.width * g2.height, C2 = g2.imageType, o = g2.numValidPixel * L2.getDataTypeSize(C2) * D2, r, s2 = A2.pixels.resultMask;
+            if (I2 === Uint8Array)
+              r = new Uint8Array(E2, Q3, o);
+            else {
+              var f2 = new ArrayBuffer(o), e = new Uint8Array(f2);
+              e.set(new Uint8Array(E2, Q3, o)), r = new I2(f2);
+            }
+            if (r.length === B3 * D2)
+              a ? A2.pixels.resultPixels = L2.swapDimensionOrder(r, B3, D2, I2, true) : A2.pixels.resultPixels = r;
+            else {
+              A2.pixels.resultPixels = new I2(B3 * D2);
+              var i = 0, t = 0, F2 = 0, S2 = 0;
+              if (D2 > 1) {
+                if (a) {
+                  for (t = 0;t < B3; t++)
+                    if (s2[t])
+                      for (S2 = t, F2 = 0;F2 < D2; F2++, S2 += B3)
+                        A2.pixels.resultPixels[S2] = r[i++];
+                } else
+                  for (t = 0;t < B3; t++)
+                    if (s2[t])
+                      for (S2 = t * D2, F2 = 0;F2 < D2; F2++)
+                        A2.pixels.resultPixels[S2 + F2] = r[i++];
+              } else
+                for (t = 0;t < B3; t++)
+                  s2[t] && (A2.pixels.resultPixels[t] = r[i++]);
+            }
+            return Q3 += o, A2.ptr = Q3, true;
+          },
+          readHuffmanTree: function(E2, A2) {
+            var I2 = this.HUFFMAN_LUT_BITS_MAX, a = new DataView(E2, A2.ptr, 16);
+            A2.ptr += 16;
+            var Q3 = a.getInt32(0, true);
+            if (Q3 < 2)
+              throw "unsupported Huffman version";
+            var g2 = a.getInt32(4, true), D2 = a.getInt32(8, true), B3 = a.getInt32(12, true);
+            if (D2 >= B3)
+              return false;
+            var C2 = new Uint32Array(B3 - D2);
+            L2.decodeBits(E2, A2, C2);
+            var o = [], r, s2, f2, e;
+            for (r = D2;r < B3; r++)
+              s2 = r - (r < g2 ? 0 : g2), o[s2] = { first: C2[r - D2], second: null };
+            var i = E2.byteLength - A2.ptr, t = Math.ceil(i / 4), F2 = new ArrayBuffer(t * 4), S2 = new Uint8Array(F2);
+            S2.set(new Uint8Array(E2, A2.ptr, i));
+            var h = new Uint32Array(F2), U2 = 0, G2, R2 = 0;
+            for (G2 = h[0], r = D2;r < B3; r++)
+              s2 = r - (r < g2 ? 0 : g2), e = o[s2].first, e > 0 && (o[s2].second = G2 << U2 >>> 32 - e, 32 - U2 >= e ? (U2 += e, U2 === 32 && (U2 = 0, R2++, G2 = h[R2])) : (U2 += e - 32, R2++, G2 = h[R2], o[s2].second |= G2 >>> 32 - U2));
+            var w = 0, n = 0, l3 = new d3;
+            for (r = 0;r < o.length; r++)
+              o[r] !== undefined && (w = Math.max(w, o[r].first));
+            w >= I2 ? n = I2 : n = w;
+            var y = [], k3, M2, c, N3, q2, m2;
+            for (r = D2;r < B3; r++)
+              if (s2 = r - (r < g2 ? 0 : g2), e = o[s2].first, e > 0)
+                if (k3 = [e, s2], e <= n)
+                  for (M2 = o[s2].second << n - e, c = 1 << n - e, f2 = 0;f2 < c; f2++)
+                    y[M2 | f2] = k3;
+                else
+                  for (M2 = o[s2].second, m2 = l3, N3 = e - 1;N3 >= 0; N3--)
+                    q2 = M2 >>> N3 & 1, q2 ? (m2.right || (m2.right = new d3), m2 = m2.right) : (m2.left || (m2.left = new d3), m2 = m2.left), N3 === 0 && !m2.val && (m2.val = k3[1]);
+            return {
+              decodeLut: y,
+              numBitsLUTQick: n,
+              numBitsLUT: w,
+              tree: l3,
+              stuffedData: h,
+              srcPtr: R2,
+              bitPos: U2
+            };
+          },
+          readHuffman: function(E2, A2, I2, a) {
+            var Q3 = A2.headerInfo, g2 = Q3.numDims, D2 = A2.headerInfo.height, B3 = A2.headerInfo.width, C2 = B3 * D2, o = this.readHuffmanTree(E2, A2), r = o.decodeLut, s2 = o.tree, f2 = o.stuffedData, e = o.srcPtr, i = o.bitPos, t = o.numBitsLUTQick, F2 = o.numBitsLUT, S2 = A2.headerInfo.imageType === 0 ? 128 : 0, h, U2, G2, R2 = A2.pixels.resultMask, w, n, l3, y, k3, M2, c, N3 = 0;
+            i > 0 && (e++, i = 0);
+            var q2 = f2[e], m2 = A2.encodeMode === 1, O3 = new I2(C2 * g2), v = O3, Y3;
+            if (g2 < 2 || m2) {
+              for (Y3 = 0;Y3 < g2; Y3++)
+                if (g2 > 1 && (v = new I2(O3.buffer, C2 * Y3, C2), N3 = 0), A2.headerInfo.numValidPixel === B3 * D2)
+                  for (M2 = 0, y = 0;y < D2; y++)
+                    for (k3 = 0;k3 < B3; k3++, M2++) {
+                      if (U2 = 0, w = q2 << i >>> 32 - t, n = w, 32 - i < t && (w |= f2[e + 1] >>> 64 - i - t, n = w), r[n])
+                        U2 = r[n][1], i += r[n][0];
+                      else
+                        for (w = q2 << i >>> 32 - F2, n = w, 32 - i < F2 && (w |= f2[e + 1] >>> 64 - i - F2, n = w), h = s2, c = 0;c < F2; c++)
+                          if (l3 = w >>> F2 - c - 1 & 1, h = l3 ? h.right : h.left, !(h.left || h.right)) {
+                            U2 = h.val, i = i + c + 1;
+                            break;
+                          }
+                      i >= 32 && (i -= 32, e++, q2 = f2[e]), G2 = U2 - S2, m2 ? (k3 > 0 ? G2 += N3 : y > 0 ? G2 += v[M2 - B3] : G2 += N3, G2 &= 255, v[M2] = G2, N3 = G2) : v[M2] = G2;
+                    }
+                else
+                  for (M2 = 0, y = 0;y < D2; y++)
+                    for (k3 = 0;k3 < B3; k3++, M2++)
+                      if (R2[M2]) {
+                        if (U2 = 0, w = q2 << i >>> 32 - t, n = w, 32 - i < t && (w |= f2[e + 1] >>> 64 - i - t, n = w), r[n])
+                          U2 = r[n][1], i += r[n][0];
+                        else
+                          for (w = q2 << i >>> 32 - F2, n = w, 32 - i < F2 && (w |= f2[e + 1] >>> 64 - i - F2, n = w), h = s2, c = 0;c < F2; c++)
+                            if (l3 = w >>> F2 - c - 1 & 1, h = l3 ? h.right : h.left, !(h.left || h.right)) {
+                              U2 = h.val, i = i + c + 1;
+                              break;
+                            }
+                        i >= 32 && (i -= 32, e++, q2 = f2[e]), G2 = U2 - S2, m2 ? (k3 > 0 && R2[M2 - 1] ? G2 += N3 : y > 0 && R2[M2 - B3] ? G2 += v[M2 - B3] : G2 += N3, G2 &= 255, v[M2] = G2, N3 = G2) : v[M2] = G2;
+                      }
+            } else
+              for (M2 = 0, y = 0;y < D2; y++)
+                for (k3 = 0;k3 < B3; k3++)
+                  if (M2 = y * B3 + k3, !R2 || R2[M2])
+                    for (Y3 = 0;Y3 < g2; Y3++, M2 += C2) {
+                      if (U2 = 0, w = q2 << i >>> 32 - t, n = w, 32 - i < t && (w |= f2[e + 1] >>> 64 - i - t, n = w), r[n])
+                        U2 = r[n][1], i += r[n][0];
+                      else
+                        for (w = q2 << i >>> 32 - F2, n = w, 32 - i < F2 && (w |= f2[e + 1] >>> 64 - i - F2, n = w), h = s2, c = 0;c < F2; c++)
+                          if (l3 = w >>> F2 - c - 1 & 1, h = l3 ? h.right : h.left, !(h.left || h.right)) {
+                            U2 = h.val, i = i + c + 1;
+                            break;
+                          }
+                      i >= 32 && (i -= 32, e++, q2 = f2[e]), G2 = U2 - S2, v[M2] = G2;
+                    }
+            A2.ptr = A2.ptr + (e + 1) * 4 + (i > 0 ? 4 : 0), A2.pixels.resultPixels = O3, g2 > 1 && !a && (A2.pixels.resultPixels = L2.swapDimensionOrder(O3, C2, g2, I2));
+          },
+          decodeBits: function(E2, A2, I2, a, Q3) {
+            {
+              var g2 = A2.headerInfo, D2 = g2.fileVersion, B3 = 0, C2 = E2.byteLength - A2.ptr >= 5 ? 5 : E2.byteLength - A2.ptr, o = new DataView(E2, A2.ptr, C2), r = o.getUint8(0);
+              B3++;
+              var s2 = r >> 6, f2 = s2 === 0 ? 4 : 3 - s2, e = (r & 32) > 0, i = r & 31, t = 0;
+              if (f2 === 1)
+                t = o.getUint8(B3), B3++;
+              else if (f2 === 2)
+                t = o.getUint16(B3, true), B3 += 2;
+              else if (f2 === 4)
+                t = o.getUint32(B3, true), B3 += 4;
+              else
+                throw "Invalid valid pixel count type";
+              var F2 = 2 * g2.maxZError, S2, h, U2, G2, R2, w, n, l3, y, k3 = g2.numDims > 1 ? g2.maxValues[Q3] : g2.zMax;
+              if (e) {
+                for (A2.counter.lut++, l3 = o.getUint8(B3), B3++, G2 = Math.ceil((l3 - 1) * i / 8), R2 = Math.ceil(G2 / 4), h = new ArrayBuffer(R2 * 4), U2 = new Uint8Array(h), A2.ptr += B3, U2.set(new Uint8Array(E2, A2.ptr, G2)), n = new Uint32Array(h), A2.ptr += G2, y = 0;l3 - 1 >>> y; )
+                  y++;
+                G2 = Math.ceil(t * y / 8), R2 = Math.ceil(G2 / 4), h = new ArrayBuffer(R2 * 4), U2 = new Uint8Array(h), U2.set(new Uint8Array(E2, A2.ptr, G2)), S2 = new Uint32Array(h), A2.ptr += G2, D2 >= 3 ? w = u.unstuffLUT2(n, i, l3 - 1, a, F2, k3) : w = u.unstuffLUT(n, i, l3 - 1, a, F2, k3), D2 >= 3 ? u.unstuff2(S2, I2, y, t, w) : u.unstuff(S2, I2, y, t, w);
+              } else
+                A2.counter.bitstuffer++, y = i, A2.ptr += B3, y > 0 && (G2 = Math.ceil(t * y / 8), R2 = Math.ceil(G2 / 4), h = new ArrayBuffer(R2 * 4), U2 = new Uint8Array(h), U2.set(new Uint8Array(E2, A2.ptr, G2)), S2 = new Uint32Array(h), A2.ptr += G2, D2 >= 3 ? a == null ? u.originalUnstuff2(S2, I2, y, t) : u.unstuff2(S2, I2, y, t, false, a, F2, k3) : a == null ? u.originalUnstuff(S2, I2, y, t) : u.unstuff(S2, I2, y, t, false, a, F2, k3));
+            }
+          },
+          readTiles: function(E2, A2, I2, a) {
+            var Q3 = A2.headerInfo, g2 = Q3.width, D2 = Q3.height, B3 = g2 * D2, C2 = Q3.microBlockSize, o = Q3.imageType, r = L2.getDataTypeSize(o), s2 = Math.ceil(g2 / C2), f2 = Math.ceil(D2 / C2);
+            A2.pixels.numBlocksY = f2, A2.pixels.numBlocksX = s2, A2.pixels.ptr = 0;
+            var e = 0, i = 0, t = 0, F2 = 0, S2 = 0, h = 0, U2 = 0, G2 = 0, R2 = 0, w = 0, n = 0, l3 = 0, y = 0, k3 = 0, M2 = 0, c = 0, N3, q2, m2, O3, v, Y3, P2 = new I2(C2 * C2), eA = D2 % C2 || C2, aA = g2 % C2 || C2, AA, b, $3 = Q3.numDims, W3, K3 = A2.pixels.resultMask, H2 = A2.pixels.resultPixels, rA = Q3.fileVersion, CA = rA >= 5 ? 14 : 15, p2, IA = Q3.zMax, V2;
+            for (t = 0;t < f2; t++)
+              for (S2 = t !== f2 - 1 ? C2 : eA, F2 = 0;F2 < s2; F2++)
+                for (h = F2 !== s2 - 1 ? C2 : aA, n = t * g2 * C2 + F2 * C2, l3 = g2 - h, W3 = 0;W3 < $3; W3++) {
+                  if ($3 > 1 ? (V2 = H2, n = t * g2 * C2 + F2 * C2, H2 = new I2(A2.pixels.resultPixels.buffer, B3 * W3 * r, B3), IA = Q3.maxValues[W3]) : V2 = null, U2 = E2.byteLength - A2.ptr, N3 = new DataView(E2, A2.ptr, Math.min(10, U2)), q2 = {}, c = 0, G2 = N3.getUint8(0), c++, p2 = Q3.fileVersion >= 5 ? G2 & 4 : 0, R2 = G2 >> 6 & 255, w = G2 >> 2 & CA, w !== (F2 * C2 >> 3 & CA) || p2 && W3 === 0)
+                    throw "integrity issue";
+                  if (Y3 = G2 & 3, Y3 > 3)
+                    throw A2.ptr += c, "Invalid block encoding (" + Y3 + ")";
+                  if (Y3 === 2) {
+                    if (p2)
+                      if (K3)
+                        for (e = 0;e < S2; e++)
+                          for (i = 0;i < h; i++)
+                            K3[n] && (H2[n] = V2[n]), n++;
+                      else
+                        for (e = 0;e < S2; e++)
+                          for (i = 0;i < h; i++)
+                            H2[n] = V2[n], n++;
+                    A2.counter.constant++, A2.ptr += c;
+                    continue;
+                  } else if (Y3 === 0) {
+                    if (p2)
+                      throw "integrity issue";
+                    if (A2.counter.uncompressed++, A2.ptr += c, y = S2 * h * r, k3 = E2.byteLength - A2.ptr, y = y < k3 ? y : k3, m2 = new ArrayBuffer(y % r === 0 ? y : y + r - y % r), O3 = new Uint8Array(m2), O3.set(new Uint8Array(E2, A2.ptr, y)), v = new I2(m2), M2 = 0, K3)
+                      for (e = 0;e < S2; e++) {
+                        for (i = 0;i < h; i++)
+                          K3[n] && (H2[n] = v[M2++]), n++;
+                        n += l3;
+                      }
+                    else
+                      for (e = 0;e < S2; e++) {
+                        for (i = 0;i < h; i++)
+                          H2[n++] = v[M2++];
+                        n += l3;
+                      }
+                    A2.ptr += M2 * r;
+                  } else if (AA = L2.getDataTypeUsed(p2 && o < 6 ? 4 : o, R2), b = L2.getOnePixel(q2, c, AA, N3), c += L2.getDataTypeSize(AA), Y3 === 3)
+                    if (A2.ptr += c, A2.counter.constantoffset++, K3)
+                      for (e = 0;e < S2; e++) {
+                        for (i = 0;i < h; i++)
+                          K3[n] && (H2[n] = p2 ? Math.min(IA, V2[n] + b) : b), n++;
+                        n += l3;
+                      }
+                    else
+                      for (e = 0;e < S2; e++) {
+                        for (i = 0;i < h; i++)
+                          H2[n] = p2 ? Math.min(IA, V2[n] + b) : b, n++;
+                        n += l3;
+                      }
+                  else if (A2.ptr += c, L2.decodeBits(E2, A2, P2, b, W3), c = 0, p2)
+                    if (K3)
+                      for (e = 0;e < S2; e++) {
+                        for (i = 0;i < h; i++)
+                          K3[n] && (H2[n] = P2[c++] + V2[n]), n++;
+                        n += l3;
+                      }
+                    else
+                      for (e = 0;e < S2; e++) {
+                        for (i = 0;i < h; i++)
+                          H2[n] = P2[c++] + V2[n], n++;
+                        n += l3;
+                      }
+                  else if (K3)
+                    for (e = 0;e < S2; e++) {
+                      for (i = 0;i < h; i++)
+                        K3[n] && (H2[n] = P2[c++]), n++;
+                      n += l3;
+                    }
+                  else
+                    for (e = 0;e < S2; e++) {
+                      for (i = 0;i < h; i++)
+                        H2[n++] = P2[c++];
+                      n += l3;
+                    }
+                }
+            $3 > 1 && !a && (A2.pixels.resultPixels = L2.swapDimensionOrder(A2.pixels.resultPixels, B3, $3, I2));
+          },
+          formatFileInfo: function(E2) {
+            return {
+              fileIdentifierString: E2.headerInfo.fileIdentifierString,
+              fileVersion: E2.headerInfo.fileVersion,
+              imageType: E2.headerInfo.imageType,
+              height: E2.headerInfo.height,
+              width: E2.headerInfo.width,
+              numValidPixel: E2.headerInfo.numValidPixel,
+              microBlockSize: E2.headerInfo.microBlockSize,
+              blobSize: E2.headerInfo.blobSize,
+              maxZError: E2.headerInfo.maxZError,
+              pixelType: L2.getPixelType(E2.headerInfo.imageType),
+              eofOffset: E2.eofOffset,
+              mask: E2.mask ? {
+                numBytes: E2.mask.numBytes
+              } : null,
+              pixels: {
+                numBlocksX: E2.pixels.numBlocksX,
+                numBlocksY: E2.pixels.numBlocksY,
+                maxValue: E2.headerInfo.zMax,
+                minValue: E2.headerInfo.zMin,
+                noDataValue: E2.noDataValue
+              }
+            };
+          },
+          constructConstantSurface: function(E2, A2) {
+            var I2 = E2.headerInfo.zMax, a = E2.headerInfo.zMin, Q3 = E2.headerInfo.maxValues, g2 = E2.headerInfo.numDims, D2 = E2.headerInfo.height * E2.headerInfo.width, B3 = 0, C2 = 0, o = 0, r = E2.pixels.resultMask, s2 = E2.pixels.resultPixels;
+            if (r)
+              if (g2 > 1) {
+                if (A2)
+                  for (B3 = 0;B3 < g2; B3++)
+                    for (o = B3 * D2, I2 = Q3[B3], C2 = 0;C2 < D2; C2++)
+                      r[C2] && (s2[o + C2] = I2);
+                else
+                  for (C2 = 0;C2 < D2; C2++)
+                    if (r[C2])
+                      for (o = C2 * g2, B3 = 0;B3 < g2; B3++)
+                        s2[o + g2] = Q3[B3];
+              } else
+                for (C2 = 0;C2 < D2; C2++)
+                  r[C2] && (s2[C2] = I2);
+            else if (g2 > 1 && a !== I2)
+              if (A2)
+                for (B3 = 0;B3 < g2; B3++)
+                  for (o = B3 * D2, I2 = Q3[B3], C2 = 0;C2 < D2; C2++)
+                    s2[o + C2] = I2;
+              else
+                for (C2 = 0;C2 < D2; C2++)
+                  for (o = C2 * g2, B3 = 0;B3 < g2; B3++)
+                    s2[o + B3] = Q3[B3];
+            else
+              for (C2 = 0;C2 < D2 * g2; C2++)
+                s2[C2] = I2;
+          },
+          getDataTypeArray: function(E2) {
+            var A2;
+            switch (E2) {
+              case 0:
+                A2 = Int8Array;
+                break;
+              case 1:
+                A2 = Uint8Array;
+                break;
+              case 2:
+                A2 = Int16Array;
+                break;
+              case 3:
+                A2 = Uint16Array;
+                break;
+              case 4:
+                A2 = Int32Array;
+                break;
+              case 5:
+                A2 = Uint32Array;
+                break;
+              case 6:
+                A2 = Float32Array;
+                break;
+              case 7:
+                A2 = Float64Array;
+                break;
+              default:
+                A2 = Float32Array;
+            }
+            return A2;
+          },
+          getPixelType: function(E2) {
+            var A2;
+            switch (E2) {
+              case 0:
+                A2 = "S8";
+                break;
+              case 1:
+                A2 = "U8";
+                break;
+              case 2:
+                A2 = "S16";
+                break;
+              case 3:
+                A2 = "U16";
+                break;
+              case 4:
+                A2 = "S32";
+                break;
+              case 5:
+                A2 = "U32";
+                break;
+              case 6:
+                A2 = "F32";
+                break;
+              case 7:
+                A2 = "F64";
+                break;
+              default:
+                A2 = "F32";
+            }
+            return A2;
+          },
+          isValidPixelValue: function(E2, A2) {
+            if (A2 == null)
+              return false;
+            var I2;
+            switch (E2) {
+              case 0:
+                I2 = A2 >= -128 && A2 <= 127;
+                break;
+              case 1:
+                I2 = A2 >= 0 && A2 <= 255;
+                break;
+              case 2:
+                I2 = A2 >= -32768 && A2 <= 32767;
+                break;
+              case 3:
+                I2 = A2 >= 0 && A2 <= 65536;
+                break;
+              case 4:
+                I2 = A2 >= -2147483648 && A2 <= 2147483647;
+                break;
+              case 5:
+                I2 = A2 >= 0 && A2 <= 4294967296;
+                break;
+              case 6:
+                I2 = A2 >= -340279993879014840000000000000000000000 && A2 <= 340279993879014840000000000000000000000;
+                break;
+              case 7:
+                I2 = A2 >= -179769313486231570000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 && A2 <= 179769313486231570000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
+                break;
+              default:
+                I2 = false;
+            }
+            return I2;
+          },
+          getDataTypeSize: function(E2) {
+            var A2 = 0;
+            switch (E2) {
+              case 0:
+              case 1:
+                A2 = 1;
+                break;
+              case 2:
+              case 3:
+                A2 = 2;
+                break;
+              case 4:
+              case 5:
+              case 6:
+                A2 = 4;
+                break;
+              case 7:
+                A2 = 8;
+                break;
+              default:
+                A2 = E2;
+            }
+            return A2;
+          },
+          getDataTypeUsed: function(E2, A2) {
+            var I2 = E2;
+            switch (E2) {
+              case 2:
+              case 4:
+                I2 = E2 - A2;
+                break;
+              case 3:
+              case 5:
+                I2 = E2 - 2 * A2;
+                break;
+              case 6:
+                A2 === 0 ? I2 = E2 : A2 === 1 ? I2 = 2 : I2 = 1;
+                break;
+              case 7:
+                A2 === 0 ? I2 = E2 : I2 = E2 - 2 * A2 + 1;
+                break;
+              default:
+                I2 = E2;
+                break;
+            }
+            return I2;
+          },
+          getOnePixel: function(E2, A2, I2, a) {
+            var Q3 = 0;
+            switch (I2) {
+              case 0:
+                Q3 = a.getInt8(A2);
+                break;
+              case 1:
+                Q3 = a.getUint8(A2);
+                break;
+              case 2:
+                Q3 = a.getInt16(A2, true);
+                break;
+              case 3:
+                Q3 = a.getUint16(A2, true);
+                break;
+              case 4:
+                Q3 = a.getInt32(A2, true);
+                break;
+              case 5:
+                Q3 = a.getUInt32(A2, true);
+                break;
+              case 6:
+                Q3 = a.getFloat32(A2, true);
+                break;
+              case 7:
+                Q3 = a.getFloat64(A2, true);
+                break;
+              default:
+                throw "the decoder does not understand this pixel type";
+            }
+            return Q3;
+          },
+          swapDimensionOrder: function(E2, A2, I2, a, Q3) {
+            var g2 = 0, D2 = 0, B3 = 0, C2 = 0, o = E2;
+            if (I2 > 1)
+              if (o = new a(A2 * I2), Q3)
+                for (g2 = 0;g2 < A2; g2++)
+                  for (C2 = g2, B3 = 0;B3 < I2; B3++, C2 += A2)
+                    o[C2] = E2[D2++];
+              else
+                for (g2 = 0;g2 < A2; g2++)
+                  for (C2 = g2, B3 = 0;B3 < I2; B3++, C2 += A2)
+                    o[D2++] = E2[C2];
+            return o;
+          }
+        }, d3 = function(E2, A2, I2) {
+          this.val = E2, this.left = A2, this.right = I2;
+        }, z = {
+          decode: function(E2, A2) {
+            A2 = A2 || {};
+            var I2 = A2.noDataValue, a = 0, Q3 = {};
+            if (Q3.ptr = A2.inputOffset || 0, Q3.pixels = {}, !!L2.readHeaderInfo(E2, Q3)) {
+              var g2 = Q3.headerInfo, D2 = g2.fileVersion, B3 = L2.getDataTypeArray(g2.imageType);
+              if (D2 > 5)
+                throw "unsupported lerc version 2." + D2;
+              L2.readMask(E2, Q3), g2.numValidPixel !== g2.width * g2.height && !Q3.pixels.resultMask && (Q3.pixels.resultMask = A2.maskData);
+              var C2 = g2.width * g2.height;
+              Q3.pixels.resultPixels = new B3(C2 * g2.numDims), Q3.counter = {
+                onesweep: 0,
+                uncompressed: 0,
+                lut: 0,
+                bitstuffer: 0,
+                constant: 0,
+                constantoffset: 0
+              };
+              var o = !A2.returnPixelInterleavedDims;
+              if (g2.numValidPixel !== 0)
+                if (g2.zMax === g2.zMin)
+                  L2.constructConstantSurface(Q3, o);
+                else if (D2 >= 4 && L2.checkMinMaxRanges(E2, Q3))
+                  L2.constructConstantSurface(Q3, o);
+                else {
+                  var r = new DataView(E2, Q3.ptr, 2), s2 = r.getUint8(0);
+                  if (Q3.ptr++, s2)
+                    L2.readDataOneSweep(E2, Q3, B3, o);
+                  else if (D2 > 1 && g2.imageType <= 1 && Math.abs(g2.maxZError - 0.5) < 0.00001) {
+                    var f2 = r.getUint8(1);
+                    if (Q3.ptr++, Q3.encodeMode = f2, f2 > 2 || D2 < 4 && f2 > 1)
+                      throw "Invalid Huffman flag " + f2;
+                    f2 ? L2.readHuffman(E2, Q3, B3, o) : L2.readTiles(E2, Q3, B3, o);
+                  } else
+                    L2.readTiles(E2, Q3, B3, o);
+                }
+              Q3.eofOffset = Q3.ptr;
+              var e;
+              A2.inputOffset ? (e = Q3.headerInfo.blobSize + A2.inputOffset - Q3.ptr, Math.abs(e) >= 1 && (Q3.eofOffset = A2.inputOffset + Q3.headerInfo.blobSize)) : (e = Q3.headerInfo.blobSize - Q3.ptr, Math.abs(e) >= 1 && (Q3.eofOffset = Q3.headerInfo.blobSize));
+              var i = {
+                width: g2.width,
+                height: g2.height,
+                pixelData: Q3.pixels.resultPixels,
+                minValue: g2.zMin,
+                maxValue: g2.zMax,
+                validPixelCount: g2.numValidPixel,
+                dimCount: g2.numDims,
+                dimStats: {
+                  minValues: g2.minValues,
+                  maxValues: g2.maxValues
+                },
+                maskData: Q3.pixels.resultMask
+              };
+              if (Q3.pixels.resultMask && L2.isValidPixelValue(g2.imageType, I2)) {
+                var t = Q3.pixels.resultMask;
+                for (a = 0;a < C2; a++)
+                  t[a] || (i.pixelData[a] = I2);
+                i.noDataValue = I2;
+              }
+              return Q3.noDataValue = I2, A2.returnFileInfo && (i.fileInfo = L2.formatFileInfo(Q3)), i;
+            }
+          },
+          getBandCount: function(E2) {
+            var A2 = 0, I2 = 0, a = {};
+            for (a.ptr = 0, a.pixels = {};I2 < E2.byteLength - 58; )
+              L2.readHeaderInfo(E2, a), I2 += a.headerInfo.blobSize, A2++, a.ptr = I2;
+            return A2;
+          }
+        };
+        return z;
+      }(), Z3 = function() {
+        var u = new ArrayBuffer(4), L2 = new Uint8Array(u), d3 = new Uint32Array(u);
+        return d3[0] = 1, L2[0] === 1;
+      }(), X2 = {
+        decode: function(u, L2) {
+          if (!Z3)
+            throw "Big endian system is not supported.";
+          L2 = L2 || {};
+          var d3 = L2.inputOffset || 0, z = new Uint8Array(u, d3, 10), E2 = String.fromCharCode.apply(null, z), A2, I2;
+          if (E2.trim() === "CntZImage")
+            A2 = J, I2 = 1;
+          else if (E2.substring(0, 5) === "Lerc2")
+            A2 = T2, I2 = 2;
+          else
+            throw "Unexpected file identifier string: " + E2;
+          for (var a = 0, Q3 = u.byteLength - 10, g2, D2 = [], B3, C2, o = {
+            width: 0,
+            height: 0,
+            pixels: [],
+            pixelType: L2.pixelType,
+            mask: null,
+            statistics: []
+          }, r = 0;d3 < Q3; ) {
+            var s2 = A2.decode(u, {
+              inputOffset: d3,
+              encodedMaskData: g2,
+              maskData: C2,
+              returnMask: a === 0,
+              returnEncodedMask: a === 0,
+              returnFileInfo: true,
+              returnPixelInterleavedDims: L2.returnPixelInterleavedDims,
+              pixelType: L2.pixelType || null,
+              noDataValue: L2.noDataValue || null
+            });
+            d3 = s2.fileInfo.eofOffset, C2 = s2.maskData, a === 0 && (g2 = s2.encodedMaskData, o.width = s2.width, o.height = s2.height, o.dimCount = s2.dimCount || 1, o.pixelType = s2.pixelType || s2.fileInfo.pixelType, o.mask = C2), I2 > 1 && (C2 && D2.push(C2), s2.fileInfo.mask && s2.fileInfo.mask.numBytes > 0 && r++), a++, o.pixels.push(s2.pixelData), o.statistics.push({
+              minValue: s2.minValue,
+              maxValue: s2.maxValue,
+              noDataValue: s2.noDataValue,
+              dimStats: s2.dimStats
+            });
+          }
+          var f2, e, i;
+          if (I2 > 1 && r > 1) {
+            for (i = o.width * o.height, o.bandMasks = D2, C2 = new Uint8Array(i), C2.set(D2[0]), f2 = 1;f2 < D2.length; f2++)
+              for (B3 = D2[f2], e = 0;e < i; e++)
+                C2[e] = C2[e] & B3[e];
+            o.maskData = C2;
+          }
+          return o;
+        }
+      };
+      j2.exports ? j2.exports = X2 : this.Lerc = X2;
+    })();
+  })(iA);
+  fA = iA.exports;
+  tA = /* @__PURE__ */ We2(fA);
+  BA = {
+    env: {
+      emscripten_notify_memory_growth: function(j2) {
+        QA = new Uint8Array(x2.exports.memory.buffer);
+      }
+    }
+  };
+  hA = new wA;
+  lA = class lA extends g {
+    constructor(J) {
+      super(), this.planarConfiguration = typeof J.PlanarConfiguration < "u" ? J.PlanarConfiguration : 1, this.samplesPerPixel = typeof J.SamplesPerPixel < "u" ? J.SamplesPerPixel : 1, this.addCompression = J.LercParameters[ss.AddCompression];
+    }
+    decodeBlock(J) {
+      switch (this.addCompression) {
+        case is.None:
+          break;
+        case is.Deflate:
+          J = br(new Uint8Array(J)).buffer;
+          break;
+        case is.Zstandard:
+          J = hA.decode(new Uint8Array(J)).buffer;
+          break;
+        default:
+          throw new Error(`Unsupported LERC additional compression method identifier: ${this.addCompression}`);
+      }
+      return tA.decode(J, { returnPixelInterleavedDims: this.planarConfiguration === 1 }).pixels[0].buffer;
+    }
+  };
+});
+
+// node_modules/geotiff-tilesource/dist/webimage-BM_pbLN3.js
+var exports_webimage_BM_pbLN3 = {};
+__export(exports_webimage_BM_pbLN3, {
+  default: () => s2
+});
+var s2;
+var init_webimage_BM_pbLN3 = __esm(() => {
+  init_basedecoder_DHcBySSe();
+  s2 = class s2 extends g {
+    constructor() {
+      if (super(), typeof createImageBitmap > "u")
+        throw new Error("Cannot decode WebImage as `createImageBitmap` is not available");
+      if (typeof document > "u" && typeof OffscreenCanvas > "u")
+        throw new Error("Cannot decode WebImage as neither `document` nor `OffscreenCanvas` is not available");
+    }
+    async decode(i, n) {
+      const o = new Blob([n]), e = await createImageBitmap(o);
+      let t;
+      typeof document < "u" ? (t = document.createElement("canvas"), t.width = e.width, t.height = e.height) : t = new OffscreenCanvas(e.width, e.height);
+      const a = t.getContext("2d");
+      return a.drawImage(e, 0, 0), a.getImageData(0, 0, e.width, e.height).data.buffer;
+    }
+  };
+});
+
+// node_modules/geotiff-tilesource/dist/decoder-DJlmx386.js
+var exports_decoder_DJlmx386 = {};
+__export(exports_decoder_DJlmx386, {
+  create: () => t
+});
+function t() {
+  const A2 = 'function A(A,e,t,i,r,I,g){try{var n=A[I](g),a=n.value}catch(A){return void t(A)}n.done?e(a):Promise.resolve(a).then(i,r)}function e(e){return function(){var t=this,i=arguments;return new Promise((function(r,I){var g=e.apply(t,i);function n(e){A(g,r,I,n,a,"next",e)}function a(e){A(g,r,I,n,a,"throw",e)}n(void 0)}))}}function t(A){return t="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(A){return typeof A}:function(A){return A&&"function"==typeof Symbol&&A.constructor===Symbol&&A!==Symbol.prototype?"symbol":typeof A},t(A)}var i={exports:{}};!function(A){var e=function(A){var e,i=Object.prototype,r=i.hasOwnProperty,I="function"==typeof Symbol?Symbol:{},g=I.iterator||"@@iterator",n=I.asyncIterator||"@@asyncIterator",a=I.toStringTag||"@@toStringTag";function o(A,e,t){return Object.defineProperty(A,e,{value:t,enumerable:!0,configurable:!0,writable:!0}),A[e]}try{o({},"")}catch(A){o=function(A,e,t){return A[e]=t}}function B(A,e,t,i){var r=e&&e.prototype instanceof h?e:h,I=Object.create(r.prototype),g=new S(i||[]);return I._invoke=function(A,e,t){var i=Q;return function(r,I){if(i===s)throw new Error("Generator is already running");if(i===f){if("throw"===r)throw I;return R()}for(t.method=r,t.arg=I;;){var g=t.delegate;if(g){var n=m(g,t);if(n){if(n===c)continue;return n}}if("next"===t.method)t.sent=t._sent=t.arg;else if("throw"===t.method){if(i===Q)throw i=f,t.arg;t.dispatchException(t.arg)}else"return"===t.method&&t.abrupt("return",t.arg);i=s;var a=C(A,e,t);if("normal"===a.type){if(i=t.done?f:E,a.arg===c)continue;return{value:a.arg,done:t.done}}"throw"===a.type&&(i=f,t.method="throw",t.arg=a.arg)}}}(A,t,g),I}function C(A,e,t){try{return{type:"normal",arg:A.call(e,t)}}catch(A){return{type:"throw",arg:A}}}A.wrap=B;var Q="suspendedStart",E="suspendedYield",s="executing",f="completed",c={};function h(){}function l(){}function u(){}var w={};o(w,g,(function(){return this}));var d=Object.getPrototypeOf,D=d&&d(d(v([])));D&&D!==i&&r.call(D,g)&&(w=D);var y=u.prototype=h.prototype=Object.create(w);function k(A){["next","throw","return"].forEach((function(e){o(A,e,(function(A){return this._invoke(e,A)}))}))}function p(A,e){function i(I,g,n,a){var o=C(A[I],A,g);if("throw"!==o.type){var B=o.arg,Q=B.value;return Q&&"object"===t(Q)&&r.call(Q,"__await")?e.resolve(Q.__await).then((function(A){i("next",A,n,a)}),(function(A){i("throw",A,n,a)})):e.resolve(Q).then((function(A){B.value=A,n(B)}),(function(A){return i("throw",A,n,a)}))}a(o.arg)}var I;this._invoke=function(A,t){function r(){return new e((function(e,r){i(A,t,e,r)}))}return I=I?I.then(r,r):r()}}function m(A,t){var i=A.iterator[t.method];if(i===e){if(t.delegate=null,"throw"===t.method){if(A.iterator.return&&(t.method="return",t.arg=e,m(A,t),"throw"===t.method))return c;t.method="throw",t.arg=new TypeError("The iterator does not provide a \'throw\' method")}return c}var r=C(i,A.iterator,t.arg);if("throw"===r.type)return t.method="throw",t.arg=r.arg,t.delegate=null,c;var I=r.arg;return I?I.done?(t[A.resultName]=I.value,t.next=A.nextLoc,"return"!==t.method&&(t.method="next",t.arg=e),t.delegate=null,c):I:(t.method="throw",t.arg=new TypeError("iterator result is not an object"),t.delegate=null,c)}function G(A){var e={tryLoc:A[0]};1 in A&&(e.catchLoc=A[1]),2 in A&&(e.finallyLoc=A[2],e.afterLoc=A[3]),this.tryEntries.push(e)}function F(A){var e=A.completion||{};e.type="normal",delete e.arg,A.completion=e}function S(A){this.tryEntries=[{tryLoc:"root"}],A.forEach(G,this),this.reset(!0)}function v(A){if(A){var t=A[g];if(t)return t.call(A);if("function"==typeof A.next)return A;if(!isNaN(A.length)){var i=-1,I=function t(){for(;++i<A.length;)if(r.call(A,i))return t.value=A[i],t.done=!1,t;return t.value=e,t.done=!0,t};return I.next=I}}return{next:R}}function R(){return{value:e,done:!0}}return l.prototype=u,o(y,"constructor",u),o(u,"constructor",l),l.displayName=o(u,a,"GeneratorFunction"),A.isGeneratorFunction=function(A){var e="function"==typeof A&&A.constructor;return!!e&&(e===l||"GeneratorFunction"===(e.displayName||e.name))},A.mark=function(A){return Object.setPrototypeOf?Object.setPrototypeOf(A,u):(A.__proto__=u,o(A,a,"GeneratorFunction")),A.prototype=Object.create(y),A},A.awrap=function(A){return{__await:A}},k(p.prototype),o(p.prototype,n,(function(){return this})),A.AsyncIterator=p,A.async=function(e,t,i,r,I){void 0===I&&(I=Promise);var g=new p(B(e,t,i,r),I);return A.isGeneratorFunction(t)?g:g.next().then((function(A){return A.done?A.value:g.next()}))},k(y),o(y,a,"Generator"),o(y,g,(function(){return this})),o(y,"toString",(function(){return"[object Generator]"})),A.keys=function(A){var e=[];for(var t in A)e.push(t);return e.reverse(),function t(){for(;e.length;){var i=e.pop();if(i in A)return t.value=i,t.done=!1,t}return t.done=!0,t}},A.values=v,S.prototype={constructor:S,reset:function(A){if(this.prev=0,this.next=0,this.sent=this._sent=e,this.done=!1,this.delegate=null,this.method="next",this.arg=e,this.tryEntries.forEach(F),!A)for(var t in this)"t"===t.charAt(0)&&r.call(this,t)&&!isNaN(+t.slice(1))&&(this[t]=e)},stop:function(){this.done=!0;var A=this.tryEntries[0].completion;if("throw"===A.type)throw A.arg;return this.rval},dispatchException:function(A){if(this.done)throw A;var t=this;function i(i,r){return n.type="throw",n.arg=A,t.next=i,r&&(t.method="next",t.arg=e),!!r}for(var I=this.tryEntries.length-1;I>=0;--I){var g=this.tryEntries[I],n=g.completion;if("root"===g.tryLoc)return i("end");if(g.tryLoc<=this.prev){var a=r.call(g,"catchLoc"),o=r.call(g,"finallyLoc");if(a&&o){if(this.prev<g.catchLoc)return i(g.catchLoc,!0);if(this.prev<g.finallyLoc)return i(g.finallyLoc)}else if(a){if(this.prev<g.catchLoc)return i(g.catchLoc,!0)}else{if(!o)throw new Error("try statement without catch or finally");if(this.prev<g.finallyLoc)return i(g.finallyLoc)}}}},abrupt:function(A,e){for(var t=this.tryEntries.length-1;t>=0;--t){var i=this.tryEntries[t];if(i.tryLoc<=this.prev&&r.call(i,"finallyLoc")&&this.prev<i.finallyLoc){var I=i;break}}I&&("break"===A||"continue"===A)&&I.tryLoc<=e&&e<=I.finallyLoc&&(I=null);var g=I?I.completion:{};return g.type=A,g.arg=e,I?(this.method="next",this.next=I.finallyLoc,c):this.complete(g)},complete:function(A,e){if("throw"===A.type)throw A.arg;return"break"===A.type||"continue"===A.type?this.next=A.arg:"return"===A.type?(this.rval=this.arg=A.arg,this.method="return",this.next="end"):"normal"===A.type&&e&&(this.next=e),c},finish:function(A){for(var e=this.tryEntries.length-1;e>=0;--e){var t=this.tryEntries[e];if(t.finallyLoc===A)return this.complete(t.completion,t.afterLoc),F(t),c}},catch:function(A){for(var e=this.tryEntries.length-1;e>=0;--e){var t=this.tryEntries[e];if(t.tryLoc===A){var i=t.completion;if("throw"===i.type){var r=i.arg;F(t)}return r}}throw new Error("illegal catch attempt")},delegateYield:function(A,t,i){return this.delegate={iterator:v(A),resultName:t,nextLoc:i},"next"===this.method&&(this.arg=e),c}},A}(A.exports);try{regeneratorRuntime=e}catch(A){"object"===("undefined"==typeof globalThis?"undefined":t(globalThis))?globalThis.regeneratorRuntime=e:Function("r","regeneratorRuntime = r")(e)}}(i);var r=i.exports,I=new Map;function g(A,e){Array.isArray(A)||(A=[A]),A.forEach((function(A){return I.set(A,e)}))}function n(A){return a.apply(this,arguments)}function a(){return(a=e(r.mark((function A(e){var t,i;return r.wrap((function(A){for(;;)switch(A.prev=A.next){case 0:if(t=I.get(e.Compression)){A.next=3;break}throw new Error("Unknown compression method identifier: ".concat(e.Compression));case 3:return A.next=5,t();case 5:return i=A.sent,A.abrupt("return",new i(e));case 7:case"end":return A.stop()}}),A)})))).apply(this,arguments)}g([void 0,1],(function(){return Promise.resolve().then((function(){return y})).then((function(A){return A.default}))})),g(5,(function(){return Promise.resolve().then((function(){return F})).then((function(A){return A.default}))})),g(6,(function(){throw new Error("old style JPEG compression is not supported.")})),g(7,(function(){return Promise.resolve().then((function(){return N})).then((function(A){return A.default}))})),g([8,32946],(function(){return Promise.resolve().then((function(){return OA})).then((function(A){return A.default}))})),g(32773,(function(){return Promise.resolve().then((function(){return _A})).then((function(A){return A.default}))})),g(34887,(function(){return Promise.resolve().then((function(){return le})).then(function(){var A=e(r.mark((function A(e){return r.wrap((function(A){for(;;)switch(A.prev=A.next){case 0:return A.next=2,e.zstd.init();case 2:return A.abrupt("return",e);case 3:case"end":return A.stop()}}),A)})));return function(e){return A.apply(this,arguments)}}()).then((function(A){return A.default}))})),g(50001,(function(){return Promise.resolve().then((function(){return de})).then((function(A){return A.default}))}));var o=globalThis;function B(A,e){if(!(A instanceof e))throw new TypeError("Cannot call a class as a function")}function C(A,e){for(var t=0;t<e.length;t++){var i=e[t];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(A,i.key,i)}}function Q(A,e,t){return e&&C(A.prototype,e),t&&C(A,t),A}function E(A,e){return E=Object.setPrototypeOf||function(A,e){return A.__proto__=e,A},E(A,e)}function s(A,e){if("function"!=typeof e&&null!==e)throw new TypeError("Super expression must either be null or a function");A.prototype=Object.create(e&&e.prototype,{constructor:{value:A,writable:!0,configurable:!0}}),e&&E(A,e)}function f(A,e){if(e&&("object"===t(e)||"function"==typeof e))return e;if(void 0!==e)throw new TypeError("Derived constructors may only return object or undefined");return function(A){if(void 0===A)throw new ReferenceError("this hasn\'t been initialised - super() hasn\'t been called");return A}(A)}function c(A){return c=Object.setPrototypeOf?Object.getPrototypeOf:function(A){return A.__proto__||Object.getPrototypeOf(A)},c(A)}function h(A,e){var t=A.length-e,i=0;do{for(var r=e;r>0;r--)A[i+e]+=A[i],i++;t-=e}while(t>0)}function l(A,e,t){for(var i=0,r=A.length,I=r/t;r>e;){for(var g=e;g>0;--g)A[i+e]+=A[i],++i;r-=e}for(var n=A.slice(),a=0;a<I;++a)for(var o=0;o<t;++o)A[t*a+o]=n[(t-o-1)*I+a]}function u(A,e,t,i,r,I){if(!e||1===e)return A;for(var g=0;g<r.length;++g){if(r[g]%8!=0)throw new Error("When decoding with predictor, only multiple of 8 bits are supported.");if(r[g]!==r[0])throw new Error("When decoding with predictor, all samples must have the same size.")}for(var n=r[0]/8,a=2===I?1:r.length,o=0;o<i&&!(o*a*t*n>=A.byteLength);++o){var B=void 0;if(2===e){switch(r[0]){case 8:B=new Uint8Array(A,o*a*t*n,a*t*n);break;case 16:B=new Uint16Array(A,o*a*t*n,a*t*n/2);break;case 32:B=new Uint32Array(A,o*a*t*n,a*t*n/4);break;default:throw new Error("Predictor 2 not allowed with ".concat(r[0]," bits per sample."))}h(B,a)}else 3===e&&l(B=new Uint8Array(A,o*a*t*n,a*t*n),a,n)}return A}o.addEventListener("message",function(){var A=e(r.mark((function A(e){var t,i,I,g,a,B;return r.wrap((function(A){for(;;)switch(A.prev=A.next){case 0:return t=e.data,i=t.id,I=t.fileDirectory,g=t.buffer,A.next=3,n(I);case 3:return a=A.sent,A.next=6,a.decode(I,g);case 6:B=A.sent,o.postMessage({decoded:B,id:i},[B]);case 8:case"end":return A.stop()}}),A)})));return function(e){return A.apply(this,arguments)}}());var w=function(){function A(){B(this,A)}var t;return Q(A,[{key:"decode",value:(t=e(r.mark((function A(e,t){var i,I,g,n,a;return r.wrap((function(A){for(;;)switch(A.prev=A.next){case 0:return A.next=2,this.decodeBlock(t);case 2:if(i=A.sent,1===(I=e.Predictor||1)){A.next=9;break}return g=!e.StripOffsets,n=g?e.TileWidth:e.ImageWidth,a=g?e.TileLength:e.RowsPerStrip||e.ImageLength,A.abrupt("return",u(i,I,n,a,e.BitsPerSample,e.PlanarConfiguration));case 9:return A.abrupt("return",i);case 10:case"end":return A.stop()}}),A,this)}))),function(A,e){return t.apply(this,arguments)})}]),A}();function d(A){var e=function(){if("undefined"==typeof Reflect||!Reflect.construct)return!1;if(Reflect.construct.sham)return!1;if("function"==typeof Proxy)return!0;try{return Boolean.prototype.valueOf.call(Reflect.construct(Boolean,[],(function(){}))),!0}catch(A){return!1}}();return function(){var t,i=c(A);if(e){var r=c(this).constructor;t=Reflect.construct(i,arguments,r)}else t=i.apply(this,arguments);return f(this,t)}}var D=function(A){s(t,w);var e=d(t);function t(){return B(this,t),e.apply(this,arguments)}return Q(t,[{key:"decodeBlock",value:function(A){return A}}]),t}(),y=Object.freeze({__proto__:null,default:D});function k(A){var e=function(){if("undefined"==typeof Reflect||!Reflect.construct)return!1;if(Reflect.construct.sham)return!1;if("function"==typeof Proxy)return!0;try{return Boolean.prototype.valueOf.call(Reflect.construct(Boolean,[],(function(){}))),!0}catch(A){return!1}}();return function(){var t,i=c(A);if(e){var r=c(this).constructor;t=Reflect.construct(i,arguments,r)}else t=i.apply(this,arguments);return f(this,t)}}function p(A,e){for(var t=e.length-1;t>=0;t--)A.push(e[t]);return A}function m(A){for(var e=new Uint16Array(4093),t=new Uint8Array(4093),i=0;i<=257;i++)e[i]=4096,t[i]=i;var r=258,I=9,g=0;function n(){r=258,I=9}function a(A){var e=function(A,e,t){var i=e%8,r=Math.floor(e/8),I=8-i,g=e+t-8*(r+1),n=8*(r+2)-(e+t),a=8*(r+2)-e;if(n=Math.max(0,n),r>=A.length)return console.warn("ran off the end of the buffer before finding EOI_CODE (end on input code)"),257;var o=A[r]&Math.pow(2,8-i)-1,B=o<<=t-I;if(r+1<A.length){var C=A[r+1]>>>n;B+=C<<=Math.max(0,t-a)}if(g>8&&r+2<A.length){var Q=8*(r+3)-(e+t);B+=A[r+2]>>>Q}return B}(A,g,I);return g+=I,e}function o(A,i){return t[r]=i,e[r]=A,++r-1}function B(A){for(var i=[],r=A;4096!==r;r=e[r])i.push(t[r]);return i}var C=[];n();for(var Q,E=new Uint8Array(A),s=a(E);257!==s;){if(256===s){for(n(),s=a(E);256===s;)s=a(E);if(257===s)break;if(s>256)throw new Error("corrupted code at scanline ".concat(s));p(C,B(s)),Q=s}else if(s<r){var f=B(s);p(C,f),o(Q,f[f.length-1]),Q=s}else{var c=B(Q);if(!c)throw new Error("Bogus entry. Not in dictionary, ".concat(Q," / ").concat(r,", position: ").concat(g));p(C,c),C.push(c[c.length-1]),o(Q,c[c.length-1]),Q=s}r+1>=Math.pow(2,I)&&(12===I?Q=void 0:I++),s=a(E)}return new Uint8Array(C)}var G=function(A){s(t,w);var e=k(t);function t(){return B(this,t),e.apply(this,arguments)}return Q(t,[{key:"decodeBlock",value:function(A){return m(A).buffer}}]),t}(),F=Object.freeze({__proto__:null,default:G});function S(A){var e=function(){if("undefined"==typeof Reflect||!Reflect.construct)return!1;if(Reflect.construct.sham)return!1;if("function"==typeof Proxy)return!0;try{return Boolean.prototype.valueOf.call(Reflect.construct(Boolean,[],(function(){}))),!0}catch(A){return!1}}();return function(){var t,i=c(A);if(e){var r=c(this).constructor;t=Reflect.construct(i,arguments,r)}else t=i.apply(this,arguments);return f(this,t)}}var v=new Int32Array([0,1,8,16,9,2,3,10,17,24,32,25,18,11,4,5,12,19,26,33,40,48,41,34,27,20,13,6,7,14,21,28,35,42,49,56,57,50,43,36,29,22,15,23,30,37,44,51,58,59,52,45,38,31,39,46,53,60,61,54,47,55,62,63]);function R(A,e){for(var t=0,i=[],r=16;r>0&&!A[r-1];)--r;i.push({children:[],index:0});for(var I,g=i[0],n=0;n<r;n++){for(var a=0;a<A[n];a++){for((g=i.pop()).children[g.index]=e[t];g.index>0;)g=i.pop();for(g.index++,i.push(g);i.length<=n;)i.push(I={children:[],index:0}),g.children[g.index]=I.children,g=I;t++}n+1<r&&(i.push(I={children:[],index:0}),g.children[g.index]=I.children,g=I)}return i[0].children}function U(A,e,i,r,I,g,n,a,o){var B=i.mcusPerLine,C=i.progressive,Q=e,E=e,s=0,f=0;function c(){if(f>0)return f--,s>>f&1;if(255===(s=A[E++])){var e=A[E++];if(e)throw new Error("unexpected marker: ".concat((s<<8|e).toString(16)))}return f=7,s>>>7}function h(A){for(var e,i=A;null!==(e=c());){if("number"==typeof(i=i[e]))return i;if("object"!==t(i))throw new Error("invalid huffman sequence")}return null}function l(A){for(var e=A,t=0;e>0;){var i=c();if(null===i)return;t=t<<1|i,--e}return t}function u(A){var e=l(A);return e>=1<<A-1?e:e+(-1<<A)+1}var w=0;var d,D=0;function y(A,e,t,i,r){var I=t%B,g=(t/B|0)*A.v+i,n=I*A.h+r;e(A,A.blocks[g][n])}function k(A,e,t){var i=t/A.blocksPerLine|0,r=t%A.blocksPerLine;e(A,A.blocks[i][r])}var p,m,G,F,S,R,U=r.length;R=C?0===g?0===a?function(A,e){var t=h(A.huffmanTableDC),i=0===t?0:u(t)<<o;A.pred+=i,e[0]=A.pred}:function(A,e){e[0]|=c()<<o}:0===a?function(A,e){if(w>0)w--;else for(var t=g,i=n;t<=i;){var r=h(A.huffmanTableAC),I=15&r,a=r>>4;if(0===I){if(a<15){w=l(a)+(1<<a)-1;break}t+=16}else e[v[t+=a]]=u(I)*(1<<o),t++}}:function(A,e){for(var t=g,i=n,r=0;t<=i;){var I=v[t],a=e[I]<0?-1:1;switch(D){case 0:var B=h(A.huffmanTableAC),C=15&B;if(r=B>>4,0===C)r<15?(w=l(r)+(1<<r),D=4):(r=16,D=1);else{if(1!==C)throw new Error("invalid ACn encoding");d=u(C),D=r?2:3}continue;case 1:case 2:e[I]?e[I]+=(c()<<o)*a:0==--r&&(D=2===D?3:0);break;case 3:e[I]?e[I]+=(c()<<o)*a:(e[I]=d<<o,D=0);break;case 4:e[I]&&(e[I]+=(c()<<o)*a)}t++}4===D&&0==--w&&(D=0)}:function(A,e){var t=h(A.huffmanTableDC),i=0===t?0:u(t);A.pred+=i,e[0]=A.pred;for(var r=1;r<64;){var I=h(A.huffmanTableAC),g=15&I,n=I>>4;if(0===g){if(n<15)break;r+=16}else e[v[r+=n]]=u(g),r++}};var L,b,M=0;b=1===U?r[0].blocksPerLine*r[0].blocksPerColumn:B*i.mcusPerColumn;for(var N=I||b;M<b;){for(m=0;m<U;m++)r[m].pred=0;if(w=0,1===U)for(p=r[0],S=0;S<N;S++)k(p,R,M),M++;else for(S=0;S<N;S++){for(m=0;m<U;m++){var x=p=r[m],J=x.h,q=x.v;for(G=0;G<q;G++)for(F=0;F<J;F++)y(p,R,M,G,F)}if(++M===b)break}if(f=0,(L=A[E]<<8|A[E+1])<65280)throw new Error("marker was not found");if(!(L>=65488&&L<=65495))break;E+=2}return E-Q}function L(A,e){var t=[],i=e.blocksPerLine,r=e.blocksPerColumn,I=i<<3,g=new Int32Array(64),n=new Uint8Array(64);function a(A,t,i){var r,I,g,n,a,o,B,C,Q,E,s=e.quantizationTable,f=i;for(E=0;E<64;E++)f[E]=A[E]*s[E];for(E=0;E<8;++E){var c=8*E;0!==f[1+c]||0!==f[2+c]||0!==f[3+c]||0!==f[4+c]||0!==f[5+c]||0!==f[6+c]||0!==f[7+c]?(r=5793*f[0+c]+128>>8,I=5793*f[4+c]+128>>8,g=f[2+c],n=f[6+c],a=2896*(f[1+c]-f[7+c])+128>>8,C=2896*(f[1+c]+f[7+c])+128>>8,o=f[3+c]<<4,Q=r-I+1>>1,r=r+I+1>>1,I=Q,Q=3784*g+1567*n+128>>8,g=1567*g-3784*n+128>>8,n=Q,Q=a-(B=f[5+c]<<4)+1>>1,a=a+B+1>>1,B=Q,Q=C+o+1>>1,o=C-o+1>>1,C=Q,Q=r-n+1>>1,r=r+n+1>>1,n=Q,Q=I-g+1>>1,I=I+g+1>>1,g=Q,Q=2276*a+3406*C+2048>>12,a=3406*a-2276*C+2048>>12,C=Q,Q=799*o+4017*B+2048>>12,o=4017*o-799*B+2048>>12,B=Q,f[0+c]=r+C,f[7+c]=r-C,f[1+c]=I+B,f[6+c]=I-B,f[2+c]=g+o,f[5+c]=g-o,f[3+c]=n+a,f[4+c]=n-a):(Q=5793*f[0+c]+512>>10,f[0+c]=Q,f[1+c]=Q,f[2+c]=Q,f[3+c]=Q,f[4+c]=Q,f[5+c]=Q,f[6+c]=Q,f[7+c]=Q)}for(E=0;E<8;++E){var h=E;0!==f[8+h]||0!==f[16+h]||0!==f[24+h]||0!==f[32+h]||0!==f[40+h]||0!==f[48+h]||0!==f[56+h]?(r=5793*f[0+h]+2048>>12,I=5793*f[32+h]+2048>>12,g=f[16+h],n=f[48+h],a=2896*(f[8+h]-f[56+h])+2048>>12,C=2896*(f[8+h]+f[56+h])+2048>>12,o=f[24+h],Q=r-I+1>>1,r=r+I+1>>1,I=Q,Q=3784*g+1567*n+2048>>12,g=1567*g-3784*n+2048>>12,n=Q,Q=a-(B=f[40+h])+1>>1,a=a+B+1>>1,B=Q,Q=C+o+1>>1,o=C-o+1>>1,C=Q,Q=r-n+1>>1,r=r+n+1>>1,n=Q,Q=I-g+1>>1,I=I+g+1>>1,g=Q,Q=2276*a+3406*C+2048>>12,a=3406*a-2276*C+2048>>12,C=Q,Q=799*o+4017*B+2048>>12,o=4017*o-799*B+2048>>12,B=Q,f[0+h]=r+C,f[56+h]=r-C,f[8+h]=I+B,f[48+h]=I-B,f[16+h]=g+o,f[40+h]=g-o,f[24+h]=n+a,f[32+h]=n-a):(Q=5793*i[E+0]+8192>>14,f[0+h]=Q,f[8+h]=Q,f[16+h]=Q,f[24+h]=Q,f[32+h]=Q,f[40+h]=Q,f[48+h]=Q,f[56+h]=Q)}for(E=0;E<64;++E){var l=128+(f[E]+8>>4);t[E]=l<0?0:l>255?255:l}}for(var o=0;o<r;o++){for(var B=o<<3,C=0;C<8;C++)t.push(new Uint8Array(I));for(var Q=0;Q<i;Q++){a(e.blocks[o][Q],n,g);for(var E=0,s=Q<<3,f=0;f<8;f++)for(var c=t[B+f],h=0;h<8;h++)c[s+h]=n[E++]}}return t}var b=function(){function A(){B(this,A),this.jfif=null,this.adobe=null,this.quantizationTables=[],this.huffmanTablesAC=[],this.huffmanTablesDC=[],this.resetFrames()}return Q(A,[{key:"resetFrames",value:function(){this.frames=[]}},{key:"parse",value:function(A){var e=0;function t(){var t=A[e]<<8|A[e+1];return e+=2,t}function i(A){var e,t,i=0,r=0;for(t in A.components)A.components.hasOwnProperty(t)&&(i<(e=A.components[t]).h&&(i=e.h),r<e.v&&(r=e.v));var I=Math.ceil(A.samplesPerLine/8/i),g=Math.ceil(A.scanLines/8/r);for(t in A.components)if(A.components.hasOwnProperty(t)){e=A.components[t];for(var n=Math.ceil(Math.ceil(A.samplesPerLine/8)*e.h/i),a=Math.ceil(Math.ceil(A.scanLines/8)*e.v/r),o=I*e.h,B=g*e.v,C=[],Q=0;Q<B;Q++){for(var E=[],s=0;s<o;s++)E.push(new Int32Array(64));C.push(E)}e.blocksPerLine=n,e.blocksPerColumn=a,e.blocks=C}A.maxH=i,A.maxV=r,A.mcusPerLine=I,A.mcusPerColumn=g}var r,I,g=t();if(65496!==g)throw new Error("SOI not found");for(g=t();65497!==g;){switch(g){case 65280:break;case 65504:case 65505:case 65506:case 65507:case 65508:case 65509:case 65510:case 65511:case 65512:case 65513:case 65514:case 65515:case 65516:case 65517:case 65518:case 65519:case 65534:var n=(r=void 0,I=void 0,r=t(),I=A.subarray(e,e+r-2),e+=I.length,I);65504===g&&74===n[0]&&70===n[1]&&73===n[2]&&70===n[3]&&0===n[4]&&(this.jfif={version:{major:n[5],minor:n[6]},densityUnits:n[7],xDensity:n[8]<<8|n[9],yDensity:n[10]<<8|n[11],thumbWidth:n[12],thumbHeight:n[13],thumbData:n.subarray(14,14+3*n[12]*n[13])}),65518===g&&65===n[0]&&100===n[1]&&111===n[2]&&98===n[3]&&101===n[4]&&0===n[5]&&(this.adobe={version:n[6],flags0:n[7]<<8|n[8],flags1:n[9]<<8|n[10],transformCode:n[11]});break;case 65499:for(var a=t()+e-2;e<a;){var o=A[e++],B=new Int32Array(64);if(o>>4==0)for(var C=0;C<64;C++){B[v[C]]=A[e++]}else{if(o>>4!=1)throw new Error("DQT: invalid table spec");for(var Q=0;Q<64;Q++){B[v[Q]]=t()}}this.quantizationTables[15&o]=B}break;case 65472:case 65473:case 65474:t();for(var E={extended:65473===g,progressive:65474===g,precision:A[e++],scanLines:t(),samplesPerLine:t(),components:{},componentsOrder:[]},s=A[e++],f=void 0,c=0;c<s;c++){f=A[e];var h=A[e+1]>>4,l=15&A[e+1],u=A[e+2];E.componentsOrder.push(f),E.components[f]={h:h,v:l,quantizationIdx:u},e+=3}i(E),this.frames.push(E);break;case 65476:for(var w=t(),d=2;d<w;){for(var D=A[e++],y=new Uint8Array(16),k=0,p=0;p<16;p++,e++)y[p]=A[e],k+=y[p];for(var m=new Uint8Array(k),G=0;G<k;G++,e++)m[G]=A[e];d+=17+k,D>>4==0?this.huffmanTablesDC[15&D]=R(y,m):this.huffmanTablesAC[15&D]=R(y,m)}break;case 65501:t(),this.resetInterval=t();break;case 65498:t();for(var F=A[e++],S=[],L=this.frames[0],b=0;b<F;b++){var M=L.components[A[e++]],N=A[e++];M.huffmanTableDC=this.huffmanTablesDC[N>>4],M.huffmanTableAC=this.huffmanTablesAC[15&N],S.push(M)}var x=A[e++],J=A[e++],q=A[e++],Y=U(A,e,L,S,this.resetInterval,x,J,q>>4,15&q);e+=Y;break;case 65535:255!==A[e]&&e--;break;default:if(255===A[e-3]&&A[e-2]>=192&&A[e-2]<=254){e-=3;break}throw new Error("unknown JPEG marker ".concat(g.toString(16)))}g=t()}}},{key:"getResult",value:function(){var A=this.frames;if(0===this.frames.length)throw new Error("no frames were decoded");this.frames.length>1&&console.warn("more than one frame is not supported");for(var e=0;e<this.frames.length;e++)for(var t=this.frames[e].components,i=0,r=Object.keys(t);i<r.length;i++){var I=r[i];t[I].quantizationTable=this.quantizationTables[t[I].quantizationIdx],delete t[I].quantizationIdx}for(var g=A[0],n=g.components,a=g.componentsOrder,o=[],B=g.samplesPerLine,C=g.scanLines,Q=0;Q<a.length;Q++){var E=n[a[Q]];o.push({lines:L(0,E),scaleX:E.h/g.maxH,scaleY:E.v/g.maxV})}for(var s=new Uint8Array(B*C*o.length),f=0,c=0;c<C;++c)for(var h=0;h<B;++h)for(var l=0;l<o.length;++l){var u=o[l];s[f]=u.lines[0|c*u.scaleY][0|h*u.scaleX],++f}return s}}]),A}(),M=function(A){s(t,w);var e=S(t);function t(A){var i;return B(this,t),(i=e.call(this)).reader=new b,A.JPEGTables&&i.reader.parse(A.JPEGTables),i}return Q(t,[{key:"decodeBlock",value:function(A){return this.reader.resetFrames(),this.reader.parse(new Uint8Array(A)),this.reader.getResult().buffer}}]),t}(),N=Object.freeze({__proto__:null,default:M});function x(A){for(var e=A.length;--e>=0;)A[e]=0}x(new Array(576)),x(new Array(60)),x(new Array(512)),x(new Array(256)),x(new Array(29)),x(new Array(30));var J=function(A,e,t,i){for(var r=65535&A|0,I=A>>>16&65535|0,g=0;0!==t;){t-=g=t>2e3?2e3:t;do{I=I+(r=r+e[i++]|0)|0}while(--g);r%=65521,I%=65521}return r|I<<16|0},q=new Uint32Array(function(){for(var A,e=[],t=0;t<256;t++){A=t;for(var i=0;i<8;i++)A=1&A?3988292384^A>>>1:A>>>1;e[t]=A}return e}()),Y=function(A,e,t,i){var r=q,I=i+t;A^=-1;for(var g=i;g<I;g++)A=A>>>8^r[255&(A^e[g])];return-1^A},K={2:"need dictionary",1:"stream end",0:"","-1":"file error","-2":"stream error","-3":"data error","-4":"insufficient memory","-5":"buffer error","-6":"incompatible version"},H={Z_NO_FLUSH:0,Z_PARTIAL_FLUSH:1,Z_SYNC_FLUSH:2,Z_FULL_FLUSH:3,Z_FINISH:4,Z_BLOCK:5,Z_TREES:6,Z_OK:0,Z_STREAM_END:1,Z_NEED_DICT:2,Z_ERRNO:-1,Z_STREAM_ERROR:-2,Z_DATA_ERROR:-3,Z_MEM_ERROR:-4,Z_BUF_ERROR:-5,Z_NO_COMPRESSION:0,Z_BEST_SPEED:1,Z_BEST_COMPRESSION:9,Z_DEFAULT_COMPRESSION:-1,Z_FILTERED:1,Z_HUFFMAN_ONLY:2,Z_RLE:3,Z_FIXED:4,Z_DEFAULT_STRATEGY:0,Z_BINARY:0,Z_TEXT:1,Z_UNKNOWN:2,Z_DEFLATED:8},O=function(A,e){return Object.prototype.hasOwnProperty.call(A,e)},P=function(A){for(var e=Array.prototype.slice.call(arguments,1);e.length;){var i=e.shift();if(i){if("object"!==t(i))throw new TypeError(i+"must be non-object");for(var r in i)O(i,r)&&(A[r]=i[r])}}return A},T=function(A){for(var e=0,t=0,i=A.length;t<i;t++)e+=A[t].length;for(var r=new Uint8Array(e),I=0,g=0,n=A.length;I<n;I++){var a=A[I];r.set(a,g),g+=a.length}return r},V=!0;try{String.fromCharCode.apply(null,new Uint8Array(1))}catch(A){V=!1}for(var _=new Uint8Array(256),X=0;X<256;X++)_[X]=X>=252?6:X>=248?5:X>=240?4:X>=224?3:X>=192?2:1;_[254]=_[254]=1;var Z=function(A){if("function"==typeof TextEncoder&&TextEncoder.prototype.encode)return(new TextEncoder).encode(A);var e,t,i,r,I,g=A.length,n=0;for(r=0;r<g;r++)55296==(64512&(t=A.charCodeAt(r)))&&r+1<g&&56320==(64512&(i=A.charCodeAt(r+1)))&&(t=65536+(t-55296<<10)+(i-56320),r++),n+=t<128?1:t<2048?2:t<65536?3:4;for(e=new Uint8Array(n),I=0,r=0;I<n;r++)55296==(64512&(t=A.charCodeAt(r)))&&r+1<g&&56320==(64512&(i=A.charCodeAt(r+1)))&&(t=65536+(t-55296<<10)+(i-56320),r++),t<128?e[I++]=t:t<2048?(e[I++]=192|t>>>6,e[I++]=128|63&t):t<65536?(e[I++]=224|t>>>12,e[I++]=128|t>>>6&63,e[I++]=128|63&t):(e[I++]=240|t>>>18,e[I++]=128|t>>>12&63,e[I++]=128|t>>>6&63,e[I++]=128|63&t);return e},j=function(A,e){var t,i,r=e||A.length;if("function"==typeof TextDecoder&&TextDecoder.prototype.decode)return(new TextDecoder).decode(A.subarray(0,e));var I=new Array(2*r);for(i=0,t=0;t<r;){var g=A[t++];if(g<128)I[i++]=g;else{var n=_[g];if(n>4)I[i++]=65533,t+=n-1;else{for(g&=2===n?31:3===n?15:7;n>1&&t<r;)g=g<<6|63&A[t++],n--;n>1?I[i++]=65533:g<65536?I[i++]=g:(g-=65536,I[i++]=55296|g>>10&1023,I[i++]=56320|1023&g)}}}return function(A,e){if(e<65534&&A.subarray&&V)return String.fromCharCode.apply(null,A.length===e?A:A.subarray(0,e));for(var t="",i=0;i<e;i++)t+=String.fromCharCode(A[i]);return t}(I,i)},W=function(A,e){(e=e||A.length)>A.length&&(e=A.length);for(var t=e-1;t>=0&&128==(192&A[t]);)t--;return t<0||0===t?e:t+_[A[t]]>e?t:e};var z=function(){this.input=null,this.next_in=0,this.avail_in=0,this.total_in=0,this.output=null,this.next_out=0,this.avail_out=0,this.total_out=0,this.msg="",this.state=null,this.data_type=2,this.adler=0},$=function(A,e){var t,i,r,I,g,n,a,o,B,C,Q,E,s,f,c,h,l,u,w,d,D,y,k,p,m=A.state;t=A.next_in,k=A.input,i=t+(A.avail_in-5),r=A.next_out,p=A.output,I=r-(e-A.avail_out),g=r+(A.avail_out-257),n=m.dmax,a=m.wsize,o=m.whave,B=m.wnext,C=m.window,Q=m.hold,E=m.bits,s=m.lencode,f=m.distcode,c=(1<<m.lenbits)-1,h=(1<<m.distbits)-1;A:do{E<15&&(Q+=k[t++]<<E,E+=8,Q+=k[t++]<<E,E+=8),l=s[Q&c];e:for(;;){if(Q>>>=u=l>>>24,E-=u,0===(u=l>>>16&255))p[r++]=65535&l;else{if(!(16&u)){if(0==(64&u)){l=s[(65535&l)+(Q&(1<<u)-1)];continue e}if(32&u){m.mode=12;break A}A.msg="invalid literal/length code",m.mode=30;break A}w=65535&l,(u&=15)&&(E<u&&(Q+=k[t++]<<E,E+=8),w+=Q&(1<<u)-1,Q>>>=u,E-=u),E<15&&(Q+=k[t++]<<E,E+=8,Q+=k[t++]<<E,E+=8),l=f[Q&h];t:for(;;){if(Q>>>=u=l>>>24,E-=u,!(16&(u=l>>>16&255))){if(0==(64&u)){l=f[(65535&l)+(Q&(1<<u)-1)];continue t}A.msg="invalid distance code",m.mode=30;break A}if(d=65535&l,E<(u&=15)&&(Q+=k[t++]<<E,(E+=8)<u&&(Q+=k[t++]<<E,E+=8)),(d+=Q&(1<<u)-1)>n){A.msg="invalid distance too far back",m.mode=30;break A}if(Q>>>=u,E-=u,d>(u=r-I)){if((u=d-u)>o&&m.sane){A.msg="invalid distance too far back",m.mode=30;break A}if(D=0,y=C,0===B){if(D+=a-u,u<w){w-=u;do{p[r++]=C[D++]}while(--u);D=r-d,y=p}}else if(B<u){if(D+=a+B-u,(u-=B)<w){w-=u;do{p[r++]=C[D++]}while(--u);if(D=0,B<w){w-=u=B;do{p[r++]=C[D++]}while(--u);D=r-d,y=p}}}else if(D+=B-u,u<w){w-=u;do{p[r++]=C[D++]}while(--u);D=r-d,y=p}for(;w>2;)p[r++]=y[D++],p[r++]=y[D++],p[r++]=y[D++],w-=3;w&&(p[r++]=y[D++],w>1&&(p[r++]=y[D++]))}else{D=r-d;do{p[r++]=p[D++],p[r++]=p[D++],p[r++]=p[D++],w-=3}while(w>2);w&&(p[r++]=p[D++],w>1&&(p[r++]=p[D++]))}break}}break}}while(t<i&&r<g);t-=w=E>>3,Q&=(1<<(E-=w<<3))-1,A.next_in=t,A.next_out=r,A.avail_in=t<i?i-t+5:5-(t-i),A.avail_out=r<g?g-r+257:257-(r-g),m.hold=Q,m.bits=E},AA=new Uint16Array([3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258,0,0]),eA=new Uint8Array([16,16,16,16,16,16,16,16,17,17,17,17,18,18,18,18,19,19,19,19,20,20,20,20,21,21,21,21,16,72,78]),tA=new Uint16Array([1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577,0,0]),iA=new Uint8Array([16,16,16,16,17,17,18,18,19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,27,27,28,28,29,29,64,64]),rA=function(A,e,t,i,r,I,g,n){var a,o,B,C,Q,E,s,f,c,h=n.bits,l=0,u=0,w=0,d=0,D=0,y=0,k=0,p=0,m=0,G=0,F=null,S=0,v=new Uint16Array(16),R=new Uint16Array(16),U=null,L=0;for(l=0;l<=15;l++)v[l]=0;for(u=0;u<i;u++)v[e[t+u]]++;for(D=h,d=15;d>=1&&0===v[d];d--);if(D>d&&(D=d),0===d)return r[I++]=20971520,r[I++]=20971520,n.bits=1,0;for(w=1;w<d&&0===v[w];w++);for(D<w&&(D=w),p=1,l=1;l<=15;l++)if(p<<=1,(p-=v[l])<0)return-1;if(p>0&&(0===A||1!==d))return-1;for(R[1]=0,l=1;l<15;l++)R[l+1]=R[l]+v[l];for(u=0;u<i;u++)0!==e[t+u]&&(g[R[e[t+u]]++]=u);if(0===A?(F=U=g,E=19):1===A?(F=AA,S-=257,U=eA,L-=257,E=256):(F=tA,U=iA,E=-1),G=0,u=0,l=w,Q=I,y=D,k=0,B=-1,C=(m=1<<D)-1,1===A&&m>852||2===A&&m>592)return 1;for(;;){s=l-k,g[u]<E?(f=0,c=g[u]):g[u]>E?(f=U[L+g[u]],c=F[S+g[u]]):(f=96,c=0),a=1<<l-k,w=o=1<<y;do{r[Q+(G>>k)+(o-=a)]=s<<24|f<<16|c|0}while(0!==o);for(a=1<<l-1;G&a;)a>>=1;if(0!==a?(G&=a-1,G+=a):G=0,u++,0==--v[l]){if(l===d)break;l=e[t+g[u]]}if(l>D&&(G&C)!==B){for(0===k&&(k=D),Q+=w,p=1<<(y=l-k);y+k<d&&!((p-=v[y+k])<=0);)y++,p<<=1;if(m+=1<<y,1===A&&m>852||2===A&&m>592)return 1;r[B=G&C]=D<<24|y<<16|Q-I|0}}return 0!==G&&(r[Q+G]=l-k<<24|64<<16|0),n.bits=D,0},IA=H.Z_FINISH,gA=H.Z_BLOCK,nA=H.Z_TREES,aA=H.Z_OK,oA=H.Z_STREAM_END,BA=H.Z_NEED_DICT,CA=H.Z_STREAM_ERROR,QA=H.Z_DATA_ERROR,EA=H.Z_MEM_ERROR,sA=H.Z_BUF_ERROR,fA=H.Z_DEFLATED,cA=function(A){return(A>>>24&255)+(A>>>8&65280)+((65280&A)<<8)+((255&A)<<24)};function hA(){this.mode=0,this.last=!1,this.wrap=0,this.havedict=!1,this.flags=0,this.dmax=0,this.check=0,this.total=0,this.head=null,this.wbits=0,this.wsize=0,this.whave=0,this.wnext=0,this.window=null,this.hold=0,this.bits=0,this.length=0,this.offset=0,this.extra=0,this.lencode=null,this.distcode=null,this.lenbits=0,this.distbits=0,this.ncode=0,this.nlen=0,this.ndist=0,this.have=0,this.next=null,this.lens=new Uint16Array(320),this.work=new Uint16Array(288),this.lendyn=null,this.distdyn=null,this.sane=0,this.back=0,this.was=0}var lA,uA,wA=function(A){if(!A||!A.state)return CA;var e=A.state;return A.total_in=A.total_out=e.total=0,A.msg="",e.wrap&&(A.adler=1&e.wrap),e.mode=1,e.last=0,e.havedict=0,e.dmax=32768,e.head=null,e.hold=0,e.bits=0,e.lencode=e.lendyn=new Int32Array(852),e.distcode=e.distdyn=new Int32Array(592),e.sane=1,e.back=-1,aA},dA=function(A){if(!A||!A.state)return CA;var e=A.state;return e.wsize=0,e.whave=0,e.wnext=0,wA(A)},DA=function(A,e){var t;if(!A||!A.state)return CA;var i=A.state;return e<0?(t=0,e=-e):(t=1+(e>>4),e<48&&(e&=15)),e&&(e<8||e>15)?CA:(null!==i.window&&i.wbits!==e&&(i.window=null),i.wrap=t,i.wbits=e,dA(A))},yA=function(A,e){if(!A)return CA;var t=new hA;A.state=t,t.window=null;var i=DA(A,e);return i!==aA&&(A.state=null),i},kA=!0,pA=function(A){if(kA){lA=new Int32Array(512),uA=new Int32Array(32);for(var e=0;e<144;)A.lens[e++]=8;for(;e<256;)A.lens[e++]=9;for(;e<280;)A.lens[e++]=7;for(;e<288;)A.lens[e++]=8;for(rA(1,A.lens,0,288,lA,0,A.work,{bits:9}),e=0;e<32;)A.lens[e++]=5;rA(2,A.lens,0,32,uA,0,A.work,{bits:5}),kA=!1}A.lencode=lA,A.lenbits=9,A.distcode=uA,A.distbits=5},mA=function(A,e,t,i){var r,I=A.state;return null===I.window&&(I.wsize=1<<I.wbits,I.wnext=0,I.whave=0,I.window=new Uint8Array(I.wsize)),i>=I.wsize?(I.window.set(e.subarray(t-I.wsize,t),0),I.wnext=0,I.whave=I.wsize):((r=I.wsize-I.wnext)>i&&(r=i),I.window.set(e.subarray(t-i,t-i+r),I.wnext),(i-=r)?(I.window.set(e.subarray(t-i,t),0),I.wnext=i,I.whave=I.wsize):(I.wnext+=r,I.wnext===I.wsize&&(I.wnext=0),I.whave<I.wsize&&(I.whave+=r))),0},GA={inflateReset:dA,inflateReset2:DA,inflateResetKeep:wA,inflateInit:function(A){return yA(A,15)},inflateInit2:yA,inflate:function(A,e){var t,i,r,I,g,n,a,o,B,C,Q,E,s,f,c,h,l,u,w,d,D,y,k,p,m=0,G=new Uint8Array(4),F=new Uint8Array([16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15]);if(!A||!A.state||!A.output||!A.input&&0!==A.avail_in)return CA;12===(t=A.state).mode&&(t.mode=13),g=A.next_out,r=A.output,a=A.avail_out,I=A.next_in,i=A.input,n=A.avail_in,o=t.hold,B=t.bits,C=n,Q=a,y=aA;A:for(;;)switch(t.mode){case 1:if(0===t.wrap){t.mode=13;break}for(;B<16;){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}if(2&t.wrap&&35615===o){t.check=0,G[0]=255&o,G[1]=o>>>8&255,t.check=Y(t.check,G,2,0),o=0,B=0,t.mode=2;break}if(t.flags=0,t.head&&(t.head.done=!1),!(1&t.wrap)||(((255&o)<<8)+(o>>8))%31){A.msg="incorrect header check",t.mode=30;break}if((15&o)!==fA){A.msg="unknown compression method",t.mode=30;break}if(B-=4,D=8+(15&(o>>>=4)),0===t.wbits)t.wbits=D;else if(D>t.wbits){A.msg="invalid window size",t.mode=30;break}t.dmax=1<<t.wbits,A.adler=t.check=1,t.mode=512&o?10:12,o=0,B=0;break;case 2:for(;B<16;){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}if(t.flags=o,(255&t.flags)!==fA){A.msg="unknown compression method",t.mode=30;break}if(57344&t.flags){A.msg="unknown header flags set",t.mode=30;break}t.head&&(t.head.text=o>>8&1),512&t.flags&&(G[0]=255&o,G[1]=o>>>8&255,t.check=Y(t.check,G,2,0)),o=0,B=0,t.mode=3;case 3:for(;B<32;){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}t.head&&(t.head.time=o),512&t.flags&&(G[0]=255&o,G[1]=o>>>8&255,G[2]=o>>>16&255,G[3]=o>>>24&255,t.check=Y(t.check,G,4,0)),o=0,B=0,t.mode=4;case 4:for(;B<16;){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}t.head&&(t.head.xflags=255&o,t.head.os=o>>8),512&t.flags&&(G[0]=255&o,G[1]=o>>>8&255,t.check=Y(t.check,G,2,0)),o=0,B=0,t.mode=5;case 5:if(1024&t.flags){for(;B<16;){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}t.length=o,t.head&&(t.head.extra_len=o),512&t.flags&&(G[0]=255&o,G[1]=o>>>8&255,t.check=Y(t.check,G,2,0)),o=0,B=0}else t.head&&(t.head.extra=null);t.mode=6;case 6:if(1024&t.flags&&((E=t.length)>n&&(E=n),E&&(t.head&&(D=t.head.extra_len-t.length,t.head.extra||(t.head.extra=new Uint8Array(t.head.extra_len)),t.head.extra.set(i.subarray(I,I+E),D)),512&t.flags&&(t.check=Y(t.check,i,E,I)),n-=E,I+=E,t.length-=E),t.length))break A;t.length=0,t.mode=7;case 7:if(2048&t.flags){if(0===n)break A;E=0;do{D=i[I+E++],t.head&&D&&t.length<65536&&(t.head.name+=String.fromCharCode(D))}while(D&&E<n);if(512&t.flags&&(t.check=Y(t.check,i,E,I)),n-=E,I+=E,D)break A}else t.head&&(t.head.name=null);t.length=0,t.mode=8;case 8:if(4096&t.flags){if(0===n)break A;E=0;do{D=i[I+E++],t.head&&D&&t.length<65536&&(t.head.comment+=String.fromCharCode(D))}while(D&&E<n);if(512&t.flags&&(t.check=Y(t.check,i,E,I)),n-=E,I+=E,D)break A}else t.head&&(t.head.comment=null);t.mode=9;case 9:if(512&t.flags){for(;B<16;){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}if(o!==(65535&t.check)){A.msg="header crc mismatch",t.mode=30;break}o=0,B=0}t.head&&(t.head.hcrc=t.flags>>9&1,t.head.done=!0),A.adler=t.check=0,t.mode=12;break;case 10:for(;B<32;){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}A.adler=t.check=cA(o),o=0,B=0,t.mode=11;case 11:if(0===t.havedict)return A.next_out=g,A.avail_out=a,A.next_in=I,A.avail_in=n,t.hold=o,t.bits=B,BA;A.adler=t.check=1,t.mode=12;case 12:if(e===gA||e===nA)break A;case 13:if(t.last){o>>>=7&B,B-=7&B,t.mode=27;break}for(;B<3;){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}switch(t.last=1&o,B-=1,3&(o>>>=1)){case 0:t.mode=14;break;case 1:if(pA(t),t.mode=20,e===nA){o>>>=2,B-=2;break A}break;case 2:t.mode=17;break;case 3:A.msg="invalid block type",t.mode=30}o>>>=2,B-=2;break;case 14:for(o>>>=7&B,B-=7&B;B<32;){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}if((65535&o)!=(o>>>16^65535)){A.msg="invalid stored block lengths",t.mode=30;break}if(t.length=65535&o,o=0,B=0,t.mode=15,e===nA)break A;case 15:t.mode=16;case 16:if(E=t.length){if(E>n&&(E=n),E>a&&(E=a),0===E)break A;r.set(i.subarray(I,I+E),g),n-=E,I+=E,a-=E,g+=E,t.length-=E;break}t.mode=12;break;case 17:for(;B<14;){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}if(t.nlen=257+(31&o),o>>>=5,B-=5,t.ndist=1+(31&o),o>>>=5,B-=5,t.ncode=4+(15&o),o>>>=4,B-=4,t.nlen>286||t.ndist>30){A.msg="too many length or distance symbols",t.mode=30;break}t.have=0,t.mode=18;case 18:for(;t.have<t.ncode;){for(;B<3;){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}t.lens[F[t.have++]]=7&o,o>>>=3,B-=3}for(;t.have<19;)t.lens[F[t.have++]]=0;if(t.lencode=t.lendyn,t.lenbits=7,k={bits:t.lenbits},y=rA(0,t.lens,0,19,t.lencode,0,t.work,k),t.lenbits=k.bits,y){A.msg="invalid code lengths set",t.mode=30;break}t.have=0,t.mode=19;case 19:for(;t.have<t.nlen+t.ndist;){for(;h=(m=t.lencode[o&(1<<t.lenbits)-1])>>>16&255,l=65535&m,!((c=m>>>24)<=B);){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}if(l<16)o>>>=c,B-=c,t.lens[t.have++]=l;else{if(16===l){for(p=c+2;B<p;){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}if(o>>>=c,B-=c,0===t.have){A.msg="invalid bit length repeat",t.mode=30;break}D=t.lens[t.have-1],E=3+(3&o),o>>>=2,B-=2}else if(17===l){for(p=c+3;B<p;){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}B-=c,D=0,E=3+(7&(o>>>=c)),o>>>=3,B-=3}else{for(p=c+7;B<p;){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}B-=c,D=0,E=11+(127&(o>>>=c)),o>>>=7,B-=7}if(t.have+E>t.nlen+t.ndist){A.msg="invalid bit length repeat",t.mode=30;break}for(;E--;)t.lens[t.have++]=D}}if(30===t.mode)break;if(0===t.lens[256]){A.msg="invalid code -- missing end-of-block",t.mode=30;break}if(t.lenbits=9,k={bits:t.lenbits},y=rA(1,t.lens,0,t.nlen,t.lencode,0,t.work,k),t.lenbits=k.bits,y){A.msg="invalid literal/lengths set",t.mode=30;break}if(t.distbits=6,t.distcode=t.distdyn,k={bits:t.distbits},y=rA(2,t.lens,t.nlen,t.ndist,t.distcode,0,t.work,k),t.distbits=k.bits,y){A.msg="invalid distances set",t.mode=30;break}if(t.mode=20,e===nA)break A;case 20:t.mode=21;case 21:if(n>=6&&a>=258){A.next_out=g,A.avail_out=a,A.next_in=I,A.avail_in=n,t.hold=o,t.bits=B,$(A,Q),g=A.next_out,r=A.output,a=A.avail_out,I=A.next_in,i=A.input,n=A.avail_in,o=t.hold,B=t.bits,12===t.mode&&(t.back=-1);break}for(t.back=0;h=(m=t.lencode[o&(1<<t.lenbits)-1])>>>16&255,l=65535&m,!((c=m>>>24)<=B);){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}if(h&&0==(240&h)){for(u=c,w=h,d=l;h=(m=t.lencode[d+((o&(1<<u+w)-1)>>u)])>>>16&255,l=65535&m,!(u+(c=m>>>24)<=B);){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}o>>>=u,B-=u,t.back+=u}if(o>>>=c,B-=c,t.back+=c,t.length=l,0===h){t.mode=26;break}if(32&h){t.back=-1,t.mode=12;break}if(64&h){A.msg="invalid literal/length code",t.mode=30;break}t.extra=15&h,t.mode=22;case 22:if(t.extra){for(p=t.extra;B<p;){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}t.length+=o&(1<<t.extra)-1,o>>>=t.extra,B-=t.extra,t.back+=t.extra}t.was=t.length,t.mode=23;case 23:for(;h=(m=t.distcode[o&(1<<t.distbits)-1])>>>16&255,l=65535&m,!((c=m>>>24)<=B);){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}if(0==(240&h)){for(u=c,w=h,d=l;h=(m=t.distcode[d+((o&(1<<u+w)-1)>>u)])>>>16&255,l=65535&m,!(u+(c=m>>>24)<=B);){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}o>>>=u,B-=u,t.back+=u}if(o>>>=c,B-=c,t.back+=c,64&h){A.msg="invalid distance code",t.mode=30;break}t.offset=l,t.extra=15&h,t.mode=24;case 24:if(t.extra){for(p=t.extra;B<p;){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}t.offset+=o&(1<<t.extra)-1,o>>>=t.extra,B-=t.extra,t.back+=t.extra}if(t.offset>t.dmax){A.msg="invalid distance too far back",t.mode=30;break}t.mode=25;case 25:if(0===a)break A;if(E=Q-a,t.offset>E){if((E=t.offset-E)>t.whave&&t.sane){A.msg="invalid distance too far back",t.mode=30;break}E>t.wnext?(E-=t.wnext,s=t.wsize-E):s=t.wnext-E,E>t.length&&(E=t.length),f=t.window}else f=r,s=g-t.offset,E=t.length;E>a&&(E=a),a-=E,t.length-=E;do{r[g++]=f[s++]}while(--E);0===t.length&&(t.mode=21);break;case 26:if(0===a)break A;r[g++]=t.length,a--,t.mode=21;break;case 27:if(t.wrap){for(;B<32;){if(0===n)break A;n--,o|=i[I++]<<B,B+=8}if(Q-=a,A.total_out+=Q,t.total+=Q,Q&&(A.adler=t.check=t.flags?Y(t.check,r,Q,g-Q):J(t.check,r,Q,g-Q)),Q=a,(t.flags?o:cA(o))!==t.check){A.msg="incorrect data check",t.mode=30;break}o=0,B=0}t.mode=28;case 28:if(t.wrap&&t.flags){for(;B<32;){if(0===n)break A;n--,o+=i[I++]<<B,B+=8}if(o!==(4294967295&t.total)){A.msg="incorrect length check",t.mode=30;break}o=0,B=0}t.mode=29;case 29:y=oA;break A;case 30:y=QA;break A;case 31:return EA;default:return CA}return A.next_out=g,A.avail_out=a,A.next_in=I,A.avail_in=n,t.hold=o,t.bits=B,(t.wsize||Q!==A.avail_out&&t.mode<30&&(t.mode<27||e!==IA))&&mA(A,A.output,A.next_out,Q-A.avail_out),C-=A.avail_in,Q-=A.avail_out,A.total_in+=C,A.total_out+=Q,t.total+=Q,t.wrap&&Q&&(A.adler=t.check=t.flags?Y(t.check,r,Q,A.next_out-Q):J(t.check,r,Q,A.next_out-Q)),A.data_type=t.bits+(t.last?64:0)+(12===t.mode?128:0)+(20===t.mode||15===t.mode?256:0),(0===C&&0===Q||e===IA)&&y===aA&&(y=sA),y},inflateEnd:function(A){if(!A||!A.state)return CA;var e=A.state;return e.window&&(e.window=null),A.state=null,aA},inflateGetHeader:function(A,e){if(!A||!A.state)return CA;var t=A.state;return 0==(2&t.wrap)?CA:(t.head=e,e.done=!1,aA)},inflateSetDictionary:function(A,e){var t,i=e.length;return A&&A.state?0!==(t=A.state).wrap&&11!==t.mode?CA:11===t.mode&&J(1,e,i,0)!==t.check?QA:mA(A,e,i,i)?(t.mode=31,EA):(t.havedict=1,aA):CA},inflateInfo:"pako inflate (from Nodeca project)"};var FA=function(){this.text=0,this.time=0,this.xflags=0,this.os=0,this.extra=null,this.extra_len=0,this.name="",this.comment="",this.hcrc=0,this.done=!1},SA=Object.prototype.toString,vA=H.Z_NO_FLUSH,RA=H.Z_FINISH,UA=H.Z_OK,LA=H.Z_STREAM_END,bA=H.Z_NEED_DICT,MA=H.Z_STREAM_ERROR,NA=H.Z_DATA_ERROR,xA=H.Z_MEM_ERROR;function JA(A){this.options=P({chunkSize:65536,windowBits:15,to:""},A||{});var e=this.options;e.raw&&e.windowBits>=0&&e.windowBits<16&&(e.windowBits=-e.windowBits,0===e.windowBits&&(e.windowBits=-15)),!(e.windowBits>=0&&e.windowBits<16)||A&&A.windowBits||(e.windowBits+=32),e.windowBits>15&&e.windowBits<48&&0==(15&e.windowBits)&&(e.windowBits|=15),this.err=0,this.msg="",this.ended=!1,this.chunks=[],this.strm=new z,this.strm.avail_out=0;var t=GA.inflateInit2(this.strm,e.windowBits);if(t!==UA)throw new Error(K[t]);if(this.header=new FA,GA.inflateGetHeader(this.strm,this.header),e.dictionary&&("string"==typeof e.dictionary?e.dictionary=Z(e.dictionary):"[object ArrayBuffer]"===SA.call(e.dictionary)&&(e.dictionary=new Uint8Array(e.dictionary)),e.raw&&(t=GA.inflateSetDictionary(this.strm,e.dictionary))!==UA))throw new Error(K[t])}function qA(A,e){var t=new JA(e);if(t.push(A),t.err)throw t.msg||K[t.err];return t.result}JA.prototype.push=function(A,e){var t,i,r,I=this.strm,g=this.options.chunkSize,n=this.options.dictionary;if(this.ended)return!1;for(i=e===~~e?e:!0===e?RA:vA,"[object ArrayBuffer]"===SA.call(A)?I.input=new Uint8Array(A):I.input=A,I.next_in=0,I.avail_in=I.input.length;;){for(0===I.avail_out&&(I.output=new Uint8Array(g),I.next_out=0,I.avail_out=g),(t=GA.inflate(I,i))===bA&&n&&((t=GA.inflateSetDictionary(I,n))===UA?t=GA.inflate(I,i):t===NA&&(t=bA));I.avail_in>0&&t===LA&&I.state.wrap>0&&0!==A[I.next_in];)GA.inflateReset(I),t=GA.inflate(I,i);switch(t){case MA:case NA:case bA:case xA:return this.onEnd(t),this.ended=!0,!1}if(r=I.avail_out,I.next_out&&(0===I.avail_out||t===LA))if("string"===this.options.to){var a=W(I.output,I.next_out),o=I.next_out-a,B=j(I.output,a);I.next_out=o,I.avail_out=g-o,o&&I.output.set(I.output.subarray(a,a+o),0),this.onData(B)}else this.onData(I.output.length===I.next_out?I.output:I.output.subarray(0,I.next_out));if(t!==UA||0!==r){if(t===LA)return t=GA.inflateEnd(this.strm),this.onEnd(t),this.ended=!0,!0;if(0===I.avail_in)break}}return!0},JA.prototype.onData=function(A){this.chunks.push(A)},JA.prototype.onEnd=function(A){A===UA&&("string"===this.options.to?this.result=this.chunks.join(""):this.result=T(this.chunks)),this.chunks=[],this.err=A,this.msg=this.strm.msg};var YA={Inflate:JA,inflate:qA,inflateRaw:function(A,e){return(e=e||{}).raw=!0,qA(A,e)},ungzip:qA,constants:H}.inflate;function KA(A){var e=function(){if("undefined"==typeof Reflect||!Reflect.construct)return!1;if(Reflect.construct.sham)return!1;if("function"==typeof Proxy)return!0;try{return Boolean.prototype.valueOf.call(Reflect.construct(Boolean,[],(function(){}))),!0}catch(A){return!1}}();return function(){var t,i=c(A);if(e){var r=c(this).constructor;t=Reflect.construct(i,arguments,r)}else t=i.apply(this,arguments);return f(this,t)}}var HA=function(A){s(t,w);var e=KA(t);function t(){return B(this,t),e.apply(this,arguments)}return Q(t,[{key:"decodeBlock",value:function(A){return YA(new Uint8Array(A)).buffer}}]),t}(),OA=Object.freeze({__proto__:null,default:HA});function PA(A){var e=function(){if("undefined"==typeof Reflect||!Reflect.construct)return!1;if(Reflect.construct.sham)return!1;if("function"==typeof Proxy)return!0;try{return Boolean.prototype.valueOf.call(Reflect.construct(Boolean,[],(function(){}))),!0}catch(A){return!1}}();return function(){var t,i=c(A);if(e){var r=c(this).constructor;t=Reflect.construct(i,arguments,r)}else t=i.apply(this,arguments);return f(this,t)}}var TA,VA=function(A){s(t,w);var e=PA(t);function t(){return B(this,t),e.apply(this,arguments)}return Q(t,[{key:"decodeBlock",value:function(A){for(var e=new DataView(A),t=[],i=0;i<A.byteLength;++i){var r=e.getInt8(i);if(r<0){var I=e.getUint8(i+1);r=-r;for(var g=0;g<=r;++g)t.push(I);i+=1}else{for(var n=0;n<=r;++n)t.push(e.getUint8(i+n+1));i+=r+1}}return new Uint8Array(t).buffer}}]),t}(),_A=Object.freeze({__proto__:null,default:VA}),XA={exports:{}};TA=XA,\n/* Copyright 2015-2021 Esri. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 @preserve */\nfunction(){var A,e,t,i,r,I,g,n,a,o,B,C,Q,E,s,f,c=(A={defaultNoDataValue:-34027999387901484e22,decode:function(I,g){var n=(g=g||{}).encodedMaskData||null===g.encodedMaskData,a=r(I,g.inputOffset||0,n),o=null!==g.noDataValue?g.noDataValue:A.defaultNoDataValue,B=e(a,g.pixelType||Float32Array,g.encodedMaskData,o,g.returnMask),C={width:a.width,height:a.height,pixelData:B.resultPixels,minValue:B.minValue,maxValue:a.pixels.maxValue,noDataValue:o};return B.resultMask&&(C.maskData=B.resultMask),g.returnEncodedMask&&a.mask&&(C.encodedMaskData=a.mask.bitset?a.mask.bitset:null),g.returnFileInfo&&(C.fileInfo=t(a),g.computeUsedBitDepths&&(C.fileInfo.bitDepths=i(a))),C}},e=function(A,e,t,i,r){var g,n,a,o=0,B=A.pixels.numBlocksX,C=A.pixels.numBlocksY,Q=Math.floor(A.width/B),E=Math.floor(A.height/C),s=2*A.maxZError,f=Number.MAX_VALUE;t=t||(A.mask?A.mask.bitset:null),n=new e(A.width*A.height),r&&t&&(a=new Uint8Array(A.width*A.height));for(var c,h,l=new Float32Array(Q*E),u=0;u<=C;u++){var w=u!==C?E:A.height%C;if(0!==w)for(var d=0;d<=B;d++){var D=d!==B?Q:A.width%B;if(0!==D){var y,k,p,m,G=u*A.width*E+d*Q,F=A.width-D,S=A.pixels.blocks[o];if(S.encoding<2?(0===S.encoding?y=S.rawData:(I(S.stuffedData,S.bitsPerPixel,S.numValidPixels,S.offset,s,l,A.pixels.maxValue),y=l),k=0):p=2===S.encoding?0:S.offset,t)for(h=0;h<w;h++){for(7&G&&(m=t[G>>3],m<<=7&G),c=0;c<D;c++)7&G||(m=t[G>>3]),128&m?(a&&(a[G]=1),f=f>(g=S.encoding<2?y[k++]:p)?g:f,n[G++]=g):(a&&(a[G]=0),n[G++]=i),m<<=1;G+=F}else if(S.encoding<2)for(h=0;h<w;h++){for(c=0;c<D;c++)f=f>(g=y[k++])?g:f,n[G++]=g;G+=F}else for(f=f>p?p:f,h=0;h<w;h++){for(c=0;c<D;c++)n[G++]=p;G+=F}if(1===S.encoding&&k!==S.numValidPixels)throw"Block and Mask do not match";o++}}}return{resultPixels:n,resultMask:a,minValue:f}},t=function(A){return{fileIdentifierString:A.fileIdentifierString,fileVersion:A.fileVersion,imageType:A.imageType,height:A.height,width:A.width,maxZError:A.maxZError,eofOffset:A.eofOffset,mask:A.mask?{numBlocksX:A.mask.numBlocksX,numBlocksY:A.mask.numBlocksY,numBytes:A.mask.numBytes,maxValue:A.mask.maxValue}:null,pixels:{numBlocksX:A.pixels.numBlocksX,numBlocksY:A.pixels.numBlocksY,numBytes:A.pixels.numBytes,maxValue:A.pixels.maxValue,noDataValue:A.noDataValue}}},i=function(A){for(var e=A.pixels.numBlocksX*A.pixels.numBlocksY,t={},i=0;i<e;i++){var r=A.pixels.blocks[i];0===r.encoding?t.float32=!0:1===r.encoding?t[r.bitsPerPixel]=!0:t[0]=!0}return Object.keys(t)},r=function(A,e,t){var i={},r=new Uint8Array(A,e,10);if(i.fileIdentifierString=String.fromCharCode.apply(null,r),"CntZImage"!==i.fileIdentifierString.trim())throw"Unexpected file identifier string: "+i.fileIdentifierString;e+=10;var I=new DataView(A,e,24);if(i.fileVersion=I.getInt32(0,!0),i.imageType=I.getInt32(4,!0),i.height=I.getUint32(8,!0),i.width=I.getUint32(12,!0),i.maxZError=I.getFloat64(16,!0),e+=24,!t)if(I=new DataView(A,e,16),i.mask={},i.mask.numBlocksY=I.getUint32(0,!0),i.mask.numBlocksX=I.getUint32(4,!0),i.mask.numBytes=I.getUint32(8,!0),i.mask.maxValue=I.getFloat32(12,!0),e+=16,i.mask.numBytes>0){var g=new Uint8Array(Math.ceil(i.width*i.height/8)),n=(I=new DataView(A,e,i.mask.numBytes)).getInt16(0,!0),a=2,o=0;do{if(n>0)for(;n--;)g[o++]=I.getUint8(a++);else{var B=I.getUint8(a++);for(n=-n;n--;)g[o++]=B}n=I.getInt16(a,!0),a+=2}while(a<i.mask.numBytes);if(-32768!==n||o<g.length)throw"Unexpected end of mask RLE encoding";i.mask.bitset=g,e+=i.mask.numBytes}else 0==(i.mask.numBytes|i.mask.numBlocksY|i.mask.maxValue)&&(i.mask.bitset=new Uint8Array(Math.ceil(i.width*i.height/8)));I=new DataView(A,e,16),i.pixels={},i.pixels.numBlocksY=I.getUint32(0,!0),i.pixels.numBlocksX=I.getUint32(4,!0),i.pixels.numBytes=I.getUint32(8,!0),i.pixels.maxValue=I.getFloat32(12,!0),e+=16;var C=i.pixels.numBlocksX,Q=i.pixels.numBlocksY,E=C+(i.width%C>0?1:0),s=Q+(i.height%Q>0?1:0);i.pixels.blocks=new Array(E*s);for(var f=0,c=0;c<s;c++)for(var h=0;h<E;h++){var l=0,u=A.byteLength-e;I=new DataView(A,e,Math.min(10,u));var w={};i.pixels.blocks[f++]=w;var d=I.getUint8(0);if(l++,w.encoding=63&d,w.encoding>3)throw"Invalid block encoding ("+w.encoding+")";if(2!==w.encoding){if(0!==d&&2!==d){if(d>>=6,w.offsetType=d,2===d)w.offset=I.getInt8(1),l++;else if(1===d)w.offset=I.getInt16(1,!0),l+=2;else{if(0!==d)throw"Invalid block offset type";w.offset=I.getFloat32(1,!0),l+=4}if(1===w.encoding)if(d=I.getUint8(l),l++,w.bitsPerPixel=63&d,d>>=6,w.numValidPixelsType=d,2===d)w.numValidPixels=I.getUint8(l),l++;else if(1===d)w.numValidPixels=I.getUint16(l,!0),l+=2;else{if(0!==d)throw"Invalid valid pixel count type";w.numValidPixels=I.getUint32(l,!0),l+=4}}var D;if(e+=l,3!==w.encoding)if(0===w.encoding){var y=(i.pixels.numBytes-1)/4;if(y!==Math.floor(y))throw"uncompressed block has invalid length";D=new ArrayBuffer(4*y),new Uint8Array(D).set(new Uint8Array(A,e,4*y));var k=new Float32Array(D);w.rawData=k,e+=4*y}else if(1===w.encoding){var p=Math.ceil(w.numValidPixels*w.bitsPerPixel/8),m=Math.ceil(p/4);D=new ArrayBuffer(4*m),new Uint8Array(D).set(new Uint8Array(A,e,p)),w.stuffedData=new Uint32Array(D),e+=p}}else e++}return i.eofOffset=e,i},I=function(A,e,t,i,r,I,g){var n,a,o,B=(1<<e)-1,C=0,Q=0,E=Math.ceil((g-i)/r),s=4*A.length-Math.ceil(e*t/8);for(A[A.length-1]<<=8*s,n=0;n<t;n++){if(0===Q&&(o=A[C++],Q=32),Q>=e)a=o>>>Q-e&B,Q-=e;else{var f=e-Q;a=(o&B)<<f&B,a+=(o=A[C++])>>>(Q=32-f)}I[n]=a<E?i+a*r:g}return I},A),h=(g=function(A,e,t,i,r,I,g,n){var a,o,B,C,Q,E=(1<<t)-1,s=0,f=0,c=4*A.length-Math.ceil(t*i/8);if(A[A.length-1]<<=8*c,r)for(a=0;a<i;a++)0===f&&(B=A[s++],f=32),f>=t?(o=B>>>f-t&E,f-=t):(o=(B&E)<<(C=t-f)&E,o+=(B=A[s++])>>>(f=32-C)),e[a]=r[o];else for(Q=Math.ceil((n-I)/g),a=0;a<i;a++)0===f&&(B=A[s++],f=32),f>=t?(o=B>>>f-t&E,f-=t):(o=(B&E)<<(C=t-f)&E,o+=(B=A[s++])>>>(f=32-C)),e[a]=o<Q?I+o*g:n},n=function(A,e,t,i,r,I){var g,n=(1<<e)-1,a=0,o=0,B=0,C=0,Q=0,E=[],s=4*A.length-Math.ceil(e*t/8);A[A.length-1]<<=8*s;var f=Math.ceil((I-i)/r);for(o=0;o<t;o++)0===C&&(g=A[a++],C=32),C>=e?(Q=g>>>C-e&n,C-=e):(Q=(g&n)<<(B=e-C)&n,Q+=(g=A[a++])>>>(C=32-B)),E[o]=Q<f?i+Q*r:I;return E.unshift(i),E},a=function(A,e,t,i,r,I,g,n){var a,o,B,C,Q=(1<<t)-1,E=0,s=0,f=0;if(r)for(a=0;a<i;a++)0===s&&(B=A[E++],s=32,f=0),s>=t?(o=B>>>f&Q,s-=t,f+=t):(o=B>>>f&Q,s=32-(C=t-s),o|=((B=A[E++])&(1<<C)-1)<<t-C,f=C),e[a]=r[o];else{var c=Math.ceil((n-I)/g);for(a=0;a<i;a++)0===s&&(B=A[E++],s=32,f=0),s>=t?(o=B>>>f&Q,s-=t,f+=t):(o=B>>>f&Q,s=32-(C=t-s),o|=((B=A[E++])&(1<<C)-1)<<t-C,f=C),e[a]=o<c?I+o*g:n}return e},o=function(A,e,t,i,r,I){var g,n=(1<<e)-1,a=0,o=0,B=0,C=0,Q=0,E=0,s=[],f=Math.ceil((I-i)/r);for(o=0;o<t;o++)0===C&&(g=A[a++],C=32,E=0),C>=e?(Q=g>>>E&n,C-=e,E+=e):(Q=g>>>E&n,C=32-(B=e-C),Q|=((g=A[a++])&(1<<B)-1)<<e-B,E=B),s[o]=Q<f?i+Q*r:I;return s.unshift(i),s},B=function(A,e,t,i){var r,I,g,n,a=(1<<t)-1,o=0,B=0,C=4*A.length-Math.ceil(t*i/8);for(A[A.length-1]<<=8*C,r=0;r<i;r++)0===B&&(g=A[o++],B=32),B>=t?(I=g>>>B-t&a,B-=t):(I=(g&a)<<(n=t-B)&a,I+=(g=A[o++])>>>(B=32-n)),e[r]=I;return e},C=function(A,e,t,i){var r,I,g,n,a=(1<<t)-1,o=0,B=0,C=0;for(r=0;r<i;r++)0===B&&(g=A[o++],B=32,C=0),B>=t?(I=g>>>C&a,B-=t,C+=t):(I=g>>>C&a,B=32-(n=t-B),I|=((g=A[o++])&(1<<n)-1)<<t-n,C=n),e[r]=I;return e},Q={HUFFMAN_LUT_BITS_MAX:12,computeChecksumFletcher32:function(A){for(var e=65535,t=65535,i=A.length,r=Math.floor(i/2),I=0;r;){var g=r>=359?359:r;r-=g;do{e+=A[I++]<<8,t+=e+=A[I++]}while(--g);e=(65535&e)+(e>>>16),t=(65535&t)+(t>>>16)}return 1&i&&(t+=e+=A[I]<<8),((t=(65535&t)+(t>>>16))<<16|(e=(65535&e)+(e>>>16)))>>>0},readHeaderInfo:function(A,e){var t=e.ptr,i=new Uint8Array(A,t,6),r={};if(r.fileIdentifierString=String.fromCharCode.apply(null,i),0!==r.fileIdentifierString.lastIndexOf("Lerc2",0))throw"Unexpected file identifier string (expect Lerc2 ): "+r.fileIdentifierString;t+=6;var I,g=new DataView(A,t,8),n=g.getInt32(0,!0);if(r.fileVersion=n,t+=4,n>=3&&(r.checksum=g.getUint32(4,!0),t+=4),g=new DataView(A,t,12),r.height=g.getUint32(0,!0),r.width=g.getUint32(4,!0),t+=8,n>=4?(r.numDims=g.getUint32(8,!0),t+=4):r.numDims=1,g=new DataView(A,t,40),r.numValidPixel=g.getUint32(0,!0),r.microBlockSize=g.getInt32(4,!0),r.blobSize=g.getInt32(8,!0),r.imageType=g.getInt32(12,!0),r.maxZError=g.getFloat64(16,!0),r.zMin=g.getFloat64(24,!0),r.zMax=g.getFloat64(32,!0),t+=40,e.headerInfo=r,e.ptr=t,n>=3&&(I=n>=4?52:48,this.computeChecksumFletcher32(new Uint8Array(A,t-I,r.blobSize-14))!==r.checksum))throw"Checksum failed.";return!0},checkMinMaxRanges:function(A,e){var t=e.headerInfo,i=this.getDataTypeArray(t.imageType),r=t.numDims*this.getDataTypeSize(t.imageType),I=this.readSubArray(A,e.ptr,i,r),g=this.readSubArray(A,e.ptr+r,i,r);e.ptr+=2*r;var n,a=!0;for(n=0;n<t.numDims;n++)if(I[n]!==g[n]){a=!1;break}return t.minValues=I,t.maxValues=g,a},readSubArray:function(A,e,t,i){var r;if(t===Uint8Array)r=new Uint8Array(A,e,i);else{var I=new ArrayBuffer(i);new Uint8Array(I).set(new Uint8Array(A,e,i)),r=new t(I)}return r},readMask:function(A,e){var t,i,r=e.ptr,I=e.headerInfo,g=I.width*I.height,n=I.numValidPixel,a=new DataView(A,r,4),o={};if(o.numBytes=a.getUint32(0,!0),r+=4,(0===n||g===n)&&0!==o.numBytes)throw"invalid mask";if(0===n)t=new Uint8Array(Math.ceil(g/8)),o.bitset=t,i=new Uint8Array(g),e.pixels.resultMask=i,r+=o.numBytes;else if(o.numBytes>0){t=new Uint8Array(Math.ceil(g/8));var B=(a=new DataView(A,r,o.numBytes)).getInt16(0,!0),C=2,Q=0,E=0;do{if(B>0)for(;B--;)t[Q++]=a.getUint8(C++);else for(E=a.getUint8(C++),B=-B;B--;)t[Q++]=E;B=a.getInt16(C,!0),C+=2}while(C<o.numBytes);if(-32768!==B||Q<t.length)throw"Unexpected end of mask RLE encoding";i=new Uint8Array(g);var s=0,f=0;for(f=0;f<g;f++)7&f?(s=t[f>>3],s<<=7&f):s=t[f>>3],128&s&&(i[f]=1);e.pixels.resultMask=i,o.bitset=t,r+=o.numBytes}return e.ptr=r,e.mask=o,!0},readDataOneSweep:function(A,e,t,i){var r,I=e.ptr,g=e.headerInfo,n=g.numDims,a=g.width*g.height,o=g.imageType,B=g.numValidPixel*Q.getDataTypeSize(o)*n,C=e.pixels.resultMask;if(t===Uint8Array)r=new Uint8Array(A,I,B);else{var E=new ArrayBuffer(B);new Uint8Array(E).set(new Uint8Array(A,I,B)),r=new t(E)}if(r.length===a*n)e.pixels.resultPixels=i?Q.swapDimensionOrder(r,a,n,t,!0):r;else{e.pixels.resultPixels=new t(a*n);var s=0,f=0,c=0,h=0;if(n>1){if(i){for(f=0;f<a;f++)if(C[f])for(h=f,c=0;c<n;c++,h+=a)e.pixels.resultPixels[h]=r[s++]}else for(f=0;f<a;f++)if(C[f])for(h=f*n,c=0;c<n;c++)e.pixels.resultPixels[h+c]=r[s++]}else for(f=0;f<a;f++)C[f]&&(e.pixels.resultPixels[f]=r[s++])}return I+=B,e.ptr=I,!0},readHuffmanTree:function(A,e){var t=this.HUFFMAN_LUT_BITS_MAX,i=new DataView(A,e.ptr,16);if(e.ptr+=16,i.getInt32(0,!0)<2)throw"unsupported Huffman version";var r=i.getInt32(4,!0),I=i.getInt32(8,!0),g=i.getInt32(12,!0);if(I>=g)return!1;var n=new Uint32Array(g-I);Q.decodeBits(A,e,n);var a,o,B,C,s=[];for(a=I;a<g;a++)s[o=a-(a<r?0:r)]={first:n[a-I],second:null};var f=A.byteLength-e.ptr,c=Math.ceil(f/4),h=new ArrayBuffer(4*c);new Uint8Array(h).set(new Uint8Array(A,e.ptr,f));var l,u=new Uint32Array(h),w=0,d=0;for(l=u[0],a=I;a<g;a++)(C=s[o=a-(a<r?0:r)].first)>0&&(s[o].second=l<<w>>>32-C,32-w>=C?32===(w+=C)&&(w=0,l=u[++d]):(w+=C-32,l=u[++d],s[o].second|=l>>>32-w));var D=0,y=0,k=new E;for(a=0;a<s.length;a++)void 0!==s[a]&&(D=Math.max(D,s[a].first));y=D>=t?t:D;var p,m,G,F,S,v=[];for(a=I;a<g;a++)if((C=s[o=a-(a<r?0:r)].first)>0)if(p=[C,o],C<=y)for(m=s[o].second<<y-C,G=1<<y-C,B=0;B<G;B++)v[m|B]=p;else for(m=s[o].second,S=k,F=C-1;F>=0;F--)m>>>F&1?(S.right||(S.right=new E),S=S.right):(S.left||(S.left=new E),S=S.left),0!==F||S.val||(S.val=p[1]);return{decodeLut:v,numBitsLUTQick:y,numBitsLUT:D,tree:k,stuffedData:u,srcPtr:d,bitPos:w}},readHuffman:function(A,e,t,i){var r,I,g,n,a,o,B,C,E,s=e.headerInfo.numDims,f=e.headerInfo.height,c=e.headerInfo.width,h=c*f,l=this.readHuffmanTree(A,e),u=l.decodeLut,w=l.tree,d=l.stuffedData,D=l.srcPtr,y=l.bitPos,k=l.numBitsLUTQick,p=l.numBitsLUT,m=0===e.headerInfo.imageType?128:0,G=e.pixels.resultMask,F=0;y>0&&(D++,y=0);var S,v=d[D],R=1===e.encodeMode,U=new t(h*s),L=U;if(s<2||R){for(S=0;S<s;S++)if(s>1&&(L=new t(U.buffer,h*S,h),F=0),e.headerInfo.numValidPixel===c*f)for(C=0,o=0;o<f;o++)for(B=0;B<c;B++,C++){if(I=0,a=n=v<<y>>>32-k,32-y<k&&(a=n|=d[D+1]>>>64-y-k),u[a])I=u[a][1],y+=u[a][0];else for(a=n=v<<y>>>32-p,32-y<p&&(a=n|=d[D+1]>>>64-y-p),r=w,E=0;E<p;E++)if(!(r=n>>>p-E-1&1?r.right:r.left).left&&!r.right){I=r.val,y=y+E+1;break}y>=32&&(y-=32,v=d[++D]),g=I-m,R?(g+=B>0?F:o>0?L[C-c]:F,g&=255,L[C]=g,F=g):L[C]=g}else for(C=0,o=0;o<f;o++)for(B=0;B<c;B++,C++)if(G[C]){if(I=0,a=n=v<<y>>>32-k,32-y<k&&(a=n|=d[D+1]>>>64-y-k),u[a])I=u[a][1],y+=u[a][0];else for(a=n=v<<y>>>32-p,32-y<p&&(a=n|=d[D+1]>>>64-y-p),r=w,E=0;E<p;E++)if(!(r=n>>>p-E-1&1?r.right:r.left).left&&!r.right){I=r.val,y=y+E+1;break}y>=32&&(y-=32,v=d[++D]),g=I-m,R?(B>0&&G[C-1]?g+=F:o>0&&G[C-c]?g+=L[C-c]:g+=F,g&=255,L[C]=g,F=g):L[C]=g}}else for(C=0,o=0;o<f;o++)for(B=0;B<c;B++)if(C=o*c+B,!G||G[C])for(S=0;S<s;S++,C+=h){if(I=0,a=n=v<<y>>>32-k,32-y<k&&(a=n|=d[D+1]>>>64-y-k),u[a])I=u[a][1],y+=u[a][0];else for(a=n=v<<y>>>32-p,32-y<p&&(a=n|=d[D+1]>>>64-y-p),r=w,E=0;E<p;E++)if(!(r=n>>>p-E-1&1?r.right:r.left).left&&!r.right){I=r.val,y=y+E+1;break}y>=32&&(y-=32,v=d[++D]),g=I-m,L[C]=g}e.ptr=e.ptr+4*(D+1)+(y>0?4:0),e.pixels.resultPixels=U,s>1&&!i&&(e.pixels.resultPixels=Q.swapDimensionOrder(U,h,s,t))},decodeBits:function(A,e,t,i,r){var I=e.headerInfo,Q=I.fileVersion,E=0,s=A.byteLength-e.ptr>=5?5:A.byteLength-e.ptr,f=new DataView(A,e.ptr,s),c=f.getUint8(0);E++;var h=c>>6,l=0===h?4:3-h,u=(32&c)>0,w=31&c,d=0;if(1===l)d=f.getUint8(E),E++;else if(2===l)d=f.getUint16(E,!0),E+=2;else{if(4!==l)throw"Invalid valid pixel count type";d=f.getUint32(E,!0),E+=4}var D,y,k,p,m,G,F,S,v,R=2*I.maxZError,U=I.numDims>1?I.maxValues[r]:I.zMax;if(u){for(e.counter.lut++,S=f.getUint8(E),E++,p=Math.ceil((S-1)*w/8),m=Math.ceil(p/4),y=new ArrayBuffer(4*m),k=new Uint8Array(y),e.ptr+=E,k.set(new Uint8Array(A,e.ptr,p)),F=new Uint32Array(y),e.ptr+=p,v=0;S-1>>>v;)v++;p=Math.ceil(d*v/8),m=Math.ceil(p/4),y=new ArrayBuffer(4*m),(k=new Uint8Array(y)).set(new Uint8Array(A,e.ptr,p)),D=new Uint32Array(y),e.ptr+=p,G=Q>=3?o(F,w,S-1,i,R,U):n(F,w,S-1,i,R,U),Q>=3?a(D,t,v,d,G):g(D,t,v,d,G)}else e.counter.bitstuffer++,v=w,e.ptr+=E,v>0&&(p=Math.ceil(d*v/8),m=Math.ceil(p/4),y=new ArrayBuffer(4*m),(k=new Uint8Array(y)).set(new Uint8Array(A,e.ptr,p)),D=new Uint32Array(y),e.ptr+=p,Q>=3?null==i?C(D,t,v,d):a(D,t,v,d,!1,i,R,U):null==i?B(D,t,v,d):g(D,t,v,d,!1,i,R,U))},readTiles:function(A,e,t,i){var r=e.headerInfo,I=r.width,g=r.height,n=I*g,a=r.microBlockSize,o=r.imageType,B=Q.getDataTypeSize(o),C=Math.ceil(I/a),E=Math.ceil(g/a);e.pixels.numBlocksY=E,e.pixels.numBlocksX=C,e.pixels.ptr=0;var s,f,c,h,l,u,w,d,D,y,k=0,p=0,m=0,G=0,F=0,S=0,v=0,R=0,U=0,L=0,b=0,M=0,N=0,x=0,J=0,q=new t(a*a),Y=g%a||a,K=I%a||a,H=r.numDims,O=e.pixels.resultMask,P=e.pixels.resultPixels,T=r.fileVersion>=5?14:15,V=r.zMax;for(m=0;m<E;m++)for(F=m!==E-1?a:Y,G=0;G<C;G++)for(L=m*I*a+G*a,b=I-(S=G!==C-1?a:K),d=0;d<H;d++){if(H>1?(y=P,L=m*I*a+G*a,P=new t(e.pixels.resultPixels.buffer,n*d*B,n),V=r.maxValues[d]):y=null,v=A.byteLength-e.ptr,f={},J=0,R=(s=new DataView(A,e.ptr,Math.min(10,v))).getUint8(0),J++,D=r.fileVersion>=5?4&R:0,U=R>>6&255,(R>>2&T)!=(G*a>>3&T))throw"integrity issue";if(D&&0===d)throw"integrity issue";if((l=3&R)>3)throw e.ptr+=J,"Invalid block encoding ("+l+")";if(2!==l)if(0===l){if(D)throw"integrity issue";if(e.counter.uncompressed++,e.ptr+=J,M=(M=F*S*B)<(N=A.byteLength-e.ptr)?M:N,c=new ArrayBuffer(M%B==0?M:M+B-M%B),new Uint8Array(c).set(new Uint8Array(A,e.ptr,M)),h=new t(c),x=0,O)for(k=0;k<F;k++){for(p=0;p<S;p++)O[L]&&(P[L]=h[x++]),L++;L+=b}else for(k=0;k<F;k++){for(p=0;p<S;p++)P[L++]=h[x++];L+=b}e.ptr+=x*B}else if(u=Q.getDataTypeUsed(D&&o<6?4:o,U),w=Q.getOnePixel(f,J,u,s),J+=Q.getDataTypeSize(u),3===l)if(e.ptr+=J,e.counter.constantoffset++,O)for(k=0;k<F;k++){for(p=0;p<S;p++)O[L]&&(P[L]=D?Math.min(V,y[L]+w):w),L++;L+=b}else for(k=0;k<F;k++){for(p=0;p<S;p++)P[L]=D?Math.min(V,y[L]+w):w,L++;L+=b}else if(e.ptr+=J,Q.decodeBits(A,e,q,w,d),J=0,D)if(O)for(k=0;k<F;k++){for(p=0;p<S;p++)O[L]&&(P[L]=q[J++]+y[L]),L++;L+=b}else for(k=0;k<F;k++){for(p=0;p<S;p++)P[L]=q[J++]+y[L],L++;L+=b}else if(O)for(k=0;k<F;k++){for(p=0;p<S;p++)O[L]&&(P[L]=q[J++]),L++;L+=b}else for(k=0;k<F;k++){for(p=0;p<S;p++)P[L++]=q[J++];L+=b}else{if(D)if(O)for(k=0;k<F;k++)for(p=0;p<S;p++)O[L]&&(P[L]=y[L]),L++;else for(k=0;k<F;k++)for(p=0;p<S;p++)P[L]=y[L],L++;e.counter.constant++,e.ptr+=J}}H>1&&!i&&(e.pixels.resultPixels=Q.swapDimensionOrder(e.pixels.resultPixels,n,H,t))},formatFileInfo:function(A){return{fileIdentifierString:A.headerInfo.fileIdentifierString,fileVersion:A.headerInfo.fileVersion,imageType:A.headerInfo.imageType,height:A.headerInfo.height,width:A.headerInfo.width,numValidPixel:A.headerInfo.numValidPixel,microBlockSize:A.headerInfo.microBlockSize,blobSize:A.headerInfo.blobSize,maxZError:A.headerInfo.maxZError,pixelType:Q.getPixelType(A.headerInfo.imageType),eofOffset:A.eofOffset,mask:A.mask?{numBytes:A.mask.numBytes}:null,pixels:{numBlocksX:A.pixels.numBlocksX,numBlocksY:A.pixels.numBlocksY,maxValue:A.headerInfo.zMax,minValue:A.headerInfo.zMin,noDataValue:A.noDataValue}}},constructConstantSurface:function(A,e){var t=A.headerInfo.zMax,i=A.headerInfo.zMin,r=A.headerInfo.maxValues,I=A.headerInfo.numDims,g=A.headerInfo.height*A.headerInfo.width,n=0,a=0,o=0,B=A.pixels.resultMask,C=A.pixels.resultPixels;if(B)if(I>1){if(e)for(n=0;n<I;n++)for(o=n*g,t=r[n],a=0;a<g;a++)B[a]&&(C[o+a]=t);else for(a=0;a<g;a++)if(B[a])for(o=a*I,n=0;n<I;n++)C[o+I]=r[n]}else for(a=0;a<g;a++)B[a]&&(C[a]=t);else if(I>1&&i!==t)if(e)for(n=0;n<I;n++)for(o=n*g,t=r[n],a=0;a<g;a++)C[o+a]=t;else for(a=0;a<g;a++)for(o=a*I,n=0;n<I;n++)C[o+n]=r[n];else for(a=0;a<g*I;a++)C[a]=t},getDataTypeArray:function(A){var e;switch(A){case 0:e=Int8Array;break;case 1:e=Uint8Array;break;case 2:e=Int16Array;break;case 3:e=Uint16Array;break;case 4:e=Int32Array;break;case 5:e=Uint32Array;break;case 6:default:e=Float32Array;break;case 7:e=Float64Array}return e},getPixelType:function(A){var e;switch(A){case 0:e="S8";break;case 1:e="U8";break;case 2:e="S16";break;case 3:e="U16";break;case 4:e="S32";break;case 5:e="U32";break;case 6:default:e="F32";break;case 7:e="F64"}return e},isValidPixelValue:function(A,e){if(null==e)return!1;var t;switch(A){case 0:t=e>=-128&&e<=127;break;case 1:t=e>=0&&e<=255;break;case 2:t=e>=-32768&&e<=32767;break;case 3:t=e>=0&&e<=65536;break;case 4:t=e>=-2147483648&&e<=2147483647;break;case 5:t=e>=0&&e<=4294967296;break;case 6:t=e>=-34027999387901484e22&&e<=34027999387901484e22;break;case 7:t=e>=-17976931348623157e292&&e<=17976931348623157e292;break;default:t=!1}return t},getDataTypeSize:function(A){var e=0;switch(A){case 0:case 1:e=1;break;case 2:case 3:e=2;break;case 4:case 5:case 6:e=4;break;case 7:e=8;break;default:e=A}return e},getDataTypeUsed:function(A,e){var t=A;switch(A){case 2:case 4:t=A-e;break;case 3:case 5:t=A-2*e;break;case 6:t=0===e?A:1===e?2:1;break;case 7:t=0===e?A:A-2*e+1;break;default:t=A}return t},getOnePixel:function(A,e,t,i){var r=0;switch(t){case 0:r=i.getInt8(e);break;case 1:r=i.getUint8(e);break;case 2:r=i.getInt16(e,!0);break;case 3:r=i.getUint16(e,!0);break;case 4:r=i.getInt32(e,!0);break;case 5:r=i.getUInt32(e,!0);break;case 6:r=i.getFloat32(e,!0);break;case 7:r=i.getFloat64(e,!0);break;default:throw"the decoder does not understand this pixel type"}return r},swapDimensionOrder:function(A,e,t,i,r){var I=0,g=0,n=0,a=0,o=A;if(t>1)if(o=new i(e*t),r)for(I=0;I<e;I++)for(a=I,n=0;n<t;n++,a+=e)o[a]=A[g++];else for(I=0;I<e;I++)for(a=I,n=0;n<t;n++,a+=e)o[g++]=A[a];return o}},E=function(A,e,t){this.val=A,this.left=e,this.right=t},{decode:function(A,e){var t=(e=e||{}).noDataValue,i=0,r={};r.ptr=e.inputOffset||0,r.pixels={},Q.readHeaderInfo(A,r);var I=r.headerInfo,g=I.fileVersion,n=Q.getDataTypeArray(I.imageType);if(g>5)throw"unsupported lerc version 2."+g;Q.readMask(A,r),I.numValidPixel===I.width*I.height||r.pixels.resultMask||(r.pixels.resultMask=e.maskData);var a=I.width*I.height;r.pixels.resultPixels=new n(a*I.numDims),r.counter={onesweep:0,uncompressed:0,lut:0,bitstuffer:0,constant:0,constantoffset:0};var o,B=!e.returnPixelInterleavedDims;if(0!==I.numValidPixel)if(I.zMax===I.zMin)Q.constructConstantSurface(r,B);else if(g>=4&&Q.checkMinMaxRanges(A,r))Q.constructConstantSurface(r,B);else{var C=new DataView(A,r.ptr,2),E=C.getUint8(0);if(r.ptr++,E)Q.readDataOneSweep(A,r,n,B);else if(g>1&&I.imageType<=1&&Math.abs(I.maxZError-.5)<1e-5){var s=C.getUint8(1);if(r.ptr++,r.encodeMode=s,s>2||g<4&&s>1)throw"Invalid Huffman flag "+s;s?Q.readHuffman(A,r,n,B):Q.readTiles(A,r,n,B)}else Q.readTiles(A,r,n,B)}r.eofOffset=r.ptr,e.inputOffset?(o=r.headerInfo.blobSize+e.inputOffset-r.ptr,Math.abs(o)>=1&&(r.eofOffset=e.inputOffset+r.headerInfo.blobSize)):(o=r.headerInfo.blobSize-r.ptr,Math.abs(o)>=1&&(r.eofOffset=r.headerInfo.blobSize));var f={width:I.width,height:I.height,pixelData:r.pixels.resultPixels,minValue:I.zMin,maxValue:I.zMax,validPixelCount:I.numValidPixel,dimCount:I.numDims,dimStats:{minValues:I.minValues,maxValues:I.maxValues},maskData:r.pixels.resultMask};if(r.pixels.resultMask&&Q.isValidPixelValue(I.imageType,t)){var c=r.pixels.resultMask;for(i=0;i<a;i++)c[i]||(f.pixelData[i]=t);f.noDataValue=t}return r.noDataValue=t,e.returnFileInfo&&(f.fileInfo=Q.formatFileInfo(r)),f},getBandCount:function(A){for(var e=0,t=0,i={ptr:0,pixels:{}};t<A.byteLength-58;)Q.readHeaderInfo(A,i),t+=i.headerInfo.blobSize,e++,i.ptr=t;return e}}),l=(s=new ArrayBuffer(4),f=new Uint8Array(s),new Uint32Array(s)[0]=1,1===f[0]),u={decode:function(A,e){if(!l)throw"Big endian system is not supported.";var t,i,r=(e=e||{}).inputOffset||0,I=new Uint8Array(A,r,10),g=String.fromCharCode.apply(null,I);if("CntZImage"===g.trim())t=c,i=1;else{if("Lerc2"!==g.substring(0,5))throw"Unexpected file identifier string: "+g;t=h,i=2}for(var n,a,o,B,C,Q,E=0,s=A.byteLength-10,f=[],u={width:0,height:0,pixels:[],pixelType:e.pixelType,mask:null,statistics:[]},w=0;r<s;){var d=t.decode(A,{inputOffset:r,encodedMaskData:n,maskData:o,returnMask:0===E,returnEncodedMask:0===E,returnFileInfo:!0,returnPixelInterleavedDims:e.returnPixelInterleavedDims,pixelType:e.pixelType||null,noDataValue:e.noDataValue||null});r=d.fileInfo.eofOffset,o=d.maskData,0===E&&(n=d.encodedMaskData,u.width=d.width,u.height=d.height,u.dimCount=d.dimCount||1,u.pixelType=d.pixelType||d.fileInfo.pixelType,u.mask=o),i>1&&(o&&f.push(o),d.fileInfo.mask&&d.fileInfo.mask.numBytes>0&&w++),E++,u.pixels.push(d.pixelData),u.statistics.push({minValue:d.minValue,maxValue:d.maxValue,noDataValue:d.noDataValue,dimStats:d.dimStats})}if(i>1&&w>1){for(Q=u.width*u.height,u.bandMasks=f,(o=new Uint8Array(Q)).set(f[0]),B=1;B<f.length;B++)for(a=f[B],C=0;C<Q;C++)o[C]=o[C]&a[C];u.maskData=o}return u}};TA.exports?TA.exports=u:this.Lerc=u}();var ZA,jA,WA,zA=XA.exports,$A={env:{emscripten_notify_memory_growth:function(A){WA=new Uint8Array(jA.exports.memory.buffer)}}},Ae=function(){function A(){B(this,A)}return Q(A,[{key:"init",value:function(){return ZA||(ZA="undefined"!=typeof fetch?fetch("data:application/wasm;base64,"+ee).then((function(A){return A.arrayBuffer()})).then((function(A){return WebAssembly.instantiate(A,$A)})).then(this._init):WebAssembly.instantiate(Buffer.from(ee,"base64"),$A).then(this._init))}},{key:"_init",value:function(A){jA=A.instance,$A.env.emscripten_notify_memory_growth(0)}},{key:"decode",value:function(A){var e=arguments.length>1&&void 0!==arguments[1]?arguments[1]:0;if(!jA)throw new Error("ZSTDDecoder: Await .init() before decoding.");var t=A.byteLength,i=jA.exports.malloc(t);WA.set(A,i),e=e||Number(jA.exports.ZSTD_findDecompressedSize(i,t));var r=jA.exports.malloc(e),I=jA.exports.ZSTD_decompress(r,e,i,t),g=WA.slice(r,r+I);return jA.exports.free(i),jA.exports.free(r),g}}]),A}(),ee="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IAMNACAEQQNxBEADQCACRQ0FIAAgAkF/aiICaiIDIAEgAmotAAA6AAAgA0EDcQ0ACwsgAkEDTQ0AA0AgACACQXxqIgJqIAEgAmooAgA2AgAgAkEDSw0ACwsgAkUNAgNAIAAgAkF/aiICaiABIAJqLQAAOgAAIAINAAsMAgsgAkEDTQ0AIAIhBANAIAMgASgCADYCACABQQRqIQEgA0EEaiEDIARBfGoiBEEDSw0ACyACQQNxIQILIAJFDQADQCADIAEtAAA6AAAgA0EBaiEDIAFBAWohASACQX9qIgINAAsLIAAL8wICAn8BfgJAIAJFDQAgACACaiIDQX9qIAE6AAAgACABOgAAIAJBA0kNACADQX5qIAE6AAAgACABOgABIANBfWogAToAACAAIAE6AAIgAkEHSQ0AIANBfGogAToAACAAIAE6AAMgAkEJSQ0AIABBACAAa0EDcSIEaiIDIAFB/wFxQYGChAhsIgE2AgAgAyACIARrQXxxIgRqIgJBfGogATYCACAEQQlJDQAgAyABNgIIIAMgATYCBCACQXhqIAE2AgAgAkF0aiABNgIAIARBGUkNACADIAE2AhggAyABNgIUIAMgATYCECADIAE2AgwgAkFwaiABNgIAIAJBbGogATYCACACQWhqIAE2AgAgAkFkaiABNgIAIAQgA0EEcUEYciIEayICQSBJDQAgAa0iBUIghiAFhCEFIAMgBGohAQNAIAEgBTcDGCABIAU3AxAgASAFNwMIIAEgBTcDACABQSBqIQEgAkFgaiICQR9LDQALCyAACy8BAn8gACgCBCAAKAIAQQJ0aiICLQACIQMgACACLwEAIAEgAi0AAxAIajYCACADCy8BAn8gACgCBCAAKAIAQQJ0aiICLQACIQMgACACLwEAIAEgAi0AAxAFajYCACADCx8AIAAgASACKAIEEAg2AgAgARAEGiAAIAJBCGo2AgQLCAAgAGdBH3MLugUBDX8jAEEQayIKJAACfyAEQQNNBEAgCkEANgIMIApBDGogAyAEEAsaIAAgASACIApBDGpBBBAVIgBBbCAAEAMbIAAgACAESxsMAQsgAEEAIAEoAgBBAXRBAmoQECENQVQgAygAACIGQQ9xIgBBCksNABogAiAAQQVqNgIAIAMgBGoiAkF8aiEMIAJBeWohDiACQXtqIRAgAEEGaiELQQQhBSAGQQR2IQRBICAAdCIAQQFyIQkgASgCACEPQQAhAiADIQYCQANAIAlBAkggAiAPS3JFBEAgAiEHAkAgCARAA0AgBEH//wNxQf//A0YEQCAHQRhqIQcgBiAQSQR/IAZBAmoiBigAACAFdgUgBUEQaiEFIARBEHYLIQQMAQsLA0AgBEEDcSIIQQNGBEAgBUECaiEFIARBAnYhBCAHQQNqIQcMAQsLIAcgCGoiByAPSw0EIAVBAmohBQNAIAIgB0kEQCANIAJBAXRqQQA7AQAgAkEBaiECDAELCyAGIA5LQQAgBiAFQQN1aiIHIAxLG0UEQCAHKAAAIAVBB3EiBXYhBAwCCyAEQQJ2IQQLIAYhBwsCfyALQX9qIAQgAEF/anEiBiAAQQF0QX9qIgggCWsiEUkNABogBCAIcSIEQQAgESAEIABIG2shBiALCyEIIA0gAkEBdGogBkF/aiIEOwEAIAlBASAGayAEIAZBAUgbayEJA0AgCSAASARAIABBAXUhACALQX9qIQsMAQsLAn8gByAOS0EAIAcgBSAIaiIFQQN1aiIGIAxLG0UEQCAFQQdxDAELIAUgDCIGIAdrQQN0awshBSACQQFqIQIgBEUhCCAGKAAAIAVBH3F2IQQMAQsLQWwgCUEBRyAFQSBKcg0BGiABIAJBf2o2AgAgBiAFQQdqQQN1aiADawwBC0FQCyEAIApBEGokACAACwkAQQFBBSAAGwsMACAAIAEoAAA2AAALqgMBCn8jAEHwAGsiCiQAIAJBAWohDiAAQQhqIQtBgIAEIAVBf2p0QRB1IQxBACECQQEhBkEBIAV0IglBf2oiDyEIA0AgAiAORkUEQAJAIAEgAkEBdCINai8BACIHQf//A0YEQCALIAhBA3RqIAI2AgQgCEF/aiEIQQEhBwwBCyAGQQAgDCAHQRB0QRB1ShshBgsgCiANaiAHOwEAIAJBAWohAgwBCwsgACAFNgIEIAAgBjYCACAJQQN2IAlBAXZqQQNqIQxBACEAQQAhBkEAIQIDQCAGIA5GBEADQAJAIAAgCUYNACAKIAsgAEEDdGoiASgCBCIGQQF0aiICIAIvAQAiAkEBajsBACABIAUgAhAUayIIOgADIAEgAiAIQf8BcXQgCWs7AQAgASAEIAZBAnQiAmooAgA6AAIgASACIANqKAIANgIEIABBAWohAAwBCwsFIAEgBkEBdGouAQAhDUEAIQcDQCAHIA1ORQRAIAsgAkEDdGogBjYCBANAIAIgDGogD3EiAiAISw0ACyAHQQFqIQcMAQsLIAZBAWohBgwBCwsgCkHwAGokAAsjAEIAIAEQCSAAhUKHla+vmLbem55/fkLj3MqV/M7y9YV/fAsQACAAQn43AwggACABNgIACyQBAX8gAARAIAEoAgQiAgRAIAEoAgggACACEQEADwsgABAmCwsfACAAIAEgAi8BABAINgIAIAEQBBogACACQQRqNgIEC0oBAX9BoCAoAgAiASAAaiIAQX9MBEBBiCBBMDYCAEF/DwsCQCAAPwBBEHRNDQAgABBmDQBBiCBBMDYCAEF/DwtBoCAgADYCACABC9cBAQh/Qbp/IQoCQCACKAIEIgggAigCACIJaiIOIAEgAGtLDQBBbCEKIAkgBCADKAIAIgtrSw0AIAAgCWoiBCACKAIIIgxrIQ0gACABQWBqIg8gCyAJQQAQKSADIAkgC2o2AgACQAJAIAwgBCAFa00EQCANIQUMAQsgDCAEIAZrSw0CIAcgDSAFayIAaiIBIAhqIAdNBEAgBCABIAgQDxoMAgsgBCABQQAgAGsQDyEBIAIgACAIaiIINgIEIAEgAGshBAsgBCAPIAUgCEEBECkLIA4hCgsgCgubAgEBfyMAQYABayINJAAgDSADNgJ8AkAgAkEDSwRAQX8hCQwBCwJAAkACQAJAIAJBAWsOAwADAgELIAZFBEBBuH8hCQwEC0FsIQkgBS0AACICIANLDQMgACAHIAJBAnQiAmooAgAgAiAIaigCABA7IAEgADYCAEEBIQkMAwsgASAJNgIAQQAhCQwCCyAKRQRAQWwhCQwCC0EAIQkgC0UgDEEZSHINAUEIIAR0QQhqIQBBACECA0AgAiAATw0CIAJBQGshAgwAAAsAC0FsIQkgDSANQfwAaiANQfgAaiAFIAYQFSICEAMNACANKAJ4IgMgBEsNACAAIA0gDSgCfCAHIAggAxAYIAEgADYCACACIQkLIA1BgAFqJAAgCQsLACAAIAEgAhALGgsQACAALwAAIAAtAAJBEHRyCy8AAn9BuH8gAUEISQ0AGkFyIAAoAAQiAEF3Sw0AGkG4fyAAQQhqIgAgACABSxsLCwkAIAAgATsAAAsDAAELigYBBX8gACAAKAIAIgVBfnE2AgBBACAAIAVBAXZqQYQgKAIAIgQgAEYbIQECQAJAIAAoAgQiAkUNACACKAIAIgNBAXENACACQQhqIgUgA0EBdkF4aiIDQQggA0EISxtnQR9zQQJ0QYAfaiIDKAIARgRAIAMgAigCDDYCAAsgAigCCCIDBEAgAyACKAIMNgIECyACKAIMIgMEQCADIAIoAgg2AgALIAIgAigCACAAKAIAQX5xajYCAEGEICEAAkACQCABRQ0AIAEgAjYCBCABKAIAIgNBAXENASADQQF2QXhqIgNBCCADQQhLG2dBH3NBAnRBgB9qIgMoAgAgAUEIakYEQCADIAEoAgw2AgALIAEoAggiAwRAIAMgASgCDDYCBAsgASgCDCIDBEAgAyABKAIINgIAQYQgKAIAIQQLIAIgAigCACABKAIAQX5xajYCACABIARGDQAgASABKAIAQQF2akEEaiEACyAAIAI2AgALIAIoAgBBAXZBeGoiAEEIIABBCEsbZ0Efc0ECdEGAH2oiASgCACEAIAEgBTYCACACIAA2AgwgAkEANgIIIABFDQEgACAFNgIADwsCQCABRQ0AIAEoAgAiAkEBcQ0AIAJBAXZBeGoiAkEIIAJBCEsbZ0Efc0ECdEGAH2oiAigCACABQQhqRgRAIAIgASgCDDYCAAsgASgCCCICBEAgAiABKAIMNgIECyABKAIMIgIEQCACIAEoAgg2AgBBhCAoAgAhBAsgACAAKAIAIAEoAgBBfnFqIgI2AgACQCABIARHBEAgASABKAIAQQF2aiAANgIEIAAoAgAhAgwBC0GEICAANgIACyACQQF2QXhqIgFBCCABQQhLG2dBH3NBAnRBgB9qIgIoAgAhASACIABBCGoiAjYCACAAIAE2AgwgAEEANgIIIAFFDQEgASACNgIADwsgBUEBdkF4aiIBQQggAUEISxtnQR9zQQJ0QYAfaiICKAIAIQEgAiAAQQhqIgI2AgAgACABNgIMIABBADYCCCABRQ0AIAEgAjYCAAsLDgAgAARAIABBeGoQJQsLgAIBA38CQCAAQQ9qQXhxQYQgKAIAKAIAQQF2ayICEB1Bf0YNAAJAQYQgKAIAIgAoAgAiAUEBcQ0AIAFBAXZBeGoiAUEIIAFBCEsbZ0Efc0ECdEGAH2oiASgCACAAQQhqRgRAIAEgACgCDDYCAAsgACgCCCIBBEAgASAAKAIMNgIECyAAKAIMIgFFDQAgASAAKAIINgIAC0EBIQEgACAAKAIAIAJBAXRqIgI2AgAgAkEBcQ0AIAJBAXZBeGoiAkEIIAJBCEsbZ0Efc0ECdEGAH2oiAygCACECIAMgAEEIaiIDNgIAIAAgAjYCDCAAQQA2AgggAkUNACACIAM2AgALIAELtwIBA38CQAJAIABBASAAGyICEDgiAA0AAkACQEGEICgCACIARQ0AIAAoAgAiA0EBcQ0AIAAgA0EBcjYCACADQQF2QXhqIgFBCCABQQhLG2dBH3NBAnRBgB9qIgEoAgAgAEEIakYEQCABIAAoAgw2AgALIAAoAggiAQRAIAEgACgCDDYCBAsgACgCDCIBBEAgASAAKAIINgIACyACECchAkEAIQFBhCAoAgAhACACDQEgACAAKAIAQX5xNgIAQQAPCyACQQ9qQXhxIgMQHSICQX9GDQIgAkEHakF4cSIAIAJHBEAgACACaxAdQX9GDQMLAkBBhCAoAgAiAUUEQEGAICAANgIADAELIAAgATYCBAtBhCAgADYCACAAIANBAXRBAXI2AgAMAQsgAEUNAQsgAEEIaiEBCyABC7kDAQJ/IAAgA2ohBQJAIANBB0wEQANAIAAgBU8NAiAAIAItAAA6AAAgAEEBaiEAIAJBAWohAgwAAAsACyAEQQFGBEACQCAAIAJrIgZBB00EQCAAIAItAAA6AAAgACACLQABOgABIAAgAi0AAjoAAiAAIAItAAM6AAMgAEEEaiACIAZBAnQiBkHAHmooAgBqIgIQFyACIAZB4B5qKAIAayECDAELIAAgAhAMCyACQQhqIQIgAEEIaiEACwJAAkACQAJAIAUgAU0EQCAAIANqIQEgBEEBRyAAIAJrQQ9Kcg0BA0AgACACEAwgAkEIaiECIABBCGoiACABSQ0ACwwFCyAAIAFLBEAgACEBDAQLIARBAUcgACACa0EPSnINASAAIQMgAiEEA0AgAyAEEAwgBEEIaiEEIANBCGoiAyABSQ0ACwwCCwNAIAAgAhAHIAJBEGohAiAAQRBqIgAgAUkNAAsMAwsgACEDIAIhBANAIAMgBBAHIARBEGohBCADQRBqIgMgAUkNAAsLIAIgASAAa2ohAgsDQCABIAVPDQEgASACLQAAOgAAIAFBAWohASACQQFqIQIMAAALAAsLQQECfyAAIAAoArjgASIDNgLE4AEgACgCvOABIQQgACABNgK84AEgACABIAJqNgK44AEgACABIAQgA2tqNgLA4AELpgEBAX8gACAAKALs4QEQFjYCyOABIABCADcD+OABIABCADcDuOABIABBwOABakIANwMAIABBqNAAaiIBQYyAgOAANgIAIABBADYCmOIBIABCADcDiOEBIABCAzcDgOEBIABBrNABakHgEikCADcCACAAQbTQAWpB6BIoAgA2AgAgACABNgIMIAAgAEGYIGo2AgggACAAQaAwajYCBCAAIABBEGo2AgALYQEBf0G4fyEDAkAgAUEDSQ0AIAIgABAhIgFBA3YiADYCCCACIAFBAXE2AgQgAiABQQF2QQNxIgM2AgACQCADQX9qIgFBAksNAAJAIAFBAWsOAgEAAgtBbA8LIAAhAwsgAwsMACAAIAEgAkEAEC4LiAQCA38CfiADEBYhBCAAQQBBKBAQIQAgBCACSwRAIAQPCyABRQRAQX8PCwJAAkAgA0EBRg0AIAEoAAAiBkGo6r5pRg0AQXYhAyAGQXBxQdDUtMIBRw0BQQghAyACQQhJDQEgAEEAQSgQECEAIAEoAAQhASAAQQE2AhQgACABrTcDAEEADwsgASACIAMQLyIDIAJLDQAgACADNgIYQXIhAyABIARqIgVBf2otAAAiAkEIcQ0AIAJBIHEiBkUEQEFwIQMgBS0AACIFQacBSw0BIAVBB3GtQgEgBUEDdkEKaq2GIgdCA4h+IAd8IQggBEEBaiEECyACQQZ2IQMgAkECdiEFAkAgAkEDcUF/aiICQQJLBEBBACECDAELAkACQAJAIAJBAWsOAgECAAsgASAEai0AACECIARBAWohBAwCCyABIARqLwAAIQIgBEECaiEEDAELIAEgBGooAAAhAiAEQQRqIQQLIAVBAXEhBQJ+AkACQAJAIANBf2oiA0ECTQRAIANBAWsOAgIDAQtCfyAGRQ0DGiABIARqMQAADAMLIAEgBGovAACtQoACfAwCCyABIARqKAAArQwBCyABIARqKQAACyEHIAAgBTYCICAAIAI2AhwgACAHNwMAQQAhAyAAQQA2AhQgACAHIAggBhsiBzcDCCAAIAdCgIAIIAdCgIAIVBs+AhALIAMLWwEBf0G4fyEDIAIQFiICIAFNBH8gACACakF/ai0AACIAQQNxQQJ0QaAeaigCACACaiAAQQZ2IgFBAnRBsB5qKAIAaiAAQSBxIgBFaiABRSAAQQV2cWoFQbh/CwsdACAAKAKQ4gEQWiAAQQA2AqDiASAAQgA3A5DiAQu1AwEFfyMAQZACayIKJABBuH8hBgJAIAVFDQAgBCwAACIIQf8BcSEHAkAgCEF/TARAIAdBgn9qQQF2IgggBU8NAkFsIQYgB0GBf2oiBUGAAk8NAiAEQQFqIQdBACEGA0AgBiAFTwRAIAUhBiAIIQcMAwUgACAGaiAHIAZBAXZqIgQtAABBBHY6AAAgACAGQQFyaiAELQAAQQ9xOgAAIAZBAmohBgwBCwAACwALIAcgBU8NASAAIARBAWogByAKEFMiBhADDQELIAYhBEEAIQYgAUEAQTQQECEJQQAhBQNAIAQgBkcEQCAAIAZqIggtAAAiAUELSwRAQWwhBgwDBSAJIAFBAnRqIgEgASgCAEEBajYCACAGQQFqIQZBASAILQAAdEEBdSAFaiEFDAILAAsLQWwhBiAFRQ0AIAUQFEEBaiIBQQxLDQAgAyABNgIAQQFBASABdCAFayIDEBQiAXQgA0cNACAAIARqIAFBAWoiADoAACAJIABBAnRqIgAgACgCAEEBajYCACAJKAIEIgBBAkkgAEEBcXINACACIARBAWo2AgAgB0EBaiEGCyAKQZACaiQAIAYLxhEBDH8jAEHwAGsiBSQAQWwhCwJAIANBCkkNACACLwAAIQogAi8AAiEJIAIvAAQhByAFQQhqIAQQDgJAIAMgByAJIApqakEGaiIMSQ0AIAUtAAohCCAFQdgAaiACQQZqIgIgChAGIgsQAw0BIAVBQGsgAiAKaiICIAkQBiILEAMNASAFQShqIAIgCWoiAiAHEAYiCxADDQEgBUEQaiACIAdqIAMgDGsQBiILEAMNASAAIAFqIg9BfWohECAEQQRqIQZBASELIAAgAUEDakECdiIDaiIMIANqIgIgA2oiDiEDIAIhBCAMIQcDQCALIAMgEElxBEAgACAGIAVB2ABqIAgQAkECdGoiCS8BADsAACAFQdgAaiAJLQACEAEgCS0AAyELIAcgBiAFQUBrIAgQAkECdGoiCS8BADsAACAFQUBrIAktAAIQASAJLQADIQogBCAGIAVBKGogCBACQQJ0aiIJLwEAOwAAIAVBKGogCS0AAhABIAktAAMhCSADIAYgBUEQaiAIEAJBAnRqIg0vAQA7AAAgBUEQaiANLQACEAEgDS0AAyENIAAgC2oiCyAGIAVB2ABqIAgQAkECdGoiAC8BADsAACAFQdgAaiAALQACEAEgAC0AAyEAIAcgCmoiCiAGIAVBQGsgCBACQQJ0aiIHLwEAOwAAIAVBQGsgBy0AAhABIActAAMhByAEIAlqIgkgBiAFQShqIAgQAkECdGoiBC8BADsAACAFQShqIAQtAAIQASAELQADIQQgAyANaiIDIAYgBUEQaiAIEAJBAnRqIg0vAQA7AAAgBUEQaiANLQACEAEgACALaiEAIAcgCmohByAEIAlqIQQgAyANLQADaiEDIAVB2ABqEA0gBUFAaxANciAFQShqEA1yIAVBEGoQDXJFIQsMAQsLIAQgDksgByACS3INAEFsIQsgACAMSw0BIAxBfWohCQNAQQAgACAJSSAFQdgAahAEGwRAIAAgBiAFQdgAaiAIEAJBAnRqIgovAQA7AAAgBUHYAGogCi0AAhABIAAgCi0AA2oiACAGIAVB2ABqIAgQAkECdGoiCi8BADsAACAFQdgAaiAKLQACEAEgACAKLQADaiEADAEFIAxBfmohCgNAIAVB2ABqEAQgACAKS3JFBEAgACAGIAVB2ABqIAgQAkECdGoiCS8BADsAACAFQdgAaiAJLQACEAEgACAJLQADaiEADAELCwNAIAAgCk0EQCAAIAYgBUHYAGogCBACQQJ0aiIJLwEAOwAAIAVB2ABqIAktAAIQASAAIAktAANqIQAMAQsLAkAgACAMTw0AIAAgBiAFQdgAaiAIEAIiAEECdGoiDC0AADoAACAMLQADQQFGBEAgBUHYAGogDC0AAhABDAELIAUoAlxBH0sNACAFQdgAaiAGIABBAnRqLQACEAEgBSgCXEEhSQ0AIAVBIDYCXAsgAkF9aiEMA0BBACAHIAxJIAVBQGsQBBsEQCAHIAYgBUFAayAIEAJBAnRqIgAvAQA7AAAgBUFAayAALQACEAEgByAALQADaiIAIAYgBUFAayAIEAJBAnRqIgcvAQA7AAAgBUFAayAHLQACEAEgACAHLQADaiEHDAEFIAJBfmohDANAIAVBQGsQBCAHIAxLckUEQCAHIAYgBUFAayAIEAJBAnRqIgAvAQA7AAAgBUFAayAALQACEAEgByAALQADaiEHDAELCwNAIAcgDE0EQCAHIAYgBUFAayAIEAJBAnRqIgAvAQA7AAAgBUFAayAALQACEAEgByAALQADaiEHDAELCwJAIAcgAk8NACAHIAYgBUFAayAIEAIiAEECdGoiAi0AADoAACACLQADQQFGBEAgBUFAayACLQACEAEMAQsgBSgCREEfSw0AIAVBQGsgBiAAQQJ0ai0AAhABIAUoAkRBIUkNACAFQSA2AkQLIA5BfWohAgNAQQAgBCACSSAFQShqEAQbBEAgBCAGIAVBKGogCBACQQJ0aiIALwEAOwAAIAVBKGogAC0AAhABIAQgAC0AA2oiACAGIAVBKGogCBACQQJ0aiIELwEAOwAAIAVBKGogBC0AAhABIAAgBC0AA2ohBAwBBSAOQX5qIQIDQCAFQShqEAQgBCACS3JFBEAgBCAGIAVBKGogCBACQQJ0aiIALwEAOwAAIAVBKGogAC0AAhABIAQgAC0AA2ohBAwBCwsDQCAEIAJNBEAgBCAGIAVBKGogCBACQQJ0aiIALwEAOwAAIAVBKGogAC0AAhABIAQgAC0AA2ohBAwBCwsCQCAEIA5PDQAgBCAGIAVBKGogCBACIgBBAnRqIgItAAA6AAAgAi0AA0EBRgRAIAVBKGogAi0AAhABDAELIAUoAixBH0sNACAFQShqIAYgAEECdGotAAIQASAFKAIsQSFJDQAgBUEgNgIsCwNAQQAgAyAQSSAFQRBqEAQbBEAgAyAGIAVBEGogCBACQQJ0aiIALwEAOwAAIAVBEGogAC0AAhABIAMgAC0AA2oiACAGIAVBEGogCBACQQJ0aiICLwEAOwAAIAVBEGogAi0AAhABIAAgAi0AA2ohAwwBBSAPQX5qIQIDQCAFQRBqEAQgAyACS3JFBEAgAyAGIAVBEGogCBACQQJ0aiIALwEAOwAAIAVBEGogAC0AAhABIAMgAC0AA2ohAwwBCwsDQCADIAJNBEAgAyAGIAVBEGogCBACQQJ0aiIALwEAOwAAIAVBEGogAC0AAhABIAMgAC0AA2ohAwwBCwsCQCADIA9PDQAgAyAGIAVBEGogCBACIgBBAnRqIgItAAA6AAAgAi0AA0EBRgRAIAVBEGogAi0AAhABDAELIAUoAhRBH0sNACAFQRBqIAYgAEECdGotAAIQASAFKAIUQSFJDQAgBUEgNgIUCyABQWwgBUHYAGoQCiAFQUBrEApxIAVBKGoQCnEgBUEQahAKcRshCwwJCwAACwALAAALAAsAAAsACwAACwALQWwhCwsgBUHwAGokACALC7UEAQ5/IwBBEGsiBiQAIAZBBGogABAOQVQhBQJAIARB3AtJDQAgBi0ABCEHIANB8ARqQQBB7AAQECEIIAdBDEsNACADQdwJaiIJIAggBkEIaiAGQQxqIAEgAhAxIhAQA0UEQCAGKAIMIgQgB0sNASADQdwFaiEPIANBpAVqIREgAEEEaiESIANBqAVqIQEgBCEFA0AgBSICQX9qIQUgCCACQQJ0aigCAEUNAAsgAkEBaiEOQQEhBQNAIAUgDk9FBEAgCCAFQQJ0IgtqKAIAIQwgASALaiAKNgIAIAVBAWohBSAKIAxqIQoMAQsLIAEgCjYCAEEAIQUgBigCCCELA0AgBSALRkUEQCABIAUgCWotAAAiDEECdGoiDSANKAIAIg1BAWo2AgAgDyANQQF0aiINIAw6AAEgDSAFOgAAIAVBAWohBQwBCwtBACEBIANBADYCqAUgBEF/cyAHaiEJQQEhBQNAIAUgDk9FBEAgCCAFQQJ0IgtqKAIAIQwgAyALaiABNgIAIAwgBSAJanQgAWohASAFQQFqIQUMAQsLIAcgBEEBaiIBIAJrIgRrQQFqIQgDQEEBIQUgBCAIT0UEQANAIAUgDk9FBEAgBUECdCIJIAMgBEE0bGpqIAMgCWooAgAgBHY2AgAgBUEBaiEFDAELCyAEQQFqIQQMAQsLIBIgByAPIAogESADIAIgARBkIAZBAToABSAGIAc6AAYgACAGKAIENgIACyAQIQULIAZBEGokACAFC8ENAQt/IwBB8ABrIgUkAEFsIQkCQCADQQpJDQAgAi8AACEKIAIvAAIhDCACLwAEIQYgBUEIaiAEEA4CQCADIAYgCiAMampBBmoiDUkNACAFLQAKIQcgBUHYAGogAkEGaiICIAoQBiIJEAMNASAFQUBrIAIgCmoiAiAMEAYiCRADDQEgBUEoaiACIAxqIgIgBhAGIgkQAw0BIAVBEGogAiAGaiADIA1rEAYiCRADDQEgACABaiIOQX1qIQ8gBEEEaiEGQQEhCSAAIAFBA2pBAnYiAmoiCiACaiIMIAJqIg0hAyAMIQQgCiECA0AgCSADIA9JcQRAIAYgBUHYAGogBxACQQF0aiIILQAAIQsgBUHYAGogCC0AARABIAAgCzoAACAGIAVBQGsgBxACQQF0aiIILQAAIQsgBUFAayAILQABEAEgAiALOgAAIAYgBUEoaiAHEAJBAXRqIggtAAAhCyAFQShqIAgtAAEQASAEIAs6AAAgBiAFQRBqIAcQAkEBdGoiCC0AACELIAVBEGogCC0AARABIAMgCzoAACAGIAVB2ABqIAcQAkEBdGoiCC0AACELIAVB2ABqIAgtAAEQASAAIAs6AAEgBiAFQUBrIAcQAkEBdGoiCC0AACELIAVBQGsgCC0AARABIAIgCzoAASAGIAVBKGogBxACQQF0aiIILQAAIQsgBUEoaiAILQABEAEgBCALOgABIAYgBUEQaiAHEAJBAXRqIggtAAAhCyAFQRBqIAgtAAEQASADIAs6AAEgA0ECaiEDIARBAmohBCACQQJqIQIgAEECaiEAIAkgBUHYAGoQDUVxIAVBQGsQDUVxIAVBKGoQDUVxIAVBEGoQDUVxIQkMAQsLIAQgDUsgAiAMS3INAEFsIQkgACAKSw0BIApBfWohCQNAIAVB2ABqEAQgACAJT3JFBEAgBiAFQdgAaiAHEAJBAXRqIggtAAAhCyAFQdgAaiAILQABEAEgACALOgAAIAYgBUHYAGogBxACQQF0aiIILQAAIQsgBUHYAGogCC0AARABIAAgCzoAASAAQQJqIQAMAQsLA0AgBUHYAGoQBCAAIApPckUEQCAGIAVB2ABqIAcQAkEBdGoiCS0AACEIIAVB2ABqIAktAAEQASAAIAg6AAAgAEEBaiEADAELCwNAIAAgCkkEQCAGIAVB2ABqIAcQAkEBdGoiCS0AACEIIAVB2ABqIAktAAEQASAAIAg6AAAgAEEBaiEADAELCyAMQX1qIQADQCAFQUBrEAQgAiAAT3JFBEAgBiAFQUBrIAcQAkEBdGoiCi0AACEJIAVBQGsgCi0AARABIAIgCToAACAGIAVBQGsgBxACQQF0aiIKLQAAIQkgBUFAayAKLQABEAEgAiAJOgABIAJBAmohAgwBCwsDQCAFQUBrEAQgAiAMT3JFBEAgBiAFQUBrIAcQAkEBdGoiAC0AACEKIAVBQGsgAC0AARABIAIgCjoAACACQQFqIQIMAQsLA0AgAiAMSQRAIAYgBUFAayAHEAJBAXRqIgAtAAAhCiAFQUBrIAAtAAEQASACIAo6AAAgAkEBaiECDAELCyANQX1qIQADQCAFQShqEAQgBCAAT3JFBEAgBiAFQShqIAcQAkEBdGoiAi0AACEKIAVBKGogAi0AARABIAQgCjoAACAGIAVBKGogBxACQQF0aiICLQAAIQogBUEoaiACLQABEAEgBCAKOgABIARBAmohBAwBCwsDQCAFQShqEAQgBCANT3JFBEAgBiAFQShqIAcQAkEBdGoiAC0AACECIAVBKGogAC0AARABIAQgAjoAACAEQQFqIQQMAQsLA0AgBCANSQRAIAYgBUEoaiAHEAJBAXRqIgAtAAAhAiAFQShqIAAtAAEQASAEIAI6AAAgBEEBaiEEDAELCwNAIAVBEGoQBCADIA9PckUEQCAGIAVBEGogBxACQQF0aiIALQAAIQIgBUEQaiAALQABEAEgAyACOgAAIAYgBUEQaiAHEAJBAXRqIgAtAAAhAiAFQRBqIAAtAAEQASADIAI6AAEgA0ECaiEDDAELCwNAIAVBEGoQBCADIA5PckUEQCAGIAVBEGogBxACQQF0aiIALQAAIQIgBUEQaiAALQABEAEgAyACOgAAIANBAWohAwwBCwsDQCADIA5JBEAgBiAFQRBqIAcQAkEBdGoiAC0AACECIAVBEGogAC0AARABIAMgAjoAACADQQFqIQMMAQsLIAFBbCAFQdgAahAKIAVBQGsQCnEgBUEoahAKcSAFQRBqEApxGyEJDAELQWwhCQsgBUHwAGokACAJC8oCAQR/IwBBIGsiBSQAIAUgBBAOIAUtAAIhByAFQQhqIAIgAxAGIgIQA0UEQCAEQQRqIQIgACABaiIDQX1qIQQDQCAFQQhqEAQgACAET3JFBEAgAiAFQQhqIAcQAkEBdGoiBi0AACEIIAVBCGogBi0AARABIAAgCDoAACACIAVBCGogBxACQQF0aiIGLQAAIQggBUEIaiAGLQABEAEgACAIOgABIABBAmohAAwBCwsDQCAFQQhqEAQgACADT3JFBEAgAiAFQQhqIAcQAkEBdGoiBC0AACEGIAVBCGogBC0AARABIAAgBjoAACAAQQFqIQAMAQsLA0AgACADT0UEQCACIAVBCGogBxACQQF0aiIELQAAIQYgBUEIaiAELQABEAEgACAGOgAAIABBAWohAAwBCwsgAUFsIAVBCGoQChshAgsgBUEgaiQAIAILtgMBCX8jAEEQayIGJAAgBkEANgIMIAZBADYCCEFUIQQCQAJAIANBQGsiDCADIAZBCGogBkEMaiABIAIQMSICEAMNACAGQQRqIAAQDiAGKAIMIgcgBi0ABEEBaksNASAAQQRqIQogBkEAOgAFIAYgBzoABiAAIAYoAgQ2AgAgB0EBaiEJQQEhBANAIAQgCUkEQCADIARBAnRqIgEoAgAhACABIAU2AgAgACAEQX9qdCAFaiEFIARBAWohBAwBCwsgB0EBaiEHQQAhBSAGKAIIIQkDQCAFIAlGDQEgAyAFIAxqLQAAIgRBAnRqIgBBASAEdEEBdSILIAAoAgAiAWoiADYCACAHIARrIQhBACEEAkAgC0EDTQRAA0AgBCALRg0CIAogASAEakEBdGoiACAIOgABIAAgBToAACAEQQFqIQQMAAALAAsDQCABIABPDQEgCiABQQF0aiIEIAg6AAEgBCAFOgAAIAQgCDoAAyAEIAU6AAIgBCAIOgAFIAQgBToABCAEIAg6AAcgBCAFOgAGIAFBBGohAQwAAAsACyAFQQFqIQUMAAALAAsgAiEECyAGQRBqJAAgBAutAQECfwJAQYQgKAIAIABHIAAoAgBBAXYiAyABa0F4aiICQXhxQQhHcgR/IAIFIAMQJ0UNASACQQhqC0EQSQ0AIAAgACgCACICQQFxIAAgAWpBD2pBeHEiASAAa0EBdHI2AgAgASAANgIEIAEgASgCAEEBcSAAIAJBAXZqIAFrIgJBAXRyNgIAQYQgIAEgAkH/////B3FqQQRqQYQgKAIAIABGGyABNgIAIAEQJQsLygIBBX8CQAJAAkAgAEEIIABBCEsbZ0EfcyAAaUEBR2oiAUEESSAAIAF2cg0AIAFBAnRB/B5qKAIAIgJFDQADQCACQXhqIgMoAgBBAXZBeGoiBSAATwRAIAIgBUEIIAVBCEsbZ0Efc0ECdEGAH2oiASgCAEYEQCABIAIoAgQ2AgALDAMLIARBHksNASAEQQFqIQQgAigCBCICDQALC0EAIQMgAUEgTw0BA0AgAUECdEGAH2ooAgAiAkUEQCABQR5LIQIgAUEBaiEBIAJFDQEMAwsLIAIgAkF4aiIDKAIAQQF2QXhqIgFBCCABQQhLG2dBH3NBAnRBgB9qIgEoAgBGBEAgASACKAIENgIACwsgAigCACIBBEAgASACKAIENgIECyACKAIEIgEEQCABIAIoAgA2AgALIAMgAygCAEEBcjYCACADIAAQNwsgAwvhCwINfwV+IwBB8ABrIgckACAHIAAoAvDhASIINgJcIAEgAmohDSAIIAAoAoDiAWohDwJAAkAgBUUEQCABIQQMAQsgACgCxOABIRAgACgCwOABIREgACgCvOABIQ4gAEEBNgKM4QFBACEIA0AgCEEDRwRAIAcgCEECdCICaiAAIAJqQazQAWooAgA2AkQgCEEBaiEIDAELC0FsIQwgB0EYaiADIAQQBhADDQEgB0EsaiAHQRhqIAAoAgAQEyAHQTRqIAdBGGogACgCCBATIAdBPGogB0EYaiAAKAIEEBMgDUFgaiESIAEhBEEAIQwDQCAHKAIwIAcoAixBA3RqKQIAIhRCEIinQf8BcSEIIAcoAkAgBygCPEEDdGopAgAiFUIQiKdB/wFxIQsgBygCOCAHKAI0QQN0aikCACIWQiCIpyEJIBVCIIghFyAUQiCIpyECAkAgFkIQiKdB/wFxIgNBAk8EQAJAIAZFIANBGUlyRQRAIAkgB0EYaiADQSAgBygCHGsiCiAKIANLGyIKEAUgAyAKayIDdGohCSAHQRhqEAQaIANFDQEgB0EYaiADEAUgCWohCQwBCyAHQRhqIAMQBSAJaiEJIAdBGGoQBBoLIAcpAkQhGCAHIAk2AkQgByAYNwNIDAELAkAgA0UEQCACBEAgBygCRCEJDAMLIAcoAkghCQwBCwJAAkAgB0EYakEBEAUgCSACRWpqIgNBA0YEQCAHKAJEQX9qIgMgA0VqIQkMAQsgA0ECdCAHaigCRCIJIAlFaiEJIANBAUYNAQsgByAHKAJINgJMCwsgByAHKAJENgJIIAcgCTYCRAsgF6chAyALBEAgB0EYaiALEAUgA2ohAwsgCCALakEUTwRAIAdBGGoQBBoLIAgEQCAHQRhqIAgQBSACaiECCyAHQRhqEAQaIAcgB0EYaiAUQhiIp0H/AXEQCCAUp0H//wNxajYCLCAHIAdBGGogFUIYiKdB/wFxEAggFadB//8DcWo2AjwgB0EYahAEGiAHIAdBGGogFkIYiKdB/wFxEAggFqdB//8DcWo2AjQgByACNgJgIAcoAlwhCiAHIAk2AmggByADNgJkAkACQAJAIAQgAiADaiILaiASSw0AIAIgCmoiEyAPSw0AIA0gBGsgC0Egak8NAQsgByAHKQNoNwMQIAcgBykDYDcDCCAEIA0gB0EIaiAHQdwAaiAPIA4gESAQEB4hCwwBCyACIARqIQggBCAKEAcgAkERTwRAIARBEGohAgNAIAIgCkEQaiIKEAcgAkEQaiICIAhJDQALCyAIIAlrIQIgByATNgJcIAkgCCAOa0sEQCAJIAggEWtLBEBBbCELDAILIBAgAiAOayICaiIKIANqIBBNBEAgCCAKIAMQDxoMAgsgCCAKQQAgAmsQDyEIIAcgAiADaiIDNgJkIAggAmshCCAOIQILIAlBEE8EQCADIAhqIQMDQCAIIAIQByACQRBqIQIgCEEQaiIIIANJDQALDAELAkAgCUEHTQRAIAggAi0AADoAACAIIAItAAE6AAEgCCACLQACOgACIAggAi0AAzoAAyAIQQRqIAIgCUECdCIDQcAeaigCAGoiAhAXIAIgA0HgHmooAgBrIQIgBygCZCEDDAELIAggAhAMCyADQQlJDQAgAyAIaiEDIAhBCGoiCCACQQhqIgJrQQ9MBEADQCAIIAIQDCACQQhqIQIgCEEIaiIIIANJDQAMAgALAAsDQCAIIAIQByACQRBqIQIgCEEQaiIIIANJDQALCyAHQRhqEAQaIAsgDCALEAMiAhshDCAEIAQgC2ogAhshBCAFQX9qIgUNAAsgDBADDQFBbCEMIAdBGGoQBEECSQ0BQQAhCANAIAhBA0cEQCAAIAhBAnQiAmpBrNABaiACIAdqKAJENgIAIAhBAWohCAwBCwsgBygCXCEIC0G6fyEMIA8gCGsiACANIARrSw0AIAQEfyAEIAggABALIABqBUEACyABayEMCyAHQfAAaiQAIAwLkRcCFn8FfiMAQdABayIHJAAgByAAKALw4QEiCDYCvAEgASACaiESIAggACgCgOIBaiETAkACQCAFRQRAIAEhAwwBCyAAKALE4AEhESAAKALA4AEhFSAAKAK84AEhDyAAQQE2AozhAUEAIQgDQCAIQQNHBEAgByAIQQJ0IgJqIAAgAmpBrNABaigCADYCVCAIQQFqIQgMAQsLIAcgETYCZCAHIA82AmAgByABIA9rNgJoQWwhECAHQShqIAMgBBAGEAMNASAFQQQgBUEESBshFyAHQTxqIAdBKGogACgCABATIAdBxABqIAdBKGogACgCCBATIAdBzABqIAdB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IAdB0AFqJAAgEAslACAAQgA3AgAgAEEAOwEIIABBADoACyAAIAE2AgwgACACOgAKC7QFAQN/IwBBMGsiBCQAIABB/wFqIgVBfWohBgJAIAMvAQIEQCAEQRhqIAEgAhAGIgIQAw0BIARBEGogBEEYaiADEBwgBEEIaiAEQRhqIAMQHCAAIQMDQAJAIARBGGoQBCADIAZPckUEQCADIARBEGogBEEYahASOgAAIAMgBEEIaiAEQRhqEBI6AAEgBEEYahAERQ0BIANBAmohAwsgBUF+aiEFAn8DQEG6fyECIAMiASAFSw0FIAEgBEEQaiAEQRhqEBI6AAAgAUEBaiEDIARBGGoQBEEDRgRAQQIhAiAEQQhqDAILIAMgBUsNBSABIARBCGogBEEYahASOgABIAFBAmohA0EDIQIgBEEYahAEQQNHDQALIARBEGoLIQUgAyAFIARBGGoQEjoAACABIAJqIABrIQIMAwsgAyAEQRBqIARBGGoQEjoAAiADIARBCGogBEEYahASOgADIANBBGohAwwAAAsACyAEQRhqIAEgAhAGIgIQAw0AIARBEGogBEEYaiADEBwgBEEIaiAEQRhqIAMQHCAAIQMDQAJAIARBGGoQBCADIAZPckUEQCADIARBEGogBEEYahAROgAAIAMgBEEIaiAEQRhqEBE6AAEgBEEYahAERQ0BIANBAmohAwsgBUF+aiEFAn8DQEG6fyECIAMiASAFSw0EIAEgBEEQaiAEQRhqEBE6AAAgAUEBaiEDIARBGGoQBEEDRgRAQQIhAiAEQQhqDAILIAMgBUsNBCABIARBCGogBEEYahAROgABIAFBAmohA0EDIQIgBEEYahAEQQNHDQALIARBEGoLIQUgAyAFIARBGGoQEToAACABIAJqIABrIQIMAgsgAyAEQRBqIARBGGoQEToAAiADIARBCGogBEEYahAROgADIANBBGohAwwAAAsACyAEQTBqJAAgAgtpAQF/An8CQAJAIAJBB00NACABKAAAQbfIwuF+Rw0AIAAgASgABDYCmOIBQWIgAEEQaiABIAIQPiIDEAMNAhogAEKBgICAEDcDiOEBIAAgASADaiACIANrECoMAQsgACABIAIQKgtBAAsLrQMBBn8jAEGAAWsiAyQAQWIhCAJAIAJBCUkNACAAQZjQAGogAUEIaiIEIAJBeGogAEGY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wOABCwutAgIEfwF+IwBBQGoiBCQAAkACQCACQQhJDQAgASgAAEFwcUHQ1LTCAUcNACABIAIQIiEBIABCADcDCCAAQQA2AgQgACABNgIADAELIARBGGogASACEC0iAxADBEAgACADEBoMAQsgAwRAIABBuH8QGgwBCyACIAQoAjAiA2shAiABIANqIQMDQAJAIAAgAyACIARBCGoQLCIFEAMEfyAFBSACIAVBA2oiBU8NAUG4fwsQGgwCCyAGQQFqIQYgAiAFayECIAMgBWohAyAEKAIMRQ0ACyAEKAI4BEAgAkEDTQRAIABBuH8QGgwCCyADQQRqIQMLIAQoAighAiAEKQMYIQcgAEEANgIEIAAgAyABazYCACAAIAIgBmytIAcgB0J/URs3AwgLIARBQGskAAslAQF/IwBBEGsiAiQAIAIgACABEFEgAigCACEAIAJBEGokACAAC30BBH8jAEGQBGsiBCQAIARB/wE2AggCQCAEQRBqIARBCGogBEEMaiABIAIQFSIGEAMEQCAGIQUMAQtBVCEFIAQoAgwiB0EGSw0AIAMgBEEQaiAEKAIIIAcQQSIFEAMNACAAIAEgBmogAiAGayADEDwhBQsgBEGQBGokACAFC4cBAgJ/An5BABAWIQMCQANAIAEgA08EQAJAIAAoAABBcHFB0NS0wgFGBEAgACABECIiAhADRQ0BQn4PCyAAIAEQVSIEQn1WDQMgBCAFfCIFIARUIQJCfiEEIAINAyAAIAEQUiICEAMNAwsgASACayEBIAAgAmohAAwBCwtCfiAFIAEbIQQLIAQLPwIBfwF+IwBBMGsiAiQAAn5CfiACQQhqIAAgARAtDQAaQgAgAigCHEEBRg0AGiACKQMICyEDIAJBMGokACADC40BAQJ/IwBBMGsiASQAAkAgAEUNACAAKAKI4gENACABIABB/OEBaigCADYCKCABIAApAvThATcDICAAEDAgACgCqOIBIQIgASABKAIoNgIYIAEgASkDIDcDECACIAFBEGoQGyAAQQA2AqjiASABIAEoAig2AgggASABKQMgNwMAIAAgARAbCyABQTBqJAALKgECfyMAQRBrIgAkACAAQQA2AgggAEIANwMAIAAQWCEBIABBEGokACABC4cBAQN/IwBBEGsiAiQAAkAgACgCAEUgACgCBEVzDQAgAiAAKAIINgIIIAIgACkCADcDAAJ/IAIoAgAiAQRAIAIoAghBqOMJIAERBQAMAQtBqOMJECgLIgFFDQAgASAAKQIANwL04QEgAUH84QFqIAAoAgg2AgAgARBZIAEhAwsgAkEQaiQAIAMLywEBAn8jAEEgayIBJAAgAEGBgIDAADYCtOIBIABBADYCiOIBIABBADYC7OEBIABCADcDkOIBIABBADYCpOMJIABBADYC3OIBIABCADcCzOIBIABBADYCvOIBIABBADYCxOABIABCADcCnOIBIABBpOIBakIANwIAIABBrOIBakEANgIAIAFCADcCECABQgA3AhggASABKQMYNwMIIAEgASkDEDcDACABKAIIQQh2QQFxIQIgAEEANgLg4gEgACACNgKM4gEgAUEgaiQAC3YBA38jAEEwayIBJAAgAARAIAEgAEHE0AFqIgIoAgA2AiggASAAKQK80AE3AyAgACgCACEDIAEgAigCADYCGCABIAApArzQATcDECADIAFBEGoQGyABIAEoAig2AgggASABKQMgNwMAIAAgARAbCyABQTBqJAALzAEBAX8gACABKAK00AE2ApjiASAAIAEoAgQiAjYCwOABIAAgAjYCvOABIAAgAiABKAIIaiICNgK44AEgACACNgLE4AEgASgCuNABBEAgAEKBgICAEDcDiOEBIAAgAUGk0ABqNgIMIAAgAUGUIGo2AgggACABQZwwajYCBCAAIAFBDGo2AgAgAEGs0AFqIAFBqNABaigCADYCACAAQbDQAWogAUGs0AFqKAIANgIAIABBtNABaiABQbDQAWooAgA2AgAPCyAAQgA3A4jhAQs7ACACRQRAQbp/DwsgBEUEQEFsDwsgAiAEEGAEQCAAIAEgAiADIAQgBRBhDwsgACABIAIgAyAEIAUQZQtGAQF/IwBBEGsiBSQAIAVBCGogBBAOAn8gBS0ACQRAIAAgASACIAMgBBAyDAELIAAgASACIAMgBBA0CyEAIAVBEGokACAACzQAIAAgAyAEIAUQNiIFEAMEQCAFDwsgBSAESQR/IAEgAiADIAVqIAQgBWsgABA1BUG4fwsLRgEBfyMAQRBrIgUkACAFQQhqIAQQDgJ/IAUtAAkEQCAAIAEgAiADIAQQYgwBCyAAIAEgAiADIAQQNQshACAFQRBqJAAgAAtZAQF/QQ8hAiABIABJBEAgAUEE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",te={315:"Artist",258:"BitsPerSample",265:"CellLength",264:"CellWidth",320:"ColorMap",259:"Compression",33432:"Copyright",306:"DateTime",338:"ExtraSamples",266:"FillOrder",289:"FreeByteCounts",288:"FreeOffsets",291:"GrayResponseCurve",290:"GrayResponseUnit",316:"HostComputer",270:"ImageDescription",257:"ImageLength",256:"ImageWidth",271:"Make",281:"MaxSampleValue",280:"MinSampleValue",272:"Model",254:"NewSubfileType",274:"Orientation",262:"PhotometricInterpretation",284:"PlanarConfiguration",296:"ResolutionUnit",278:"RowsPerStrip",277:"SamplesPerPixel",305:"Software",279:"StripByteCounts",273:"StripOffsets",255:"SubfileType",263:"Threshholding",282:"XResolution",283:"YResolution",326:"BadFaxLines",327:"CleanFaxData",343:"ClipPath",328:"ConsecutiveBadFaxLines",433:"Decode",434:"DefaultImageColor",269:"DocumentName",336:"DotRange",321:"HalftoneHints",346:"Indexed",347:"JPEGTables",285:"PageName",297:"PageNumber",317:"Predictor",319:"PrimaryChromaticities",532:"ReferenceBlackWhite",339:"SampleFormat",340:"SMinSampleValue",341:"SMaxSampleValue",559:"StripRowCounts",330:"SubIFDs",292:"T4Options",293:"T6Options",325:"TileByteCounts",323:"TileLength",324:"TileOffsets",322:"TileWidth",301:"TransferFunction",318:"WhitePoint",344:"XClipPathUnits",286:"XPosition",529:"YCbCrCoefficients",531:"YCbCrPositioning",530:"YCbCrSubSampling",345:"YClipPathUnits",287:"YPosition",37378:"ApertureValue",40961:"ColorSpace",36868:"DateTimeDigitized",36867:"DateTimeOriginal",34665:"Exif IFD",36864:"ExifVersion",33434:"ExposureTime",41728:"FileSource",37385:"Flash",40960:"FlashpixVersion",33437:"FNumber",42016:"ImageUniqueID",37384:"LightSource",37500:"MakerNote",37377:"ShutterSpeedValue",37510:"UserComment",33723:"IPTC",34675:"ICC Profile",700:"XMP",42112:"GDAL_METADATA",42113:"GDAL_NODATA",34377:"Photoshop",33550:"ModelPixelScale",33922:"ModelTiepoint",34264:"ModelTransformation",34735:"GeoKeyDirectory",34736:"GeoDoubleParams",34737:"GeoAsciiParams",50674:"LercParameters"},ie={};for(var re in te)te.hasOwnProperty(re)&&(ie[te[re]]=parseInt(re,10));ie.BitsPerSample,ie.ExtraSamples,ie.SampleFormat,ie.StripByteCounts,ie.StripOffsets,ie.StripRowCounts,ie.TileByteCounts,ie.TileOffsets,ie.SubIFDs;var Ie={1:"BYTE",2:"ASCII",3:"SHORT",4:"LONG",5:"RATIONAL",6:"SBYTE",7:"UNDEFINED",8:"SSHORT",9:"SLONG",10:"SRATIONAL",11:"FLOAT",12:"DOUBLE",13:"IFD",16:"LONG8",17:"SLONG8",18:"IFD8"},ge={};for(var ne in Ie)Ie.hasOwnProperty(ne)&&(ge[Ie[ne]]=parseInt(ne,10));var ae=1,oe=0,Be=1,Ce=2,Qe={1024:"GTModelTypeGeoKey",1025:"GTRasterTypeGeoKey",1026:"GTCitationGeoKey",2048:"GeographicTypeGeoKey",2049:"GeogCitationGeoKey",2050:"GeogGeodeticDatumGeoKey",2051:"GeogPrimeMeridianGeoKey",2052:"GeogLinearUnitsGeoKey",2053:"GeogLinearUnitSizeGeoKey",2054:"GeogAngularUnitsGeoKey",2055:"GeogAngularUnitSizeGeoKey",2056:"GeogEllipsoidGeoKey",2057:"GeogSemiMajorAxisGeoKey",2058:"GeogSemiMinorAxisGeoKey",2059:"GeogInvFlatteningGeoKey",2060:"GeogAzimuthUnitsGeoKey",2061:"GeogPrimeMeridianLongGeoKey",2062:"GeogTOWGS84GeoKey",3072:"ProjectedCSTypeGeoKey",3073:"PCSCitationGeoKey",3074:"ProjectionGeoKey",3075:"ProjCoordTransGeoKey",3076:"ProjLinearUnitsGeoKey",3077:"ProjLinearUnitSizeGeoKey",3078:"ProjStdParallel1GeoKey",3079:"ProjStdParallel2GeoKey",3080:"ProjNatOriginLongGeoKey",3081:"ProjNatOriginLatGeoKey",3082:"ProjFalseEastingGeoKey",3083:"ProjFalseNorthingGeoKey",3084:"ProjFalseOriginLongGeoKey",3085:"ProjFalseOriginLatGeoKey",3086:"ProjFalseOriginEastingGeoKey",3087:"ProjFalseOriginNorthingGeoKey",3088:"ProjCenterLongGeoKey",3089:"ProjCenterLatGeoKey",3090:"ProjCenterEastingGeoKey",3091:"ProjCenterNorthingGeoKey",3092:"ProjScaleAtNatOriginGeoKey",3093:"ProjScaleAtCenterGeoKey",3094:"ProjAzimuthAngleGeoKey",3095:"ProjStraightVertPoleLongGeoKey",3096:"ProjRectifiedGridAngleGeoKey",4096:"VerticalCSTypeGeoKey",4097:"VerticalCitationGeoKey",4098:"VerticalDatumGeoKey",4099:"VerticalUnitsGeoKey"},Ee={};for(var se in Qe)Qe.hasOwnProperty(se)&&(Ee[Qe[se]]=parseInt(se,10));function fe(A){var e=function(){if("undefined"==typeof Reflect||!Reflect.construct)return!1;if(Reflect.construct.sham)return!1;if("function"==typeof Proxy)return!0;try{return Boolean.prototype.valueOf.call(Reflect.construct(Boolean,[],(function(){}))),!0}catch(A){return!1}}();return function(){var t,i=c(A);if(e){var r=c(this).constructor;t=Reflect.construct(i,arguments,r)}else t=i.apply(this,arguments);return f(this,t)}}var ce=new Ae,he=function(A){s(t,w);var e=fe(t);function t(A){var i;return B(this,t),(i=e.call(this)).planarConfiguration=void 0!==A.PlanarConfiguration?A.PlanarConfiguration:1,i.samplesPerPixel=void 0!==A.SamplesPerPixel?A.SamplesPerPixel:1,i.addCompression=A.LercParameters[ae],i}return Q(t,[{key:"decodeBlock",value:function(A){switch(this.addCompression){case oe:break;case Be:A=YA(new Uint8Array(A)).buffer;break;case Ce:A=ce.decode(new Uint8Array(A)).buffer;break;default:throw new Error("Unsupported LERC additional compression method identifier: ".concat(this.addCompression))}return zA.decode(A,{returnPixelInterleavedDims:1===this.planarConfiguration}).pixels[0].buffer}}]),t}(),le=Object.freeze({__proto__:null,zstd:ce,default:he});function ue(A){var e=function(){if("undefined"==typeof Reflect||!Reflect.construct)return!1;if(Reflect.construct.sham)return!1;if("function"==typeof Proxy)return!0;try{return Boolean.prototype.valueOf.call(Reflect.construct(Boolean,[],(function(){}))),!0}catch(A){return!1}}();return function(){var t,i=c(A);if(e){var r=c(this).constructor;t=Reflect.construct(i,arguments,r)}else t=i.apply(this,arguments);return f(this,t)}}var we=function(A){s(I,w);var t,i=ue(I);function I(){var A;if(B(this,I),A=i.call(this),"undefined"==typeof createImageBitmap)throw new Error("Cannot decode WebImage as `createImageBitmap` is not available");if("undefined"==typeof document&&"undefined"==typeof OffscreenCanvas)throw new Error("Cannot decode WebImage as neither `document` nor `OffscreenCanvas` is not available");return A}return Q(I,[{key:"decode",value:(t=e(r.mark((function A(e,t){var i,I,g,n;return r.wrap((function(A){for(;;)switch(A.prev=A.next){case 0:return i=new Blob([t]),A.next=3,createImageBitmap(i);case 3:return I=A.sent,"undefined"!=typeof document?((g=document.createElement("canvas")).width=I.width,g.height=I.height):g=new OffscreenCanvas(I.width,I.height),(n=g.getContext("2d")).drawImage(I,0,0),A.abrupt("return",n.getImageData(0,0,I.width,I.height).data.buffer);case 8:case"end":return A.stop()}}),A)}))),function(A,e){return t.apply(this,arguments)})}]),I}(),de=Object.freeze({__proto__:null,default:we});';
+  return new e(typeof Buffer < "u" ? "data:application/javascript;base64," + Buffer.from(A2, "binary").toString("base64") : URL.createObjectURL(new Blob([A2], { type: "application/javascript" })));
+}
+var e;
+var init_decoder_DJlmx386 = __esm(() => {
+  e = Worker;
+});
+
+// node_modules/geotiff-tilesource/dist/main-8v7k2MJ1.js
+var exports_main_8v7k2MJ1 = {};
+__export(exports_main_8v7k2MJ1, {
+  g: () => We2,
+  e: () => qr,
+  a: () => is,
+  L: () => ss
+});
+function E2(i) {
+  return (e2, ...t2) => gt2(i, e2, t2);
+}
+function H2(i, e2) {
+  return E2(Ue2(i, e2).get);
+}
+function Rt2(i) {
+  if (i[ee2] === Le2 && Q3.next === Ke2)
+    return i;
+  const e2 = pe2(kt2);
+  return Pt2(He2, e2, It2(i)), e2;
+}
+function vt(i) {
+  const e2 = i >> 10;
+  return Ot2[0] = xe2[Xe2[e2] + (i & 1023)] + Y3[e2], Gt2[0];
+}
+function $e2(i, e2, ...t2) {
+  return vt(Et2(i, e2, ...Rt2(t2)));
+}
+function We2(i) {
+  return i && i.__esModule && Object.prototype.hasOwnProperty.call(i, "default") ? i.default : i;
+}
+function Ze(i, e2, t2) {
+  const r = t2 && t2.debug || false;
+  r && console.log("[xml-utils] getting " + e2 + " in " + i);
+  const s3 = typeof i == "object" ? i.outer : i, o = s3.slice(0, s3.indexOf(">") + 1), n = ['"', "'"];
+  for (let a = 0;a < n.length; a++) {
+    const l3 = n[a], c = e2 + "\\=" + l3 + "([^" + l3 + "]*)" + l3;
+    r && console.log("[xml-utils] pattern:", c);
+    const d3 = new RegExp(c).exec(o);
+    if (r && console.log("[xml-utils] match:", d3), d3)
+      return d3[1];
+  }
+}
+function Je2(i, e2, t2) {
+  const s3 = new RegExp(e2).exec(i.slice(t2));
+  return s3 ? t2 + s3.index : -1;
+}
+function Qe2(i, e2, t2) {
+  const s3 = new RegExp(e2).exec(i.slice(t2));
+  return s3 ? t2 + s3.index + s3[0].length - 1 : -1;
+}
+function et2(i, e2) {
+  const t2 = new RegExp(e2, "g"), r = i.match(t2);
+  return r ? r.length : 0;
+}
+function tt2(i, e2, t2) {
+  const r = t2 && t2.debug || false, s3 = !(t2 && typeof t2.nested === false), o = t2 && t2.startIndex || 0;
+  r && console.log("[xml-utils] starting findTagByName with", e2, " and ", t2);
+  const n = jt2(i, `<${e2}[ 
+>/]`, o);
+  if (r && console.log("[xml-utils] start:", n), n === -1)
+    return;
+  const a = i.slice(n + e2.length);
+  let l3 = le3(a, "^[^<]*[ /]>", 0);
+  const c = l3 !== -1 && a[l3 - 1] === "/";
+  if (r && console.log("[xml-utils] selfClosing:", c), c === false)
+    if (s3) {
+      let g2 = 0, f2 = 1, y = 0;
+      for (;(l3 = le3(a, "[ /]" + e2 + ">", g2)) !== -1; ) {
+        const p2 = a.substring(g2, l3 + 1);
+        if (f2 += Be2(p2, "<" + e2 + `[ 
+	>]`), y += Be2(p2, "</" + e2 + ">"), y >= f2)
+          break;
+        g2 = l3;
+      }
+    } else
+      l3 = le3(a, "[ /]" + e2 + ">", 0);
+  const h = n + e2.length + l3 + 1;
+  if (r && console.log("[xml-utils] end:", h), h === -1)
+    return;
+  const d3 = i.slice(n, h);
+  let u;
+  return c ? u = null : u = d3.slice(d3.indexOf(">") + 1, d3.lastIndexOf("<")), { inner: u, outer: d3, start: n, end: h };
+}
+function rt2(i, e2, t2) {
+  const r = [], s3 = t2 && t2.debug || false, o = t2 && typeof t2.nested == "boolean" ? t2.nested : true;
+  let n = t2 && t2.startIndex || 0, a;
+  for (;a = Kt2(i, e2, { debug: s3, startIndex: n }); )
+    o ? n = a.start + 1 + e2.length : n = a.end, r.push(a);
+  return s3 && console.log("findTagsByName found", r.length, "tags"), r;
+}
+function $t2(i, e2) {
+  const { width: t2, height: r } = i, s3 = new Uint8Array(t2 * r * 3);
+  let o;
+  for (let n = 0, a = 0;n < i.length; ++n, a += 3)
+    o = 256 - i[n] / e2 * 256, s3[a] = o, s3[a + 1] = o, s3[a + 2] = o;
+  return s3;
+}
+function Wt2(i, e2) {
+  const { width: t2, height: r } = i, s3 = new Uint8Array(t2 * r * 3);
+  let o;
+  for (let n = 0, a = 0;n < i.length; ++n, a += 3)
+    o = i[n] / e2 * 256, s3[a] = o, s3[a + 1] = o, s3[a + 2] = o;
+  return s3;
+}
+function Zt2(i, e2) {
+  const { width: t2, height: r } = i, s3 = new Uint8Array(t2 * r * 3), o = e2.length / 3, n = e2.length / 3 * 2;
+  for (let a = 0, l3 = 0;a < i.length; ++a, l3 += 3) {
+    const c = i[a];
+    s3[l3] = e2[c] / 65536 * 256, s3[l3 + 1] = e2[c + o] / 65536 * 256, s3[l3 + 2] = e2[c + n] / 65536 * 256;
+  }
+  return s3;
+}
+function Jt2(i) {
+  const { width: e2, height: t2 } = i, r = new Uint8Array(e2 * t2 * 3);
+  for (let s3 = 0, o = 0;s3 < i.length; s3 += 4, o += 3) {
+    const n = i[s3], a = i[s3 + 1], l3 = i[s3 + 2], c = i[s3 + 3];
+    r[o] = 255 * ((255 - n) / 256) * ((255 - c) / 256), r[o + 1] = 255 * ((255 - a) / 256) * ((255 - c) / 256), r[o + 2] = 255 * ((255 - l3) / 256) * ((255 - c) / 256);
+  }
+  return r;
+}
+function Qt2(i) {
+  const { width: e2, height: t2 } = i, r = new Uint8ClampedArray(e2 * t2 * 3);
+  for (let s3 = 0, o = 0;s3 < i.length; s3 += 3, o += 3) {
+    const n = i[s3], a = i[s3 + 1], l3 = i[s3 + 2];
+    r[o] = n + 1.402 * (l3 - 128), r[o + 1] = n - 0.34414 * (a - 128) - 0.71414 * (l3 - 128), r[o + 2] = n + 1.772 * (a - 128);
+  }
+  return r;
+}
+function sr2(i) {
+  const { width: e2, height: t2 } = i, r = new Uint8Array(e2 * t2 * 3);
+  for (let s3 = 0, o = 0;s3 < i.length; s3 += 3, o += 3) {
+    const n = i[s3 + 0], a = i[s3 + 1] << 24 >> 24, l3 = i[s3 + 2] << 24 >> 24;
+    let c = (n + 16) / 116, h = a / 500 + c, d3 = c - l3 / 200, u, g2, f2;
+    h = er2 * (h * h * h > 0.008856 ? h * h * h : (h - 16 / 116) / 7.787), c = tr2 * (c * c * c > 0.008856 ? c * c * c : (c - 16 / 116) / 7.787), d3 = rr2 * (d3 * d3 * d3 > 0.008856 ? d3 * d3 * d3 : (d3 - 16 / 116) / 7.787), u = h * 3.2406 + c * -1.5372 + d3 * -0.4986, g2 = h * -0.9689 + c * 1.8758 + d3 * 0.0415, f2 = h * 0.0557 + c * -0.204 + d3 * 1.057, u = u > 0.0031308 ? 1.055 * u ** (1 / 2.4) - 0.055 : 12.92 * u, g2 = g2 > 0.0031308 ? 1.055 * g2 ** (1 / 2.4) - 0.055 : 12.92 * g2, f2 = f2 > 0.0031308 ? 1.055 * f2 ** (1 / 2.4) - 0.055 : 12.92 * f2, r[o] = Math.max(0, Math.min(1, u)) * 255, r[o + 1] = Math.max(0, Math.min(1, g2)) * 255, r[o + 2] = Math.max(0, Math.min(1, f2)) * 255;
+  }
+  return r;
+}
+function j2(i, e2) {
+  Array.isArray(i) || (i = [i]), i.forEach((t2) => st2.set(t2, e2));
+}
+async function it2(i) {
+  const e2 = st2.get(i.Compression);
+  if (!e2)
+    throw new Error(`Unknown compression method identifier: ${i.Compression}`);
+  const t2 = await e2();
+  return new t2(i);
+}
+function ne3(i, e2, t2, r = 1) {
+  return new (Object.getPrototypeOf(i)).constructor(e2 * t2 * r);
+}
+function ir2(i, e2, t2, r, s3) {
+  const o = e2 / r, n = t2 / s3;
+  return i.map((a) => {
+    const l3 = ne3(a, r, s3);
+    for (let c = 0;c < s3; ++c) {
+      const h = Math.min(Math.round(n * c), t2 - 1);
+      for (let d3 = 0;d3 < r; ++d3) {
+        const u = Math.min(Math.round(o * d3), e2 - 1), g2 = a[h * e2 + u];
+        l3[c * r + d3] = g2;
+      }
+    }
+    return l3;
+  });
+}
+function V2(i, e2, t2) {
+  return (1 - t2) * i + t2 * e2;
+}
+function nr2(i, e2, t2, r, s3) {
+  const o = e2 / r, n = t2 / s3;
+  return i.map((a) => {
+    const l3 = ne3(a, r, s3);
+    for (let c = 0;c < s3; ++c) {
+      const h = n * c, d3 = Math.floor(h), u = Math.min(Math.ceil(h), t2 - 1);
+      for (let g2 = 0;g2 < r; ++g2) {
+        const f2 = o * g2, y = f2 % 1, p2 = Math.floor(f2), w = Math.min(Math.ceil(f2), e2 - 1), m2 = a[d3 * e2 + p2], b = a[d3 * e2 + w], T2 = a[u * e2 + p2], S2 = a[u * e2 + w], D2 = V2(V2(m2, b, y), V2(T2, S2, y), h % 1);
+        l3[c * r + g2] = D2;
+      }
+    }
+    return l3;
+  });
+}
+function or2(i, e2, t2, r, s3, o = "nearest") {
+  switch (o.toLowerCase()) {
+    case "nearest":
+      return ir2(i, e2, t2, r, s3);
+    case "bilinear":
+    case "linear":
+      return nr2(i, e2, t2, r, s3);
+    default:
+      throw new Error(`Unsupported resampling method: '${o}'`);
+  }
+}
+function ar2(i, e2, t2, r, s3, o) {
+  const n = e2 / r, a = t2 / s3, l3 = ne3(i, r, s3, o);
+  for (let c = 0;c < s3; ++c) {
+    const h = Math.min(Math.round(a * c), t2 - 1);
+    for (let d3 = 0;d3 < r; ++d3) {
+      const u = Math.min(Math.round(n * d3), e2 - 1);
+      for (let g2 = 0;g2 < o; ++g2) {
+        const f2 = i[h * e2 * o + u * o + g2];
+        l3[c * r * o + d3 * o + g2] = f2;
+      }
+    }
+  }
+  return l3;
+}
+function lr2(i, e2, t2, r, s3, o) {
+  const n = e2 / r, a = t2 / s3, l3 = ne3(i, r, s3, o);
+  for (let c = 0;c < s3; ++c) {
+    const h = a * c, d3 = Math.floor(h), u = Math.min(Math.ceil(h), t2 - 1);
+    for (let g2 = 0;g2 < r; ++g2) {
+      const f2 = n * g2, y = f2 % 1, p2 = Math.floor(f2), w = Math.min(Math.ceil(f2), e2 - 1);
+      for (let m2 = 0;m2 < o; ++m2) {
+        const b = i[d3 * e2 * o + p2 * o + m2], T2 = i[d3 * e2 * o + w * o + m2], S2 = i[u * e2 * o + p2 * o + m2], D2 = i[u * e2 * o + w * o + m2], M2 = V2(V2(b, T2, y), V2(S2, D2, y), h % 1);
+        l3[c * r * o + g2 * o + m2] = M2;
+      }
+    }
+  }
+  return l3;
+}
+function cr2(i, e2, t2, r, s3, o, n = "nearest") {
+  switch (n.toLowerCase()) {
+    case "nearest":
+      return ar2(i, e2, t2, r, s3, o);
+    case "bilinear":
+    case "linear":
+      return lr2(i, e2, t2, r, s3, o);
+    default:
+      throw new Error(`Unsupported resampling method: '${n}'`);
+  }
+}
+function hr2(i, e2, t2) {
+  let r = 0;
+  for (let s3 = e2;s3 < t2; ++s3)
+    r += i[s3];
+  return r;
+}
+function ue2(i, e2, t2) {
+  switch (i) {
+    case 1:
+      if (e2 <= 8)
+        return new Uint8Array(t2);
+      if (e2 <= 16)
+        return new Uint16Array(t2);
+      if (e2 <= 32)
+        return new Uint32Array(t2);
+      break;
+    case 2:
+      if (e2 === 8)
+        return new Int8Array(t2);
+      if (e2 === 16)
+        return new Int16Array(t2);
+      if (e2 === 32)
+        return new Int32Array(t2);
+      break;
+    case 3:
+      switch (e2) {
+        case 16:
+        case 32:
+          return new Float32Array(t2);
+        case 64:
+          return new Float64Array(t2);
+      }
+      break;
+  }
+  throw Error("Unsupported data format/bitsPerSample");
+}
+function fr2(i, e2) {
+  return (i === 1 || i === 2) && e2 <= 32 && e2 % 8 === 0 ? false : !(i === 3 && (e2 === 16 || e2 === 32 || e2 === 64));
+}
+function ur2(i, e2, t2, r, s3, o, n) {
+  const a = new DataView(i), l3 = t2 === 2 ? n * o : n * o * r, c = t2 === 2 ? 1 : r, h = ue2(e2, s3, l3), d3 = parseInt("1".repeat(s3), 2);
+  if (e2 === 1) {
+    let u;
+    t2 === 1 ? u = r * s3 : u = s3;
+    let g2 = o * u;
+    g2 & 7 && (g2 = g2 + 7 & -8);
+    for (let f2 = 0;f2 < n; ++f2) {
+      const y = f2 * g2;
+      for (let p2 = 0;p2 < o; ++p2) {
+        const w = y + p2 * c * s3;
+        for (let m2 = 0;m2 < c; ++m2) {
+          const b = w + m2 * s3, T2 = (f2 * o + p2) * c + m2, S2 = Math.floor(b / 8), D2 = b % 8;
+          if (D2 + s3 <= 8)
+            h[T2] = a.getUint8(S2) >> 8 - s3 - D2 & d3;
+          else if (D2 + s3 <= 16)
+            h[T2] = a.getUint16(S2) >> 16 - s3 - D2 & d3;
+          else if (D2 + s3 <= 24) {
+            const M2 = a.getUint16(S2) << 8 | a.getUint8(S2 + 2);
+            h[T2] = M2 >> 24 - s3 - D2 & d3;
+          } else
+            h[T2] = a.getUint32(S2) >> 32 - s3 - D2 & d3;
+        }
+      }
+    }
+  }
+  return h.buffer;
+}
+
+class dr2 {
+  constructor(e2, t2, r, s3, o, n) {
+    this.fileDirectory = e2, this.geoKeys = t2, this.dataView = r, this.littleEndian = s3, this.tiles = o ? {} : null, this.isTiled = !e2.StripOffsets;
+    const a = e2.PlanarConfiguration;
+    if (this.planarConfiguration = typeof a > "u" ? 1 : a, this.planarConfiguration !== 1 && this.planarConfiguration !== 2)
+      throw new Error("Invalid planar configuration.");
+    this.source = n;
+  }
+  getFileDirectory() {
+    return this.fileDirectory;
+  }
+  getGeoKeys() {
+    return this.geoKeys;
+  }
+  getWidth() {
+    return this.fileDirectory.ImageWidth;
+  }
+  getHeight() {
+    return this.fileDirectory.ImageLength;
+  }
+  getSamplesPerPixel() {
+    return typeof this.fileDirectory.SamplesPerPixel < "u" ? this.fileDirectory.SamplesPerPixel : 1;
+  }
+  getTileWidth() {
+    return this.isTiled ? this.fileDirectory.TileWidth : this.getWidth();
+  }
+  getTileHeight() {
+    return this.isTiled ? this.fileDirectory.TileLength : typeof this.fileDirectory.RowsPerStrip < "u" ? Math.min(this.fileDirectory.RowsPerStrip, this.getHeight()) : this.getHeight();
+  }
+  getBlockWidth() {
+    return this.getTileWidth();
+  }
+  getBlockHeight(e2) {
+    return this.isTiled || (e2 + 1) * this.getTileHeight() <= this.getHeight() ? this.getTileHeight() : this.getHeight() - e2 * this.getTileHeight();
+  }
+  getBytesPerPixel() {
+    let e2 = 0;
+    for (let t2 = 0;t2 < this.fileDirectory.BitsPerSample.length; ++t2)
+      e2 += this.getSampleByteSize(t2);
+    return e2;
+  }
+  getSampleByteSize(e2) {
+    if (e2 >= this.fileDirectory.BitsPerSample.length)
+      throw new RangeError(`Sample index ${e2} is out of range.`);
+    return Math.ceil(this.fileDirectory.BitsPerSample[e2] / 8);
+  }
+  getReaderForSample(e2) {
+    const t2 = this.fileDirectory.SampleFormat ? this.fileDirectory.SampleFormat[e2] : 1, r = this.fileDirectory.BitsPerSample[e2];
+    switch (t2) {
+      case 1:
+        if (r <= 8)
+          return DataView.prototype.getUint8;
+        if (r <= 16)
+          return DataView.prototype.getUint16;
+        if (r <= 32)
+          return DataView.prototype.getUint32;
+        break;
+      case 2:
+        if (r <= 8)
+          return DataView.prototype.getInt8;
+        if (r <= 16)
+          return DataView.prototype.getInt16;
+        if (r <= 32)
+          return DataView.prototype.getInt32;
+        break;
+      case 3:
+        switch (r) {
+          case 16:
+            return function(s3, o) {
+              return $e2(this, s3, o);
+            };
+          case 32:
+            return DataView.prototype.getFloat32;
+          case 64:
+            return DataView.prototype.getFloat64;
+        }
+        break;
+    }
+    throw Error("Unsupported data format/bitsPerSample");
+  }
+  getSampleFormat(e2 = 0) {
+    return this.fileDirectory.SampleFormat ? this.fileDirectory.SampleFormat[e2] : 1;
+  }
+  getBitsPerSample(e2 = 0) {
+    return this.fileDirectory.BitsPerSample[e2];
+  }
+  getArrayForSample(e2, t2) {
+    const r = this.getSampleFormat(e2), s3 = this.getBitsPerSample(e2);
+    return ue2(r, s3, t2);
+  }
+  async getTileOrStrip(e2, t2, r, s3, o) {
+    const n = Math.ceil(this.getWidth() / this.getTileWidth()), a = Math.ceil(this.getHeight() / this.getTileHeight());
+    let l3;
+    const { tiles: c } = this;
+    this.planarConfiguration === 1 ? l3 = t2 * n + e2 : this.planarConfiguration === 2 && (l3 = r * n * a + t2 * n + e2);
+    let h, d3;
+    this.isTiled ? (h = this.fileDirectory.TileOffsets[l3], d3 = this.fileDirectory.TileByteCounts[l3]) : (h = this.fileDirectory.StripOffsets[l3], d3 = this.fileDirectory.StripByteCounts[l3]);
+    const u = (await this.source.fetch([{ offset: h, length: d3 }], o))[0];
+    let g2;
+    return c === null || !c[l3] ? (g2 = (async () => {
+      let f2 = await s3.decode(this.fileDirectory, u);
+      const y = this.getSampleFormat(), p2 = this.getBitsPerSample();
+      return fr2(y, p2) && (f2 = ur2(f2, y, this.planarConfiguration, this.getSamplesPerPixel(), p2, this.getTileWidth(), this.getBlockHeight(t2))), f2;
+    })(), c !== null && (c[l3] = g2)) : g2 = c[l3], { x: e2, y: t2, sample: r, data: await g2 };
+  }
+  async _readRaster(e2, t2, r, s3, o, n, a, l3, c) {
+    const h = this.getTileWidth(), d3 = this.getTileHeight(), u = this.getWidth(), g2 = this.getHeight(), f2 = Math.max(Math.floor(e2[0] / h), 0), y = Math.min(Math.ceil(e2[2] / h), Math.ceil(u / h)), p2 = Math.max(Math.floor(e2[1] / d3), 0), w = Math.min(Math.ceil(e2[3] / d3), Math.ceil(g2 / d3)), m2 = e2[2] - e2[0];
+    let b = this.getBytesPerPixel();
+    const T2 = [], S2 = [];
+    for (let I2 = 0;I2 < t2.length; ++I2)
+      this.planarConfiguration === 1 ? T2.push(hr2(this.fileDirectory.BitsPerSample, 0, t2[I2]) / 8) : T2.push(0), S2.push(this.getReaderForSample(t2[I2]));
+    const D2 = [], { littleEndian: M2 } = this;
+    for (let I2 = p2;I2 < w; ++I2)
+      for (let C2 = f2;C2 < y; ++C2) {
+        let O3;
+        this.planarConfiguration === 1 && (O3 = this.getTileOrStrip(C2, I2, 0, o, c));
+        for (let P2 = 0;P2 < t2.length; ++P2) {
+          const F2 = P2, G2 = t2[P2];
+          this.planarConfiguration === 2 && (b = this.getSampleByteSize(G2), O3 = this.getTileOrStrip(C2, I2, G2, o, c));
+          const L2 = O3.then((B3) => {
+            const N3 = B3.data, te2 = new DataView(N3), X2 = this.getBlockHeight(B3.y), $3 = B3.y * d3, re2 = B3.x * h, ot2 = $3 + X2, at2 = (B3.x + 1) * h, lt2 = S2[F2], ct2 = Math.min(X2, X2 - (ot2 - e2[3]), g2 - $3), ht2 = Math.min(h, h - (at2 - e2[2]), u - re2);
+            for (let W3 = Math.max(0, e2[1] - $3);W3 < ct2; ++W3)
+              for (let Z3 = Math.max(0, e2[0] - re2);Z3 < ht2; ++Z3) {
+                const ft2 = (W3 * h + Z3) * b, Re2 = lt2.call(te2, ft2 + T2[F2], M2);
+                let se2;
+                s3 ? (se2 = (W3 + $3 - e2[1]) * m2 * t2.length + (Z3 + re2 - e2[0]) * t2.length + F2, r[se2] = Re2) : (se2 = (W3 + $3 - e2[1]) * m2 + Z3 + re2 - e2[0], r[F2][se2] = Re2);
+              }
+          });
+          D2.push(L2);
+        }
+      }
+    if (await Promise.all(D2), n && e2[2] - e2[0] !== n || a && e2[3] - e2[1] !== a) {
+      let I2;
+      return s3 ? I2 = cr2(r, e2[2] - e2[0], e2[3] - e2[1], n, a, t2.length, l3) : I2 = or2(r, e2[2] - e2[0], e2[3] - e2[1], n, a, l3), I2.width = n, I2.height = a, I2;
+    }
+    return r.width = n || e2[2] - e2[0], r.height = a || e2[3] - e2[1], r;
+  }
+  async readRasters({
+    window: e2,
+    samples: t2 = [],
+    interleave: r,
+    pool: s3 = null,
+    width: o,
+    height: n,
+    resampleMethod: a,
+    fillValue: l3,
+    signal: c
+  } = {}) {
+    const h = e2 || [0, 0, this.getWidth(), this.getHeight()];
+    if (h[0] > h[2] || h[1] > h[3])
+      throw new Error("Invalid subsets");
+    const d3 = h[2] - h[0], u = h[3] - h[1], g2 = d3 * u, f2 = this.getSamplesPerPixel();
+    if (!t2 || !t2.length)
+      for (let m2 = 0;m2 < f2; ++m2)
+        t2.push(m2);
+    else
+      for (let m2 = 0;m2 < t2.length; ++m2)
+        if (t2[m2] >= f2)
+          return Promise.reject(new RangeError(`Invalid sample index '${t2[m2]}'.`));
+    let y;
+    if (r) {
+      const m2 = this.fileDirectory.SampleFormat ? Math.max.apply(null, this.fileDirectory.SampleFormat) : 1, b = Math.max.apply(null, this.fileDirectory.BitsPerSample);
+      y = ue2(m2, b, g2 * t2.length), l3 && y.fill(l3);
+    } else {
+      y = [];
+      for (let m2 = 0;m2 < t2.length; ++m2) {
+        const b = this.getArrayForSample(t2[m2], g2);
+        Array.isArray(l3) && m2 < l3.length ? b.fill(l3[m2]) : l3 && !Array.isArray(l3) && b.fill(l3), y.push(b);
+      }
+    }
+    const p2 = s3 || await it2(this.fileDirectory);
+    return await this._readRaster(h, t2, y, r, p2, o, n, a, c);
+  }
+  async readRGB({
+    window: e2,
+    interleave: t2 = true,
+    pool: r = null,
+    width: s3,
+    height: o,
+    resampleMethod: n,
+    enableAlpha: a = false,
+    signal: l3
+  } = {}) {
+    const c = e2 || [0, 0, this.getWidth(), this.getHeight()];
+    if (c[0] > c[2] || c[1] > c[3])
+      throw new Error("Invalid subsets");
+    const h = this.fileDirectory.PhotometricInterpretation;
+    if (h === A2.RGB) {
+      let w = [0, 1, 2];
+      if (this.fileDirectory.ExtraSamples !== Yt2.Unspecified && a) {
+        w = [];
+        for (let m2 = 0;m2 < this.fileDirectory.BitsPerSample.length; m2 += 1)
+          w.push(m2);
+      }
+      return this.readRasters({
+        window: e2,
+        interleave: t2,
+        samples: w,
+        pool: r,
+        width: s3,
+        height: o,
+        resampleMethod: n,
+        signal: l3
+      });
+    }
+    let d3;
+    switch (h) {
+      case A2.WhiteIsZero:
+      case A2.BlackIsZero:
+      case A2.Palette:
+        d3 = [0];
+        break;
+      case A2.CMYK:
+        d3 = [0, 1, 2, 3];
+        break;
+      case A2.YCbCr:
+      case A2.CIELab:
+        d3 = [0, 1, 2];
+        break;
+      default:
+        throw new Error("Invalid or unsupported photometric interpretation.");
+    }
+    const u = {
+      window: c,
+      interleave: true,
+      samples: d3,
+      pool: r,
+      width: s3,
+      height: o,
+      resampleMethod: n,
+      signal: l3
+    }, { fileDirectory: g2 } = this, f2 = await this.readRasters(u), y = 2 ** this.fileDirectory.BitsPerSample[0];
+    let p2;
+    switch (h) {
+      case A2.WhiteIsZero:
+        p2 = $t2(f2, y);
+        break;
+      case A2.BlackIsZero:
+        p2 = Wt2(f2, y);
+        break;
+      case A2.Palette:
+        p2 = Zt2(f2, g2.ColorMap);
+        break;
+      case A2.CMYK:
+        p2 = Jt2(f2);
+        break;
+      case A2.YCbCr:
+        p2 = Qt2(f2);
+        break;
+      case A2.CIELab:
+        p2 = sr2(f2);
+        break;
+      default:
+        throw new Error("Unsupported photometric interpretation.");
+    }
+    if (!t2) {
+      const w = new Uint8Array(p2.length / 3), m2 = new Uint8Array(p2.length / 3), b = new Uint8Array(p2.length / 3);
+      for (let T2 = 0, S2 = 0;T2 < p2.length; T2 += 3, ++S2)
+        w[S2] = p2[T2], m2[S2] = p2[T2 + 1], b[S2] = p2[T2 + 2];
+      p2 = [w, m2, b];
+    }
+    return p2.width = f2.width, p2.height = f2.height, p2;
+  }
+  getTiePoints() {
+    if (!this.fileDirectory.ModelTiepoint)
+      return [];
+    const e2 = [];
+    for (let t2 = 0;t2 < this.fileDirectory.ModelTiepoint.length; t2 += 6)
+      e2.push({
+        i: this.fileDirectory.ModelTiepoint[t2],
+        j: this.fileDirectory.ModelTiepoint[t2 + 1],
+        k: this.fileDirectory.ModelTiepoint[t2 + 2],
+        x: this.fileDirectory.ModelTiepoint[t2 + 3],
+        y: this.fileDirectory.ModelTiepoint[t2 + 4],
+        z: this.fileDirectory.ModelTiepoint[t2 + 5]
+      });
+    return e2;
+  }
+  getGDALMetadata(e2 = null) {
+    const t2 = {};
+    if (!this.fileDirectory.GDAL_METADATA)
+      return null;
+    const r = this.fileDirectory.GDAL_METADATA;
+    let s3 = qt2(r, "Item");
+    e2 === null ? s3 = s3.filter((o) => ae2(o, "sample") === undefined) : s3 = s3.filter((o) => Number(ae2(o, "sample")) === e2);
+    for (let o = 0;o < s3.length; ++o) {
+      const n = s3[o];
+      t2[ae2(n, "name")] = n.inner;
+    }
+    return t2;
+  }
+  getGDALNoData() {
+    if (!this.fileDirectory.GDAL_NODATA)
+      return null;
+    const e2 = this.fileDirectory.GDAL_NODATA;
+    return Number(e2.substring(0, e2.length - 1));
+  }
+  getOrigin() {
+    const e2 = this.fileDirectory.ModelTiepoint, t2 = this.fileDirectory.ModelTransformation;
+    if (e2 && e2.length === 6)
+      return [
+        e2[3],
+        e2[4],
+        e2[5]
+      ];
+    if (t2)
+      return [
+        t2[3],
+        t2[7],
+        t2[11]
+      ];
+    throw new Error("The image does not have an affine transformation.");
+  }
+  getResolution(e2 = null) {
+    const t2 = this.fileDirectory.ModelPixelScale, r = this.fileDirectory.ModelTransformation;
+    if (t2)
+      return [
+        t2[0],
+        -t2[1],
+        t2[2]
+      ];
+    if (r)
+      return r[1] === 0 && r[4] === 0 ? [
+        r[0],
+        -r[5],
+        r[10]
+      ] : [
+        Math.sqrt(r[0] * r[0] + r[4] * r[4]),
+        -Math.sqrt(r[1] * r[1] + r[5] * r[5]),
+        r[10]
+      ];
+    if (e2) {
+      const [s3, o, n] = e2.getResolution();
+      return [
+        s3 * e2.getWidth() / this.getWidth(),
+        o * e2.getHeight() / this.getHeight(),
+        n * e2.getWidth() / this.getWidth()
+      ];
+    }
+    throw new Error("The image does not have an affine transformation.");
+  }
+  pixelIsArea() {
+    return this.geoKeys.GTRasterTypeGeoKey === 1;
+  }
+  getBoundingBox(e2 = false) {
+    const t2 = this.getHeight(), r = this.getWidth();
+    if (this.fileDirectory.ModelTransformation && !e2) {
+      const [s3, o, n, a, l3, c, h, d3] = this.fileDirectory.ModelTransformation, g2 = [
+        [0, 0],
+        [0, t2],
+        [r, 0],
+        [r, t2]
+      ].map(([p2, w]) => [
+        a + s3 * p2 + o * w,
+        d3 + l3 * p2 + c * w
+      ]), f2 = g2.map((p2) => p2[0]), y = g2.map((p2) => p2[1]);
+      return [
+        Math.min(...f2),
+        Math.min(...y),
+        Math.max(...f2),
+        Math.max(...y)
+      ];
+    } else {
+      const s3 = this.getOrigin(), o = this.getResolution(), n = s3[0], a = s3[1], l3 = n + o[0] * r, c = a + o[1] * t2;
+      return [
+        Math.min(n, l3),
+        Math.min(a, c),
+        Math.max(n, l3),
+        Math.max(a, c)
+      ];
+    }
+  }
+}
+
+class gr {
+  constructor(e2) {
+    this._dataView = new DataView(e2);
+  }
+  get buffer() {
+    return this._dataView.buffer;
+  }
+  getUint64(e2, t2) {
+    const r = this.getUint32(e2, t2), s3 = this.getUint32(e2 + 4, t2);
+    let o;
+    if (t2) {
+      if (o = r + 2 ** 32 * s3, !Number.isSafeInteger(o))
+        throw new Error(`${o} exceeds MAX_SAFE_INTEGER. Precision may be lost. Please report if you get this message to https://github.com/geotiffjs/geotiff.js/issues`);
+      return o;
+    }
+    if (o = 2 ** 32 * r + s3, !Number.isSafeInteger(o))
+      throw new Error(`${o} exceeds MAX_SAFE_INTEGER. Precision may be lost. Please report if you get this message to https://github.com/geotiffjs/geotiff.js/issues`);
+    return o;
+  }
+  getInt64(e2, t2) {
+    let r = 0;
+    const s3 = (this._dataView.getUint8(e2 + (t2 ? 7 : 0)) & 128) > 0;
+    let o = true;
+    for (let n = 0;n < 8; n++) {
+      let a = this._dataView.getUint8(e2 + (t2 ? n : 7 - n));
+      s3 && (o ? a !== 0 && (a = ~(a - 1) & 255, o = false) : a = ~a & 255), r += a * 256 ** n;
+    }
+    return s3 && (r = -r), r;
+  }
+  getUint8(e2, t2) {
+    return this._dataView.getUint8(e2, t2);
+  }
+  getInt8(e2, t2) {
+    return this._dataView.getInt8(e2, t2);
+  }
+  getUint16(e2, t2) {
+    return this._dataView.getUint16(e2, t2);
+  }
+  getInt16(e2, t2) {
+    return this._dataView.getInt16(e2, t2);
+  }
+  getUint32(e2, t2) {
+    return this._dataView.getUint32(e2, t2);
+  }
+  getInt32(e2, t2) {
+    return this._dataView.getInt32(e2, t2);
+  }
+  getFloat16(e2, t2) {
+    return $e2(this._dataView, e2, t2);
+  }
+  getFloat32(e2, t2) {
+    return this._dataView.getFloat32(e2, t2);
+  }
+  getFloat64(e2, t2) {
+    return this._dataView.getFloat64(e2, t2);
+  }
+}
+
+class yr {
+  constructor(e2, t2, r, s3) {
+    this._dataView = new DataView(e2), this._sliceOffset = t2, this._littleEndian = r, this._bigTiff = s3;
+  }
+  get sliceOffset() {
+    return this._sliceOffset;
+  }
+  get sliceTop() {
+    return this._sliceOffset + this.buffer.byteLength;
+  }
+  get littleEndian() {
+    return this._littleEndian;
+  }
+  get bigTiff() {
+    return this._bigTiff;
+  }
+  get buffer() {
+    return this._dataView.buffer;
+  }
+  covers(e2, t2) {
+    return this.sliceOffset <= e2 && this.sliceTop >= e2 + t2;
+  }
+  readUint8(e2) {
+    return this._dataView.getUint8(e2 - this._sliceOffset, this._littleEndian);
+  }
+  readInt8(e2) {
+    return this._dataView.getInt8(e2 - this._sliceOffset, this._littleEndian);
+  }
+  readUint16(e2) {
+    return this._dataView.getUint16(e2 - this._sliceOffset, this._littleEndian);
+  }
+  readInt16(e2) {
+    return this._dataView.getInt16(e2 - this._sliceOffset, this._littleEndian);
+  }
+  readUint32(e2) {
+    return this._dataView.getUint32(e2 - this._sliceOffset, this._littleEndian);
+  }
+  readInt32(e2) {
+    return this._dataView.getInt32(e2 - this._sliceOffset, this._littleEndian);
+  }
+  readFloat32(e2) {
+    return this._dataView.getFloat32(e2 - this._sliceOffset, this._littleEndian);
+  }
+  readFloat64(e2) {
+    return this._dataView.getFloat64(e2 - this._sliceOffset, this._littleEndian);
+  }
+  readUint64(e2) {
+    const t2 = this.readUint32(e2), r = this.readUint32(e2 + 4);
+    let s3;
+    if (this._littleEndian) {
+      if (s3 = t2 + 2 ** 32 * r, !Number.isSafeInteger(s3))
+        throw new Error(`${s3} exceeds MAX_SAFE_INTEGER. Precision may be lost. Please report if you get this message to https://github.com/geotiffjs/geotiff.js/issues`);
+      return s3;
+    }
+    if (s3 = 2 ** 32 * t2 + r, !Number.isSafeInteger(s3))
+      throw new Error(`${s3} exceeds MAX_SAFE_INTEGER. Precision may be lost. Please report if you get this message to https://github.com/geotiffjs/geotiff.js/issues`);
+    return s3;
+  }
+  readInt64(e2) {
+    let t2 = 0;
+    const r = (this._dataView.getUint8(e2 + (this._littleEndian ? 7 : 0)) & 128) > 0;
+    let s3 = true;
+    for (let o = 0;o < 8; o++) {
+      let n = this._dataView.getUint8(e2 + (this._littleEndian ? o : 7 - o));
+      r && (s3 ? n !== 0 && (n = ~(n - 1) & 255, s3 = false) : n = ~n & 255), t2 += n * 256 ** o;
+    }
+    return r && (t2 = -t2), t2;
+  }
+  readOffset(e2) {
+    return this._bigTiff ? this.readUint64(e2) : this.readUint32(e2);
+  }
+}
+
+class mr {
+  constructor(e2 = pr, t2) {
+    this.workers = null, this._awaitingDecoder = null, this.size = e2, this.messageId = 0, e2 && (this._awaitingDecoder = t2 ? Promise.resolve(t2) : new Promise((r) => {
+      Promise.resolve().then(() => (init_decoder_DJlmx386(), exports_decoder_DJlmx386)).then((s3) => {
+        r(s3.create);
+      });
+    }), this._awaitingDecoder.then((r) => {
+      this._awaitingDecoder = null, this.workers = [];
+      for (let s3 = 0;s3 < e2; s3++)
+        this.workers.push({ worker: r(), idle: true });
+    }));
+  }
+  async decode(e2, t2) {
+    return this._awaitingDecoder && await this._awaitingDecoder, this.size === 0 ? it2(e2).then((r) => r.decode(e2, t2)) : new Promise((r) => {
+      const s3 = this.workers.find((a) => a.idle) || this.workers[Math.floor(Math.random() * this.size)];
+      s3.idle = false;
+      const o = this.messageId++, n = (a) => {
+        a.data.id === o && (s3.idle = true, r(a.data.decoded), s3.worker.removeEventListener("message", n));
+      };
+      s3.worker.addEventListener("message", n), s3.worker.postMessage({ fileDirectory: e2, buffer: t2, id: o }, [t2]);
+    });
+  }
+  destroy() {
+    this.workers && (this.workers.forEach((e2) => {
+      e2.worker.terminate();
+    }), this.workers = null);
+  }
+}
+function nt2(i) {
+  if (typeof Object.fromEntries < "u")
+    return Object.fromEntries(i);
+  const e2 = {};
+  for (const [t2, r] of i)
+    e2[t2.toLowerCase()] = r;
+  return e2;
+}
+function wr2(i) {
+  const e2 = i.split(`\r
+`).map((t2) => {
+    const r = t2.split(":").map((s3) => s3.trim());
+    return r[0] = r[0].toLowerCase(), r;
+  });
+  return nt2(e2);
+}
+function xr(i) {
+  const [e2, ...t2] = i.split(";").map((s3) => s3.trim()), r = t2.map((s3) => s3.split("="));
+  return { type: e2, params: nt2(r) };
+}
+function de2(i) {
+  let e2, t2, r;
+  return i && ([, e2, t2, r] = i.match(/bytes (\d+)-(\d+)\/(\d+)/), e2 = parseInt(e2, 10), t2 = parseInt(t2, 10), r = parseInt(r, 10)), { start: e2, end: t2, total: r };
+}
+function br2(i, e2) {
+  let t2 = null;
+  const r = new TextDecoder("ascii"), s3 = [], o = `--${e2}`, n = `${o}--`;
+  for (let a = 0;a < 10; ++a)
+    r.decode(new Uint8Array(i, a, o.length)) === o && (t2 = a);
+  if (t2 === null)
+    throw new Error("Could not find initial boundary");
+  for (;t2 < i.byteLength; ) {
+    const a = r.decode(new Uint8Array(i, t2, Math.min(o.length + 1024, i.byteLength - t2)));
+    if (a.length === 0 || a.startsWith(n))
+      break;
+    if (!a.startsWith(o))
+      throw new Error("Part does not start with boundary");
+    const l3 = a.substr(o.length + 2);
+    if (l3.length === 0)
+      break;
+    const c = l3.indexOf(Ge2), h = wr2(l3.substr(0, c)), { start: d3, end: u, total: g2 } = de2(h["content-range"]), f2 = t2 + o.length + c + Ge2.length, y = parseInt(u, 10) + 1 - parseInt(d3, 10);
+    s3.push({
+      headers: h,
+      data: i.slice(f2, f2 + y),
+      offset: d3,
+      length: y,
+      fileSize: g2
+    }), t2 = f2 + y + 4;
+  }
+  return s3;
+}
+
+class Ce2 {
+  async fetch(e2, t2 = undefined) {
+    return Promise.all(e2.map((r) => this.fetchSlice(r, t2)));
+  }
+  async fetchSlice(e2) {
+    throw new Error(`fetching of slice ${e2} not possible, not implemented`);
+  }
+  get fileSize() {
+    return null;
+  }
+  async close() {}
+}
+async function Tr(i) {
+  return new Promise((e2) => setTimeout(e2, i));
+}
+function Sr(i, e2) {
+  const t2 = Array.isArray(i) ? i : Array.from(i), r = Array.isArray(e2) ? e2 : Array.from(e2);
+  return t2.map((s3, o) => [s3, r[o]]);
+}
+
+class Cr {
+  constructor(e2, t2, r = null) {
+    this.offset = e2, this.length = t2, this.data = r;
+  }
+  get top() {
+    return this.offset + this.length;
+  }
+}
+
+class Oe2 {
+  constructor(e2, t2, r) {
+    this.offset = e2, this.length = t2, this.blockIds = r;
+  }
+}
+
+class Fe2 {
+  get ok() {
+    return this.status >= 200 && this.status <= 299;
+  }
+  get status() {
+    throw new Error("not implemented");
+  }
+  getHeader(e2) {
+    throw new Error("not implemented");
+  }
+  async getData() {
+    throw new Error("not implemented");
+  }
+}
+
+class Ee2 {
+  constructor(e2) {
+    this.url = e2;
+  }
+  async request({ headers: e2, signal: t2 } = {}) {
+    throw new Error("request is not implemented");
+  }
+}
+function ke2(i, { blockSize: e2, cacheSize: t2 }) {
+  return e2 === null ? i : new Fr(i, { blockSize: e2, cacheSize: t2 });
+}
+function Gr(i, { headers: e2 = {}, credentials: t2, maxRanges: r = 0, allowFullFile: s3 = false, ...o } = {}) {
+  const n = new Pr(i, t2), a = new Pe2(n, e2, r, s3);
+  return ke2(a, o);
+}
+function Or(i, { headers: e2 = {}, maxRanges: t2 = 0, allowFullFile: r = false, ...s3 } = {}) {
+  const o = new Rr(i), n = new Pe2(o, e2, t2, r);
+  return ke2(n, s3);
+}
+function vr(i, { headers: e2 = {}, maxRanges: t2 = 0, allowFullFile: r = false, ...s3 } = {}) {
+  const o = new Br(i), n = new Pe2(o, e2, t2, r);
+  return ke2(n, s3);
+}
+function _r2(i, { forceXHR: e2 = false, ...t2 } = {}) {
+  return typeof fetch == "function" && !e2 ? Gr(i, t2) : typeof XMLHttpRequest < "u" ? Or(i, t2) : vr(i, t2);
+}
+function Lr(i) {
+  return new Ur(i);
+}
+function ge2(i) {
+  switch (i) {
+    case x3.BYTE:
+    case x3.ASCII:
+    case x3.SBYTE:
+    case x3.UNDEFINED:
+      return 1;
+    case x3.SHORT:
+    case x3.SSHORT:
+      return 2;
+    case x3.LONG:
+    case x3.SLONG:
+    case x3.FLOAT:
+    case x3.IFD:
+      return 4;
+    case x3.RATIONAL:
+    case x3.SRATIONAL:
+    case x3.DOUBLE:
+    case x3.LONG8:
+    case x3.SLONG8:
+    case x3.IFD8:
+      return 8;
+    default:
+      throw new RangeError(`Invalid field type: ${i}`);
+  }
+}
+function Nr(i) {
+  const e2 = i.GeoKeyDirectory;
+  if (!e2)
+    return null;
+  const t2 = {};
+  for (let r = 4;r <= e2[3] * 4; r += 4) {
+    const s3 = Xt2[e2[r]], o = e2[r + 1] ? J[e2[r + 1]] : null, n = e2[r + 2], a = e2[r + 3];
+    let l3 = null;
+    if (!o)
+      l3 = a;
+    else {
+      if (l3 = i[o], typeof l3 > "u" || l3 === null)
+        throw new Error(`Could not get value of geoKey '${s3}'.`);
+      typeof l3 == "string" ? l3 = l3.substring(a, a + n - 1) : l3.subarray && (l3 = l3.subarray(a, a + n), n === 1 && (l3 = l3[0]));
+    }
+    t2[s3] = l3;
+  }
+  return t2;
+}
+function K3(i, e2, t2, r) {
+  let s3 = null, o = null;
+  const n = ge2(e2);
+  switch (e2) {
+    case x3.BYTE:
+    case x3.ASCII:
+    case x3.UNDEFINED:
+      s3 = new Uint8Array(t2), o = i.readUint8;
+      break;
+    case x3.SBYTE:
+      s3 = new Int8Array(t2), o = i.readInt8;
+      break;
+    case x3.SHORT:
+      s3 = new Uint16Array(t2), o = i.readUint16;
+      break;
+    case x3.SSHORT:
+      s3 = new Int16Array(t2), o = i.readInt16;
+      break;
+    case x3.LONG:
+    case x3.IFD:
+      s3 = new Uint32Array(t2), o = i.readUint32;
+      break;
+    case x3.SLONG:
+      s3 = new Int32Array(t2), o = i.readInt32;
+      break;
+    case x3.LONG8:
+    case x3.IFD8:
+      s3 = new Array(t2), o = i.readUint64;
+      break;
+    case x3.SLONG8:
+      s3 = new Array(t2), o = i.readInt64;
+      break;
+    case x3.RATIONAL:
+      s3 = new Uint32Array(t2 * 2), o = i.readUint32;
+      break;
+    case x3.SRATIONAL:
+      s3 = new Int32Array(t2 * 2), o = i.readInt32;
+      break;
+    case x3.FLOAT:
+      s3 = new Float32Array(t2), o = i.readFloat32;
+      break;
+    case x3.DOUBLE:
+      s3 = new Float64Array(t2), o = i.readFloat64;
+      break;
+    default:
+      throw new RangeError(`Invalid field type: ${e2}`);
+  }
+  if (e2 === x3.RATIONAL || e2 === x3.SRATIONAL)
+    for (let a = 0;a < t2; a += 2)
+      s3[a] = o.call(i, r + a * n), s3[a + 1] = o.call(i, r + (a * n + 4));
+  else
+    for (let a = 0;a < t2; ++a)
+      s3[a] = o.call(i, r + a * n);
+  return e2 === x3.ASCII ? new TextDecoder("utf-8").decode(s3) : s3;
+}
+
+class jr {
+  constructor(e2, t2, r) {
+    this.fileDirectory = e2, this.geoKeyDirectory = t2, this.nextIFDByteOffset = r;
+  }
+}
+
+class zr {
+  async readRasters(e2 = {}) {
+    const { window: t2, width: r, height: s3 } = e2;
+    let { resX: o, resY: n, bbox: a } = e2;
+    const l3 = await this.getImage();
+    let c = l3;
+    const h = await this.getImageCount(), d3 = l3.getBoundingBox();
+    if (t2 && a)
+      throw new Error('Both "bbox" and "window" passed.');
+    if (r || s3) {
+      if (t2) {
+        const [f2, y] = l3.getOrigin(), [p2, w] = l3.getResolution();
+        a = [
+          f2 + t2[0] * p2,
+          y + t2[1] * w,
+          f2 + t2[2] * p2,
+          y + t2[3] * w
+        ];
+      }
+      const g2 = a || d3;
+      if (r) {
+        if (o)
+          throw new Error("Both width and resX passed");
+        o = (g2[2] - g2[0]) / r;
+      }
+      if (s3) {
+        if (n)
+          throw new Error("Both width and resY passed");
+        n = (g2[3] - g2[1]) / s3;
+      }
+    }
+    if (o || n) {
+      const g2 = [];
+      for (let f2 = 0;f2 < h; ++f2) {
+        const y = await this.getImage(f2), { SubfileType: p2, NewSubfileType: w } = y.fileDirectory;
+        (f2 === 0 || p2 === 2 || w & 1) && g2.push(y);
+      }
+      g2.sort((f2, y) => f2.getWidth() - y.getWidth());
+      for (let f2 = 0;f2 < g2.length; ++f2) {
+        const y = g2[f2], p2 = (d3[2] - d3[0]) / y.getWidth(), w = (d3[3] - d3[1]) / y.getHeight();
+        if (c = y, o && o > p2 || n && n > w)
+          break;
+      }
+    }
+    let u = t2;
+    if (a) {
+      const [g2, f2] = l3.getOrigin(), [y, p2] = c.getResolution(l3);
+      u = [
+        Math.round((a[0] - g2) / y),
+        Math.round((a[1] - f2) / p2),
+        Math.round((a[2] - g2) / y),
+        Math.round((a[3] - f2) / p2)
+      ], u = [
+        Math.min(u[0], u[2]),
+        Math.min(u[1], u[3]),
+        Math.max(u[0], u[2]),
+        Math.max(u[1], u[3])
+      ];
+    }
+    return c.readRasters({ ...e2, window: u });
+  }
+}
+async function ve2(i, e2 = {}, t2) {
+  return oe2.fromSource(_r2(i, e2), t2);
+}
+async function _e2(i, e2) {
+  return oe2.fromSource(Lr(i), e2);
+}
+
+class fe3 {
+  constructor() {
+    this.promise = new Promise((e2, t2) => {
+      this.reject = t2, this.resolve = e2;
+    });
+  }
+}
+
+class z {
+  static RGBAfromYCbCr(e2) {
+    const t2 = new Uint8ClampedArray(e2.length * 4 / 3);
+    let r, s3;
+    for (r = 0, s3 = 0;r < e2.length; r += 3, s3 += 4) {
+      const o = e2[r], n = e2[r + 1], a = e2[r + 2];
+      t2[s3] = o + 1.402 * (a - 128), t2[s3 + 1] = o - 0.34414 * (n - 128) - 0.71414 * (a - 128), t2[s3 + 2] = o + 1.772 * (n - 128), t2[s3 + 3] = 255;
+    }
+    return t2;
+  }
+  static RGBAfromRGB(e2) {
+    const t2 = new Uint8ClampedArray(e2.length * 4 / 3);
+    let r, s3;
+    for (r = 0, s3 = 0;r < e2.length; r += 3, s3 += 4)
+      t2[s3] = e2[r], t2[s3 + 1] = e2[r + 1], t2[s3 + 2] = e2[r + 2], t2[s3 + 3] = 255;
+    return t2;
+  }
+  static RGBAfromWhiteIsZero(e2, t2) {
+    const r = new Uint8ClampedArray(e2.length * 4);
+    let s3;
+    for (let o = 0, n = 0;o < e2.length; ++o, n += 4)
+      s3 = 256 - e2[o] / t2 * 256, r[n] = s3, r[n + 1] = s3, r[n + 2] = s3, r[n + 3] = 255;
+    return r;
+  }
+  static RGBAfromBlackIsZero(e2, t2) {
+    const r = new Uint8ClampedArray(e2.length * 4);
+    let s3;
+    for (let o = 0, n = 0;o < e2.length; ++o, n += 4)
+      s3 = e2[o] / t2 * 256, r[n] = s3, r[n + 1] = s3, r[n + 2] = s3, r[n + 3] = 255;
+    return r;
+  }
+  static RGBAfromPalette(e2, t2) {
+    const r = new Uint8ClampedArray(e2.length * 4), s3 = t2.length / 3, o = t2.length / 3 * 2;
+    for (let n = 0, a = 0;n < e2.length; ++n, a += 4) {
+      const l3 = e2[n];
+      r[a] = t2[l3] / 65536 * 256, r[a + 1] = t2[l3 + s3] / 65536 * 256, r[a + 2] = t2[l3 + o] / 65536 * 256, r[a + 3] = 255;
+    }
+    return r;
+  }
+  static RGBAfromCMYK(e2) {
+    const t2 = new Uint8ClampedArray(e2.length);
+    for (let r = 0, s3 = 0;r < e2.length; r += 4, s3 += 4) {
+      const o = e2[r], n = e2[r + 1], a = e2[r + 2], l3 = e2[r + 3];
+      t2[s3] = 255 * ((255 - o) / 256) * ((255 - l3) / 256), t2[s3 + 1] = 255 * ((255 - n) / 256) * ((255 - l3) / 256), t2[s3 + 2] = 255 * ((255 - a) / 256) * ((255 - l3) / 256), t2[s3 + 3] = 255;
+    }
+    return t2;
+  }
+  static RGBAfromCIELab(e2) {
+    const o = new Uint8ClampedArray(e2.length * 4 / 3);
+    for (let n = 0, a = 0;n < e2.length; n += 3, a += 4) {
+      const l3 = e2[n + 0], c = e2[n + 1] << 24 >> 24, h = e2[n + 2] << 24 >> 24;
+      let d3 = (l3 + 16) / 116, u = c / 500 + d3, g2 = d3 - h / 200, f2, y, p2;
+      u = 0.95047 * (u * u * u > 0.008856 ? u * u * u : (u - 0.13793103448275862) / 7.787), d3 = 1 * (d3 * d3 * d3 > 0.008856 ? d3 * d3 * d3 : (d3 - 0.13793103448275862) / 7.787), g2 = 1.08883 * (g2 * g2 * g2 > 0.008856 ? g2 * g2 * g2 : (g2 - 0.13793103448275862) / 7.787), f2 = u * 3.2406 + d3 * -1.5372 + g2 * -0.4986, y = u * -0.9689 + d3 * 1.8758 + g2 * 0.0415, p2 = u * 0.0557 + d3 * -0.204 + g2 * 1.057, f2 = f2 > 0.0031308 ? 1.055 * f2 ** 0.4166666666666667 - 0.055 : 12.92 * f2, y = y > 0.0031308 ? 1.055 * y ** 0.4166666666666667 - 0.055 : 12.92 * y, p2 = p2 > 0.0031308 ? 1.055 * p2 ** 0.4166666666666667 - 0.055 : 12.92 * p2, o[a] = Math.max(0, Math.min(1, f2)) * 255, o[a + 1] = Math.max(0, Math.min(1, y)) * 255, o[a + 2] = Math.max(0, Math.min(1, p2)) * 255, o[a + 3] = 255;
+    }
+    return o;
+  }
+}
+function Vr(i) {
+  if (!i.version || i.version.major < 2 || i.version.major == 2 && i.version.minor < 3) {
+    console.error("This version of OpenSeadragon is too old to support this monkey patch");
+    return;
+  }
+  if (i.ImageJob)
+    return;
+  function e2(r) {
+    i.extend(true, this, {
+      timeout: i.DEFAULT_SETTINGS.timeout,
+      jobId: null
+    }, r), this.image = null;
+  }
+  e2.prototype = {
+    errorMsg: null,
+    start: function() {
+      var r = this, s3 = this.abort;
+      this.image = new Image, this.image.onload = function() {
+        r.finish(true);
+      }, this.image.onabort = this.image.onerror = function() {
+        r.errorMsg = "Image load aborted", r.finish(false);
+      }, this.jobId = window.setTimeout(function() {
+        r.errorMsg = "Image load exceeded timeout (" + r.timeout + " ms)", r.finish(false);
+      }, this.timeout), this.loadWithAjax ? (this.request = i.makeAjaxRequest({
+        url: this.src,
+        withCredentials: this.ajaxWithCredentials,
+        headers: this.ajaxHeaders,
+        responseType: "arraybuffer",
+        postData: this.postData,
+        success: function(o) {
+          var n;
+          try {
+            n = new window.Blob([o.response]);
+          } catch (h) {
+            var a = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder;
+            if (h.name === "TypeError" && a) {
+              var l3 = new a;
+              l3.append(o.response), n = l3.getBlob();
+            }
+          }
+          n.size === 0 && (r.errorMsg = "Empty image response.", r.finish(false));
+          var c = (window.URL || window.webkitURL).createObjectURL(n);
+          r.image.src = c;
+        },
+        error: function(o) {
+          r.errorMsg = "Image load aborted - XHR error: Ajax returned " + o.status, r.finish(false);
+        }
+      }), this.abort = function() {
+        r.request.abort(), typeof s3 == "function" && s3();
+      }) : (this.crossOriginPolicy !== false && (this.image.crossOrigin = this.crossOriginPolicy), this.src.fetch ? this.src.fetch().then((o) => this.image.src = o) : this.image.src = this.src);
+    },
+    finish: function(r) {
+      this.image.onload = this.image.onerror = this.image.onabort = null, r || (this.image = null), this.jobId && window.clearTimeout(this.jobId), this.callback(this);
+    }
+  };
+  function t2(r, s3, o) {
+    var n;
+    r.jobsInProgress--, (!r.jobLimit || r.jobsInProgress < r.jobLimit) && r.jobQueue.length > 0 && (n = r.jobQueue.shift(), n.start(), r.jobsInProgress++), o(s3.image, s3.errorMsg, s3.request);
+  }
+  i.ImageLoader.prototype.addJob = function(r) {
+    var s3 = this, o = function(l3) {
+      t2(s3, l3, r.callback);
+    }, n = {
+      src: r.src,
+      loadWithAjax: r.loadWithAjax,
+      ajaxHeaders: r.loadWithAjax ? r.ajaxHeaders : null,
+      crossOriginPolicy: r.crossOriginPolicy,
+      ajaxWithCredentials: r.ajaxWithCredentials,
+      postData: r.postData,
+      callback: o,
+      abort: r.abort,
+      timeout: this.timeout
+    }, a = new e2(n);
+    !this.jobLimit || this.jobsInProgress < this.jobLimit ? (a.start(), this.jobsInProgress++) : this.jobQueue.push(a);
+  }, i.Tile.prototype._hasTransparencyChannel = function() {
+    return false;
+  };
+}
+var ut2, dt2 = (i, e2, t2) => (e2 in i) ? ut2(i, e2, { enumerable: true, configurable: true, writable: true, value: t2 }) : i[e2] = t2, k3 = (i, e2, t2) => dt2(i, typeof e2 != "symbol" ? e2 + "" : e2, t2), gt2, Yr, Xr, $r, Ue2, ye2, Wr, yt2, Zr, Jr, ee2, Qr, pt2, es, mt2, pe2, wt2, ts, rs, xt2, bt2, Le2, It2, Ne2, Tt2, Me2, je2, R2, St2, ze2, me2, At2, Q3, Ke2, Dt2, Ct2, Ft2, Et2, we2, Ve2, qe2, Pt2, He2, kt2, Mt2, Bt2, Ye2, Gt2, Ot2, v, _2, xe2, Y3, Xe2, be2, _t2, ae2, Ie, Te2, Se2, Ut2, Ae2, Lt2, De2, Nt2, jt2, le3, Be2, zt2, Kt2, Vt2, qt2, J, U2, Ht2, ce3, x3, A2, Yt2, ss, is, Xt2, er2 = 0.95047, tr2 = 1, rr2 = 1.08883, st2, pr, Ge2 = `\r
+\r
+`, Ir, q2, Ar, Dr, Fr, Er, Pr, kr, Rr, he2, Mr, Br, Pe2, Ur, ie3, oe2, Kr = (i) => {
+  var t2, r, s3;
+  const e2 = /* @__PURE__ */ new Map;
+  for (const o of i) {
+    const n = new DOMParser().parseFromString((t2 = o.fileDirectory) == null ? undefined : t2.ImageDescription, "text/xml"), a = (r = n == null ? undefined : n.querySelector("Name")) == null ? undefined : r.textContent, l3 = (s3 = n == null ? undefined : n.querySelector("Color")) == null ? undefined : s3.textContent;
+    if (!a)
+      continue;
+    const c = l3 ? l3.split(",").map((h) => parseInt(h)) : [255, 255, 255];
+    e2.has(a) || e2.set(a, {
+      name: a,
+      color: c,
+      images: []
+    }), e2.get(a).images.push(o);
+  }
+  return e2;
+}, qr = (i) => {
+  let e2 = 0;
+  const r = class r2 extends i.TileSource {
+    constructor(n, a = { logLatency: false }) {
+      super();
+      k3(this, "getTileWidth", (n2) => {
+        if (this.levels.length > n2)
+          return this.levels[n2].tileWidth;
+      });
+      k3(this, "getTileHeight", (n2) => {
+        if (this.levels.length > n2)
+          return this.levels[n2].tileHeight;
+      });
+      k3(this, "getLevelScale", (n2) => {
+        let a2 = NaN;
+        return this.levels.length > 0 && n2 >= this.minLevel && n2 <= this.maxLevel && (a2 = this.levels[n2].width / this.levels[this.maxLevel].width), a2;
+      });
+      k3(this, "getTileHashKey", (n2, a2, l4) => {
+        var c;
+        return `geotiffTileSource${this._tsCounter}_${((c = this == null ? undefined : this.channel) == null ? undefined : c.name) ?? ""}_${n2}_${a2}_${l4}`;
+      });
+      k3(this, "getTileUrl", (n2, a2, l4) => {
+        let c = this.levels[n2], h = new String(`${n2}/${a2}_${l4}`);
+        return h.fetch = /* @__PURE__ */ ((d3, u, g2, f2, y) => () => this.regionToDataUrl.call(d3, u, g2, f2, y))(this, c, a2, l4, h), h;
+      });
+      k3(this, "downloadTileStart", (n2) => {
+        n2.src.fetch().then((a2) => {
+          let l4 = new Image, c = "" + n2.src;
+          l4.onload = function() {
+            n2.finish(l4);
+          }, l4.onerror = l4.onabort = function() {
+            n2.finish(null, c, "Request aborted");
+          }, l4.src = a2;
+        });
+      });
+      k3(this, "downloadTileAbort", (n2) => {
+        n2.src.abortController && n2.src.abortController.abort();
+      });
+      k3(this, "setupComplete", () => {
+        this._ready = true, this.promises.ready.resolve(), this.raiseEvent("ready", { tileSource: this });
+      });
+      k3(this, "setupLevels", () => {
+        if (this._ready)
+          return;
+        let n2 = this.GeoTIFFImages.sort((u, g2) => g2.getWidth() - u.getWidth()), a2 = this._tileSize, l4 = this._tileSize, c = n2[0].getWidth();
+        this.width = c;
+        let h = n2[0].getHeight();
+        if (this.height = h, this.tileOverlap = 0, this.minLevel = 0, this.aspectRatio = this.width / this.height, this.dimensions = new i.Point(this.width, this.height), n2.reduce((u, g2) => (u.width !== -1 && (u.valid = u.valid && g2.getWidth() < u.width), u.width = g2.getWidth(), u), { valid: true, width: -1 }).valid)
+          this.levels = n2.map((u) => {
+            let g2 = u.getWidth(), f2 = u.getHeight();
+            return {
+              width: g2,
+              height: f2,
+              tileWidth: this.options.tileWidth || u.getTileWidth() || a2,
+              tileHeight: this.options.tileHeight || u.getTileHeight() || l4,
+              image: u,
+              scaleFactor: 1
+            };
+          }), this.maxLevel = this.levels.length - 1;
+        else {
+          let u = Math.ceil(Math.log2(Math.max(c / a2, h / l4))), g2 = [...Array(u).keys()].filter((f2) => f2 % 2 == 0);
+          this.levels = g2.map((f2) => {
+            let y = Math.pow(2, f2);
+            const p2 = n2.filter((m2) => {
+              const b = Math.pow(2, f2 - 1);
+              return b >= 0 ? m2.getWidth() * b < c && m2.getWidth() * y >= c : m2.getWidth() * y >= c;
+            });
+            if (p2.length === 0)
+              return null;
+            const w = p2[0];
+            return {
+              width: c / y,
+              height: h / y,
+              tileWidth: this.options.tileWidth || w.getTileWidth() || a2,
+              tileHeight: this.options.tileHeight || w.getTileHeight() || l4,
+              image: w,
+              scaleFactor: y * w.getWidth() / c
+            };
+          }).filter((f2) => f2 !== null), this.maxLevel = this.levels.length - 1;
+        }
+        this.levels = this.levels.sort((u, g2) => u.width - g2.width), this._tileWidth = this.levels[0].tileWidth, this._tileHeight = this.levels[0].tileHeight, this.setupComplete();
+      });
+      k3(this, "regionToDataUrl", (n2, a2, l4, c) => {
+        var m2, b, T2, S2, D2;
+        let h = this.options.logLatency && Date.now(), u = (c.abortController = new AbortController).signal;
+        const { tileWidth: g2, tileHeight: f2 } = n2, y = [a2 * g2, l4 * f2, (a2 + 1) * g2, (l4 + 1) * f2].map((M2) => M2 * n2.scaleFactor), p2 = n2.image;
+        if ((b = (m2 = p2.fileDirectory) == null ? undefined : m2.Software) == null ? undefined : b.startsWith("PerkinElmer-QPI")) {
+          const M2 = new DOMParser().parseFromString((T2 = p2.fileDirectory) == null ? undefined : T2.ImageDescription, "text/xml");
+          (S2 = M2.querySelector("Name")) == null || S2.textContent;
+          const I2 = (D2 = M2.querySelector("Color")) == null ? undefined : D2.textContent, C2 = I2 ? I2.split(",").map((O3) => parseInt(O3)) : [255, 255, 255];
+          return n2.image.readRGB({
+            interleave: true,
+            window: y,
+            pool: this._pool,
+            width: n2.tileWidth,
+            height: n2.tileHeight,
+            signal: u
+          }).then((O3) => {
+            let P2 = document.createElement("canvas");
+            P2.width = n2.tileWidth, P2.height = n2.tileHeight;
+            let F2 = P2.getContext("2d"), G2 = new Uint8ClampedArray(4 * P2.width * P2.height), L2 = new Uint8ClampedArray(O3), B3, N3;
+            for (B3 = 0, N3 = 0;B3 < L2.length; B3 += 3, N3 += 4)
+              G2[N3] = L2[B3] * C2[0] / 255, G2[N3 + 1] = L2[B3 + 1] * C2[1] / 255, G2[N3 + 2] = L2[B3 + 2] * C2[2] / 255, G2[N3 + 3] = 255;
+            const te2 = F2.createImageData(P2.width, P2.height);
+            te2.data.set(G2), F2.putImageData(te2, 0, 0);
+            let X2 = P2.toDataURL("image/jpeg", 0.8);
+            return this.options.logLatency && (typeof this.options.logLatency == "function" ? this.options.logLatency : console.log)("Tile latency (ms):", Date.now() - h), X2;
+          });
+        } else
+          return n2.image.getTileOrStrip(a2, l4, null, this._pool, u).then((M2) => {
+            let I2 = new Uint8ClampedArray(M2.data), C2 = document.createElement("canvas");
+            C2.width = n2.tileWidth, C2.height = n2.tileHeight;
+            let O3 = C2.getContext("2d"), P2 = n2.image.fileDirectory.PhotometricInterpretation, F2;
+            if (I2.length / (C2.width * C2.height) % 4 === 0)
+              F2 = I2;
+            else
+              switch (P2) {
+                case A2.WhiteIsZero:
+                  F2 = z.RGBAfromWhiteIsZero(I2, 2 ** n2.image.fileDirectory.BitsPerSample[0]);
+                  break;
+                case A2.BlackIsZero:
+                  F2 = z.RGBAfromBlackIsZero(I2, 2 ** n2.image.fileDirectory.BitsPerSample[0]);
+                  break;
+                case A2.RGB:
+                  F2 = z.RGBAfromRGB(I2);
+                  break;
+                case A2.Palette:
+                  F2 = z.RGBAfromPalette(I2, 2 ** n2.image.fileDirectory.colorMap);
+                  break;
+                case A2.CMYK:
+                  F2 = z.RGBAfromCMYK(I2);
+                  break;
+                case A2.YCbCr:
+                  F2 = z.RGBAfromYCbCr(I2);
+                  break;
+                case A2.CIELab:
+                  F2 = z.RGBAfromCIELab(I2);
+                  break;
+              }
+            const G2 = O3.createImageData(C2.width, C2.height);
+            G2.data.set(F2), O3.putImageData(G2, 0, 0);
+            let L2 = C2.toDataURL("image/jpeg", 0.8);
+            return this.options.logLatency && (typeof this.options.logLatency == "function" ? this.options.logLatency : console.log)("Tile latency (ms):", Date.now() - h), L2;
+          });
+      });
+      r2._osdReady || r2.applyOSDPatch(i);
+      let l3 = this;
+      this.input = n, this.options = a, this.channel = (n == null ? undefined : n.channel) ?? null, this._ready = false, this._pool = r2.sharedPool, this._tileSize = 256, this._tsCounter = e2, e2 += 1, n.GeoTIFF && n.GeoTIFFImages ? (this.promises = {
+        GeoTIFF: Promise.resolve(n.GeoTIFF),
+        GeoTIFFImages: Promise.resolve(n.GeoTIFFImages),
+        ready: new fe3
+      }, this.GeoTIFF = n.GeoTIFF, this.imageCount = n.GeoTIFFImages.length, this.GeoTIFFImages = n.GeoTIFFImages, this.setupLevels()) : (this.promises = {
+        GeoTIFF: n instanceof File ? _e2(n) : ve2(n),
+        GeoTIFFImages: new fe3,
+        ready: new fe3
+      }, this.promises.GeoTIFF.then((c) => (l3.GeoTIFF = c, c.getImageCount())).then((c) => {
+        l3.imageCount = c;
+        let h = [...Array(c).keys()].map((d3) => l3.GeoTIFF.getImage(d3));
+        return Promise.all(h);
+      }).then((c) => {
+        l3.GeoTIFFImages = c, l3.promises.GeoTIFFImages.resolve(c), this.setupLevels();
+      }).catch((c) => {
+        throw console.error("Re-throwing error with GeoTIFF:", c), c;
+      }));
+    }
+  };
+  k3(r, "sharedPool", new mr), k3(r, "_osdReady", false), k3(r, "applyOSDPatch", (n) => {
+    Vr(n), r._osdReady = true;
+  }), k3(r, "getAllTileSources", async (n, a) => {
+    const l3 = n instanceof File ? n.name.split(".").pop() : n.split(".").pop();
+    let c = n instanceof File ? _e2(n) : ve2(n);
+    return c.then((h) => (c = h, h.getImageCount())).then((h) => Promise.all([...Array(h).keys()].map(async (d3) => (await c).getImage(d3)))).then((h) => {
+      h = h.filter((f2) => f2.fileDirectory.photometricInterpretation !== A2.TransparencyMask), h.sort((f2, y) => y.getWidth() - f2.getWidth());
+      const d3 = 0.015;
+      return h.reduce((f2, y) => {
+        const p2 = y.getWidth() / y.getHeight();
+        let w = "";
+        y.fileDirectory.ImageDescription && (w = y.fileDirectory.ImageDescription.split(`
+`)[1] ?? "");
+        const m2 = f2.filter((b) => Math.abs(1 - b.aspectRatio / p2) < d3 && !(w != null && w.includes("macro") || w != null && w.includes("label")));
+        if (m2.length === 0) {
+          let b = {
+            aspectRatio: p2,
+            images: [y]
+          };
+          f2.push(b);
+        } else
+          m2[0].images.push(y);
+        return f2;
+      }, []).map((f2) => f2.images).map((f2, y) => {
+        if (y !== 0)
+          return new i.GeoTIFFTileSource({
+            GeoTIFF: c,
+            GeoTIFFImages: f2
+          }, a);
+        switch (l3) {
+          case "qptiff":
+            const p2 = Kr(f2);
+            return Array.from(p2.values()).map((w, m2) => new i.GeoTIFFTileSource({
+              GeoTIFF: c,
+              GeoTIFFImages: w.images,
+              channel: {
+                name: w.name,
+                color: w.color
+              }
+            }, a));
+          default:
+            return new i.GeoTIFFTileSource({
+              GeoTIFF: c,
+              GeoTIFFImages: f2
+            }, a);
+        }
+      });
+    });
+  });
+  let t2 = r;
+  i.GeoTIFFTileSource = t2;
+};
+var init_main_8v7k2MJ1 = __esm(() => {
+  ut2 = Object.defineProperty;
+  ({
+    apply: gt2,
+    construct: Yr,
+    defineProperty: Xr,
+    get: $r,
+    getOwnPropertyDescriptor: Ue2,
+    getPrototypeOf: ye2,
+    has: Wr,
+    ownKeys: yt2,
+    set: Zr,
+    setPrototypeOf: Jr
+  } = Reflect);
+  ({
+    iterator: ee2,
+    species: Qr,
+    toStringTag: pt2,
+    for: es
+  } = Symbol);
+  mt2 = Object;
+  ({
+    create: pe2,
+    defineProperty: wt2,
+    freeze: ts,
+    is: rs
+  } = mt2);
+  xt2 = Array;
+  bt2 = xt2.prototype;
+  Le2 = bt2[ee2];
+  It2 = E2(Le2);
+  Ne2 = ArrayBuffer;
+  Tt2 = Ne2.prototype;
+  H2(Tt2, "byteLength");
+  Me2 = typeof SharedArrayBuffer < "u" ? SharedArrayBuffer : null;
+  Me2 && H2(Me2.prototype, "byteLength");
+  je2 = ye2(Uint8Array);
+  je2.from;
+  R2 = je2.prototype;
+  R2[ee2];
+  E2(R2.keys);
+  E2(R2.values);
+  E2(R2.entries);
+  E2(R2.set);
+  E2(R2.reverse);
+  E2(R2.fill);
+  E2(R2.copyWithin);
+  E2(R2.sort);
+  E2(R2.slice);
+  E2(R2.subarray);
+  H2(R2, "buffer");
+  H2(R2, "byteOffset");
+  H2(R2, "length");
+  H2(R2, pt2);
+  St2 = Uint8Array;
+  ze2 = Uint16Array;
+  me2 = Uint32Array;
+  At2 = Float32Array;
+  Q3 = ye2([][ee2]());
+  Ke2 = E2(Q3.next);
+  Dt2 = E2(function* () {}().next);
+  Ct2 = ye2(Q3);
+  Ft2 = DataView.prototype;
+  Et2 = E2(Ft2.getUint16);
+  we2 = WeakMap;
+  Ve2 = we2.prototype;
+  qe2 = E2(Ve2.get);
+  Pt2 = E2(Ve2.set);
+  He2 = new we2;
+  kt2 = pe2(null, {
+    next: {
+      value: function() {
+        const e2 = qe2(He2, this);
+        return Ke2(e2);
+      }
+    },
+    [ee2]: {
+      value: function() {
+        return this;
+      }
+    }
+  });
+  Mt2 = new we2;
+  Bt2 = pe2(Ct2, {
+    next: {
+      value: function() {
+        const e2 = qe2(Mt2, this);
+        return Dt2(e2);
+      },
+      writable: true,
+      configurable: true
+    }
+  });
+  for (const i of yt2(Q3))
+    i !== "next" && wt2(Bt2, i, Ue2(Q3, i));
+  Ye2 = new Ne2(4);
+  Gt2 = new At2(Ye2);
+  Ot2 = new me2(Ye2);
+  v = new ze2(512);
+  _2 = new St2(512);
+  for (let i = 0;i < 256; ++i) {
+    const e2 = i - 127;
+    e2 < -24 ? (v[i] = 0, v[i | 256] = 32768, _2[i] = 24, _2[i | 256] = 24) : e2 < -14 ? (v[i] = 1024 >> -e2 - 14, v[i | 256] = 1024 >> -e2 - 14 | 32768, _2[i] = -e2 - 1, _2[i | 256] = -e2 - 1) : e2 <= 15 ? (v[i] = e2 + 15 << 10, v[i | 256] = e2 + 15 << 10 | 32768, _2[i] = 13, _2[i | 256] = 13) : e2 < 128 ? (v[i] = 31744, v[i | 256] = 64512, _2[i] = 24, _2[i | 256] = 24) : (v[i] = 31744, v[i | 256] = 64512, _2[i] = 13, _2[i | 256] = 13);
+  }
+  xe2 = new me2(2048);
+  for (let i = 1;i < 1024; ++i) {
+    let e2 = i << 13, t2 = 0;
+    for (;!(e2 & 8388608); )
+      e2 <<= 1, t2 -= 8388608;
+    e2 &= -8388609, t2 += 947912704, xe2[i] = e2 | t2;
+  }
+  for (let i = 1024;i < 2048; ++i)
+    xe2[i] = 939524096 + (i - 1024 << 13);
+  Y3 = new me2(64);
+  for (let i = 1;i < 31; ++i)
+    Y3[i] = i << 23;
+  Y3[31] = 1199570944;
+  Y3[32] = 2147483648;
+  for (let i = 33;i < 63; ++i)
+    Y3[i] = 2147483648 + (i - 32 << 23);
+  Y3[63] = 3347054592;
+  Xe2 = new ze2(64);
+  for (let i = 1;i < 64; ++i)
+    i !== 32 && (Xe2[i] = 1024);
+  be2 = { exports: {} };
+  be2.exports = Ze;
+  be2.exports.default = Ze;
+  _t2 = be2.exports;
+  ae2 = /* @__PURE__ */ We2(_t2);
+  Ie = { exports: {} };
+  Te2 = { exports: {} };
+  Se2 = { exports: {} };
+  Se2.exports = Je2;
+  Se2.exports.default = Je2;
+  Ut2 = Se2.exports;
+  Ae2 = { exports: {} };
+  Ae2.exports = Qe2;
+  Ae2.exports.default = Qe2;
+  Lt2 = Ae2.exports;
+  De2 = { exports: {} };
+  De2.exports = et2;
+  De2.exports.default = et2;
+  Nt2 = De2.exports;
+  jt2 = Ut2;
+  le3 = Lt2;
+  Be2 = Nt2;
+  Te2.exports = tt2;
+  Te2.exports.default = tt2;
+  zt2 = Te2.exports;
+  Kt2 = zt2;
+  Ie.exports = rt2;
+  Ie.exports.default = rt2;
+  Vt2 = Ie.exports;
+  qt2 = /* @__PURE__ */ We2(Vt2);
+  J = {
+    315: "Artist",
+    258: "BitsPerSample",
+    265: "CellLength",
+    264: "CellWidth",
+    320: "ColorMap",
+    259: "Compression",
+    33432: "Copyright",
+    306: "DateTime",
+    338: "ExtraSamples",
+    266: "FillOrder",
+    289: "FreeByteCounts",
+    288: "FreeOffsets",
+    291: "GrayResponseCurve",
+    290: "GrayResponseUnit",
+    316: "HostComputer",
+    270: "ImageDescription",
+    257: "ImageLength",
+    256: "ImageWidth",
+    271: "Make",
+    281: "MaxSampleValue",
+    280: "MinSampleValue",
+    272: "Model",
+    254: "NewSubfileType",
+    274: "Orientation",
+    262: "PhotometricInterpretation",
+    284: "PlanarConfiguration",
+    296: "ResolutionUnit",
+    278: "RowsPerStrip",
+    277: "SamplesPerPixel",
+    305: "Software",
+    279: "StripByteCounts",
+    273: "StripOffsets",
+    255: "SubfileType",
+    263: "Threshholding",
+    282: "XResolution",
+    283: "YResolution",
+    326: "BadFaxLines",
+    327: "CleanFaxData",
+    343: "ClipPath",
+    328: "ConsecutiveBadFaxLines",
+    433: "Decode",
+    434: "DefaultImageColor",
+    269: "DocumentName",
+    336: "DotRange",
+    321: "HalftoneHints",
+    346: "Indexed",
+    347: "JPEGTables",
+    285: "PageName",
+    297: "PageNumber",
+    317: "Predictor",
+    319: "PrimaryChromaticities",
+    532: "ReferenceBlackWhite",
+    339: "SampleFormat",
+    340: "SMinSampleValue",
+    341: "SMaxSampleValue",
+    559: "StripRowCounts",
+    330: "SubIFDs",
+    292: "T4Options",
+    293: "T6Options",
+    325: "TileByteCounts",
+    323: "TileLength",
+    324: "TileOffsets",
+    322: "TileWidth",
+    301: "TransferFunction",
+    318: "WhitePoint",
+    344: "XClipPathUnits",
+    286: "XPosition",
+    529: "YCbCrCoefficients",
+    531: "YCbCrPositioning",
+    530: "YCbCrSubSampling",
+    345: "YClipPathUnits",
+    287: "YPosition",
+    37378: "ApertureValue",
+    40961: "ColorSpace",
+    36868: "DateTimeDigitized",
+    36867: "DateTimeOriginal",
+    34665: "Exif IFD",
+    36864: "ExifVersion",
+    33434: "ExposureTime",
+    41728: "FileSource",
+    37385: "Flash",
+    40960: "FlashpixVersion",
+    33437: "FNumber",
+    42016: "ImageUniqueID",
+    37384: "LightSource",
+    37500: "MakerNote",
+    37377: "ShutterSpeedValue",
+    37510: "UserComment",
+    33723: "IPTC",
+    34675: "ICC Profile",
+    700: "XMP",
+    42112: "GDAL_METADATA",
+    42113: "GDAL_NODATA",
+    34377: "Photoshop",
+    33550: "ModelPixelScale",
+    33922: "ModelTiepoint",
+    34264: "ModelTransformation",
+    34735: "GeoKeyDirectory",
+    34736: "GeoDoubleParams",
+    34737: "GeoAsciiParams",
+    50674: "LercParameters"
+  };
+  U2 = {};
+  for (const i in J)
+    J.hasOwnProperty(i) && (U2[J[i]] = parseInt(i, 10));
+  Ht2 = [
+    U2.BitsPerSample,
+    U2.ExtraSamples,
+    U2.SampleFormat,
+    U2.StripByteCounts,
+    U2.StripOffsets,
+    U2.StripRowCounts,
+    U2.TileByteCounts,
+    U2.TileOffsets,
+    U2.SubIFDs
+  ];
+  ce3 = {
+    1: "BYTE",
+    2: "ASCII",
+    3: "SHORT",
+    4: "LONG",
+    5: "RATIONAL",
+    6: "SBYTE",
+    7: "UNDEFINED",
+    8: "SSHORT",
+    9: "SLONG",
+    10: "SRATIONAL",
+    11: "FLOAT",
+    12: "DOUBLE",
+    13: "IFD",
+    16: "LONG8",
+    17: "SLONG8",
+    18: "IFD8"
+  };
+  x3 = {};
+  for (const i in ce3)
+    ce3.hasOwnProperty(i) && (x3[ce3[i]] = parseInt(i, 10));
+  A2 = {
+    WhiteIsZero: 0,
+    BlackIsZero: 1,
+    RGB: 2,
+    Palette: 3,
+    TransparencyMask: 4,
+    CMYK: 5,
+    YCbCr: 6,
+    CIELab: 8,
+    ICCLab: 9
+  };
+  Yt2 = {
+    Unspecified: 0,
+    Assocalpha: 1,
+    Unassalpha: 2
+  };
+  ss = {
+    Version: 0,
+    AddCompression: 1
+  };
+  is = {
+    None: 0,
+    Deflate: 1,
+    Zstandard: 2
+  };
+  Xt2 = {
+    1024: "GTModelTypeGeoKey",
+    1025: "GTRasterTypeGeoKey",
+    1026: "GTCitationGeoKey",
+    2048: "GeographicTypeGeoKey",
+    2049: "GeogCitationGeoKey",
+    2050: "GeogGeodeticDatumGeoKey",
+    2051: "GeogPrimeMeridianGeoKey",
+    2052: "GeogLinearUnitsGeoKey",
+    2053: "GeogLinearUnitSizeGeoKey",
+    2054: "GeogAngularUnitsGeoKey",
+    2055: "GeogAngularUnitSizeGeoKey",
+    2056: "GeogEllipsoidGeoKey",
+    2057: "GeogSemiMajorAxisGeoKey",
+    2058: "GeogSemiMinorAxisGeoKey",
+    2059: "GeogInvFlatteningGeoKey",
+    2060: "GeogAzimuthUnitsGeoKey",
+    2061: "GeogPrimeMeridianLongGeoKey",
+    2062: "GeogTOWGS84GeoKey",
+    3072: "ProjectedCSTypeGeoKey",
+    3073: "PCSCitationGeoKey",
+    3074: "ProjectionGeoKey",
+    3075: "ProjCoordTransGeoKey",
+    3076: "ProjLinearUnitsGeoKey",
+    3077: "ProjLinearUnitSizeGeoKey",
+    3078: "ProjStdParallel1GeoKey",
+    3079: "ProjStdParallel2GeoKey",
+    3080: "ProjNatOriginLongGeoKey",
+    3081: "ProjNatOriginLatGeoKey",
+    3082: "ProjFalseEastingGeoKey",
+    3083: "ProjFalseNorthingGeoKey",
+    3084: "ProjFalseOriginLongGeoKey",
+    3085: "ProjFalseOriginLatGeoKey",
+    3086: "ProjFalseOriginEastingGeoKey",
+    3087: "ProjFalseOriginNorthingGeoKey",
+    3088: "ProjCenterLongGeoKey",
+    3089: "ProjCenterLatGeoKey",
+    3090: "ProjCenterEastingGeoKey",
+    3091: "ProjCenterNorthingGeoKey",
+    3092: "ProjScaleAtNatOriginGeoKey",
+    3093: "ProjScaleAtCenterGeoKey",
+    3094: "ProjAzimuthAngleGeoKey",
+    3095: "ProjStraightVertPoleLongGeoKey",
+    3096: "ProjRectifiedGridAngleGeoKey",
+    4096: "VerticalCSTypeGeoKey",
+    4097: "VerticalCitationGeoKey",
+    4098: "VerticalDatumGeoKey",
+    4099: "VerticalUnitsGeoKey"
+  };
+  st2 = /* @__PURE__ */ new Map;
+  j2([undefined, 1], () => Promise.resolve().then(() => (init_raw_CMGvRjfu(), exports_raw_CMGvRjfu)).then((i) => i.default));
+  j2(5, () => Promise.resolve().then(() => (init_lzw_LAGDNbSC(), exports_lzw_LAGDNbSC)).then((i) => i.default));
+  j2(6, () => {
+    throw new Error("old style JPEG compression is not supported.");
+  });
+  j2(7, () => Promise.resolve().then(() => (init_jpeg_BAgeD1d3(), exports_jpeg_BAgeD1d3)).then((i) => i.default));
+  j2([8, 32946], () => Promise.resolve().then(() => (init_deflate_BXt_9JA_(), exports_deflate_BXt_9JA_)).then((i) => i.default));
+  j2(32773, () => Promise.resolve().then(() => (init_packbits_BlDR4Kj5(), exports_packbits_BlDR4Kj5)).then((i) => i.default));
+  j2(34887, () => Promise.resolve().then(() => (init_lerc_CoQvYJmm(), exports_lerc_CoQvYJmm)).then(async (i) => (await i.zstd.init(), i)).then((i) => i.default));
+  j2(50001, () => Promise.resolve().then(() => (init_webimage_BM_pbLN3(), exports_webimage_BM_pbLN3)).then((i) => i.default));
+  pr = typeof navigator < "u" && navigator.hardwareConcurrency || 2;
+  Ir = class Ir extends Map {
+    constructor(e2 = {}) {
+      if (super(), !(e2.maxSize && e2.maxSize > 0))
+        throw new TypeError("`maxSize` must be a number greater than 0");
+      if (typeof e2.maxAge == "number" && e2.maxAge === 0)
+        throw new TypeError("`maxAge` must be a number greater than 0");
+      this.maxSize = e2.maxSize, this.maxAge = e2.maxAge || Number.POSITIVE_INFINITY, this.onEviction = e2.onEviction, this.cache = /* @__PURE__ */ new Map, this.oldCache = /* @__PURE__ */ new Map, this._size = 0;
+    }
+    _emitEvictions(e2) {
+      if (typeof this.onEviction == "function")
+        for (const [t2, r] of e2)
+          this.onEviction(t2, r.value);
+    }
+    _deleteIfExpired(e2, t2) {
+      return typeof t2.expiry == "number" && t2.expiry <= Date.now() ? (typeof this.onEviction == "function" && this.onEviction(e2, t2.value), this.delete(e2)) : false;
+    }
+    _getOrDeleteIfExpired(e2, t2) {
+      if (this._deleteIfExpired(e2, t2) === false)
+        return t2.value;
+    }
+    _getItemValue(e2, t2) {
+      return t2.expiry ? this._getOrDeleteIfExpired(e2, t2) : t2.value;
+    }
+    _peek(e2, t2) {
+      const r = t2.get(e2);
+      return this._getItemValue(e2, r);
+    }
+    _set(e2, t2) {
+      this.cache.set(e2, t2), this._size++, this._size >= this.maxSize && (this._size = 0, this._emitEvictions(this.oldCache), this.oldCache = this.cache, this.cache = /* @__PURE__ */ new Map);
+    }
+    _moveToRecent(e2, t2) {
+      this.oldCache.delete(e2), this._set(e2, t2);
+    }
+    *_entriesAscending() {
+      for (const e2 of this.oldCache) {
+        const [t2, r] = e2;
+        this.cache.has(t2) || this._deleteIfExpired(t2, r) === false && (yield e2);
+      }
+      for (const e2 of this.cache) {
+        const [t2, r] = e2;
+        this._deleteIfExpired(t2, r) === false && (yield e2);
+      }
+    }
+    get(e2) {
+      if (this.cache.has(e2)) {
+        const t2 = this.cache.get(e2);
+        return this._getItemValue(e2, t2);
+      }
+      if (this.oldCache.has(e2)) {
+        const t2 = this.oldCache.get(e2);
+        if (this._deleteIfExpired(e2, t2) === false)
+          return this._moveToRecent(e2, t2), t2.value;
+      }
+    }
+    set(e2, t2, { maxAge: r = this.maxAge } = {}) {
+      const s3 = typeof r == "number" && r !== Number.POSITIVE_INFINITY ? Date.now() + r : undefined;
+      return this.cache.has(e2) ? this.cache.set(e2, {
+        value: t2,
+        expiry: s3
+      }) : this._set(e2, { value: t2, expiry: s3 }), this;
+    }
+    has(e2) {
+      return this.cache.has(e2) ? !this._deleteIfExpired(e2, this.cache.get(e2)) : this.oldCache.has(e2) ? !this._deleteIfExpired(e2, this.oldCache.get(e2)) : false;
+    }
+    peek(e2) {
+      if (this.cache.has(e2))
+        return this._peek(e2, this.cache);
+      if (this.oldCache.has(e2))
+        return this._peek(e2, this.oldCache);
+    }
+    delete(e2) {
+      const t2 = this.cache.delete(e2);
+      return t2 && this._size--, this.oldCache.delete(e2) || t2;
+    }
+    clear() {
+      this.cache.clear(), this.oldCache.clear(), this._size = 0;
+    }
+    resize(e2) {
+      if (!(e2 && e2 > 0))
+        throw new TypeError("`maxSize` must be a number greater than 0");
+      const t2 = [...this._entriesAscending()], r = t2.length - e2;
+      r < 0 ? (this.cache = new Map(t2), this.oldCache = /* @__PURE__ */ new Map, this._size = t2.length) : (r > 0 && this._emitEvictions(t2.slice(0, r)), this.oldCache = new Map(t2.slice(r)), this.cache = /* @__PURE__ */ new Map, this._size = 0), this.maxSize = e2;
+    }
+    *keys() {
+      for (const [e2] of this)
+        yield e2;
+    }
+    *values() {
+      for (const [, e2] of this)
+        yield e2;
+    }
+    *[Symbol.iterator]() {
+      for (const e2 of this.cache) {
+        const [t2, r] = e2;
+        this._deleteIfExpired(t2, r) === false && (yield [t2, r.value]);
+      }
+      for (const e2 of this.oldCache) {
+        const [t2, r] = e2;
+        this.cache.has(t2) || this._deleteIfExpired(t2, r) === false && (yield [t2, r.value]);
+      }
+    }
+    *entriesDescending() {
+      let e2 = [...this.cache];
+      for (let t2 = e2.length - 1;t2 >= 0; --t2) {
+        const r = e2[t2], [s3, o] = r;
+        this._deleteIfExpired(s3, o) === false && (yield [s3, o.value]);
+      }
+      e2 = [...this.oldCache];
+      for (let t2 = e2.length - 1;t2 >= 0; --t2) {
+        const r = e2[t2], [s3, o] = r;
+        this.cache.has(s3) || this._deleteIfExpired(s3, o) === false && (yield [s3, o.value]);
+      }
+    }
+    *entriesAscending() {
+      for (const [e2, t2] of this._entriesAscending())
+        yield [e2, t2.value];
+    }
+    get size() {
+      if (!this._size)
+        return this.oldCache.size;
+      let e2 = 0;
+      for (const t2 of this.oldCache.keys())
+        this.cache.has(t2) || e2++;
+      return Math.min(this._size + e2, this.maxSize);
+    }
+    entries() {
+      return this.entriesAscending();
+    }
+    forEach(e2, t2 = this) {
+      for (const [r, s3] of this.entriesAscending())
+        e2.call(t2, s3, r, this);
+    }
+    get [Symbol.toStringTag]() {
+      return JSON.stringify([...this.entriesAscending()]);
+    }
+  };
+  q2 = class q2 extends Error {
+    constructor(e2) {
+      super(e2), Error.captureStackTrace && Error.captureStackTrace(this, q2), this.name = "AbortError";
+    }
+  };
+  Ar = class Ar extends Error {
+    constructor(e2, t2) {
+      super(t2), this.errors = e2, this.message = t2, this.name = "AggregateError";
+    }
+  };
+  Dr = Ar;
+  Fr = class Fr extends Ce2 {
+    constructor(e2, { blockSize: t2 = 65536, cacheSize: r = 100 } = {}) {
+      super(), this.source = e2, this.blockSize = t2, this.blockCache = new Ir({
+        maxSize: r,
+        onEviction: (s3, o) => {
+          this.evictedBlocks.set(s3, o);
+        }
+      }), this.evictedBlocks = /* @__PURE__ */ new Map, this.blockRequests = /* @__PURE__ */ new Map, this.blockIdsToFetch = /* @__PURE__ */ new Set, this.abortedBlockIds = /* @__PURE__ */ new Set;
+    }
+    get fileSize() {
+      return this.source.fileSize;
+    }
+    async fetch(e2, t2) {
+      const r = [], s3 = [], o = [];
+      this.evictedBlocks.clear();
+      for (const { offset: u, length: g2 } of e2) {
+        let f2 = u + g2;
+        const { fileSize: y } = this;
+        y !== null && (f2 = Math.min(f2, y));
+        const p2 = Math.floor(u / this.blockSize) * this.blockSize;
+        for (let w = p2;w < f2; w += this.blockSize) {
+          const m2 = Math.floor(w / this.blockSize);
+          !this.blockCache.has(m2) && !this.blockRequests.has(m2) && (this.blockIdsToFetch.add(m2), s3.push(m2)), this.blockRequests.has(m2) && r.push(this.blockRequests.get(m2)), o.push(m2);
+        }
+      }
+      await Tr(), this.fetchBlocks(t2);
+      const n = [];
+      for (const u of s3)
+        this.blockRequests.has(u) && n.push(this.blockRequests.get(u));
+      await Promise.allSettled(r), await Promise.allSettled(n);
+      const a = [], l3 = o.filter((u) => this.abortedBlockIds.has(u) || !this.blockCache.has(u));
+      if (l3.forEach((u) => this.blockIdsToFetch.add(u)), l3.length > 0 && t2 && !t2.aborted) {
+        this.fetchBlocks(null);
+        for (const u of l3) {
+          const g2 = this.blockRequests.get(u);
+          if (!g2)
+            throw new Error(`Block ${u} is not in the block requests`);
+          a.push(g2);
+        }
+        await Promise.allSettled(a);
+      }
+      if (t2 && t2.aborted)
+        throw new q2("Request was aborted");
+      const c = o.map((u) => this.blockCache.get(u) || this.evictedBlocks.get(u)), h = c.filter((u) => !u);
+      if (h.length)
+        throw new Dr(h, "Request failed");
+      const d3 = new Map(Sr(o, c));
+      return this.readSliceData(e2, d3);
+    }
+    fetchBlocks(e2) {
+      if (this.blockIdsToFetch.size > 0) {
+        const t2 = this.groupBlocks(this.blockIdsToFetch), r = this.source.fetch(t2, e2);
+        for (let s3 = 0;s3 < t2.length; ++s3) {
+          const o = t2[s3];
+          for (const n of o.blockIds)
+            this.blockRequests.set(n, (async () => {
+              try {
+                const a = (await r)[s3], l3 = n * this.blockSize, c = l3 - a.offset, h = Math.min(c + this.blockSize, a.data.byteLength), d3 = a.data.slice(c, h), u = new Cr(l3, d3.byteLength, d3, n);
+                this.blockCache.set(n, u), this.abortedBlockIds.delete(n);
+              } catch (a) {
+                if (a.name === "AbortError")
+                  a.signal = e2, this.blockCache.delete(n), this.abortedBlockIds.add(n);
+                else
+                  throw a;
+              } finally {
+                this.blockRequests.delete(n);
+              }
+            })());
+        }
+        this.blockIdsToFetch.clear();
+      }
+    }
+    groupBlocks(e2) {
+      const t2 = Array.from(e2).sort((n, a) => n - a);
+      if (t2.length === 0)
+        return [];
+      let r = [], s3 = null;
+      const o = [];
+      for (const n of t2)
+        s3 === null || s3 + 1 === n ? (r.push(n), s3 = n) : (o.push(new Oe2(r[0] * this.blockSize, r.length * this.blockSize, r)), r = [n], s3 = n);
+      return o.push(new Oe2(r[0] * this.blockSize, r.length * this.blockSize, r)), o;
+    }
+    readSliceData(e2, t2) {
+      return e2.map((r) => {
+        let s3 = r.offset + r.length;
+        this.fileSize !== null && (s3 = Math.min(this.fileSize, s3));
+        const o = Math.floor(r.offset / this.blockSize), n = Math.floor(s3 / this.blockSize), a = new ArrayBuffer(r.length), l3 = new Uint8Array(a);
+        for (let c = o;c <= n; ++c) {
+          const h = t2.get(c), d3 = h.offset - r.offset, u = h.top - s3;
+          let g2 = 0, f2 = 0, y;
+          d3 < 0 ? g2 = -d3 : d3 > 0 && (f2 = d3), u < 0 ? y = h.length - g2 : y = s3 - h.offset - g2;
+          const p2 = new Uint8Array(h.data, g2, y);
+          l3.set(p2, f2);
+        }
+        return a;
+      });
+    }
+  };
+  Er = class Er extends Fe2 {
+    constructor(e2) {
+      super(), this.response = e2;
+    }
+    get status() {
+      return this.response.status;
+    }
+    getHeader(e2) {
+      return this.response.headers.get(e2);
+    }
+    async getData() {
+      return this.response.arrayBuffer ? await this.response.arrayBuffer() : (await this.response.buffer()).buffer;
+    }
+  };
+  Pr = class Pr extends Ee2 {
+    constructor(e2, t2) {
+      super(e2), this.credentials = t2;
+    }
+    async request({ headers: e2, signal: t2 } = {}) {
+      const r = await fetch(this.url, {
+        headers: e2,
+        credentials: this.credentials,
+        signal: t2
+      });
+      return new Er(r);
+    }
+  };
+  kr = class kr extends Fe2 {
+    constructor(e2, t2) {
+      super(), this.xhr = e2, this.data = t2;
+    }
+    get status() {
+      return this.xhr.status;
+    }
+    getHeader(e2) {
+      return this.xhr.getResponseHeader(e2);
+    }
+    async getData() {
+      return this.data;
+    }
+  };
+  Rr = class Rr extends Ee2 {
+    constructRequest(e2, t2) {
+      return new Promise((r, s3) => {
+        const o = new XMLHttpRequest;
+        o.open("GET", this.url), o.responseType = "arraybuffer";
+        for (const [n, a] of Object.entries(e2))
+          o.setRequestHeader(n, a);
+        o.onload = () => {
+          const n = o.response;
+          r(new kr(o, n));
+        }, o.onerror = s3, o.onabort = () => s3(new q2("Request aborted")), o.send(), t2 && (t2.aborted && o.abort(), t2.addEventListener("abort", () => o.abort()));
+      });
+    }
+    async request({ headers: e2, signal: t2 } = {}) {
+      return await this.constructRequest(e2, t2);
+    }
+  };
+  he2 = {};
+  Mr = class Mr extends Fe2 {
+    constructor(e2, t2) {
+      super(), this.response = e2, this.dataPromise = t2;
+    }
+    get status() {
+      return this.response.statusCode;
+    }
+    getHeader(e2) {
+      return this.response.headers[e2];
+    }
+    async getData() {
+      return await this.dataPromise;
+    }
+  };
+  Br = class Br extends Ee2 {
+    constructor(e2) {
+      super(e2), this.parsedUrl = he2.parse(this.url), this.httpApi = (this.parsedUrl.protocol === "http:", he2);
+    }
+    constructRequest(e2, t2) {
+      return new Promise((r, s3) => {
+        const o = this.httpApi.get({
+          ...this.parsedUrl,
+          headers: e2
+        }, (n) => {
+          const a = new Promise((l3) => {
+            const c = [];
+            n.on("data", (h) => {
+              c.push(h);
+            }), n.on("end", () => {
+              const h = Buffer.concat(c).buffer;
+              l3(h);
+            }), n.on("error", s3);
+          });
+          r(new Mr(n, a));
+        });
+        o.on("error", s3), t2 && (t2.aborted && o.destroy(new q2("Request aborted")), t2.addEventListener("abort", () => o.destroy(new q2("Request aborted"))));
+      });
+    }
+    async request({ headers: e2, signal: t2 } = {}) {
+      return await this.constructRequest(e2, t2);
+    }
+  };
+  Pe2 = class Pe2 extends Ce2 {
+    constructor(e2, t2, r, s3) {
+      super(), this.client = e2, this.headers = t2, this.maxRanges = r, this.allowFullFile = s3, this._fileSize = null;
+    }
+    async fetch(e2, t2) {
+      return this.maxRanges >= e2.length ? this.fetchSlices(e2, t2) : (this.maxRanges > 0 && e2.length > 1, Promise.all(e2.map((r) => this.fetchSlice(r, t2))));
+    }
+    async fetchSlices(e2, t2) {
+      const r = await this.client.request({
+        headers: {
+          ...this.headers,
+          Range: `bytes=${e2.map(({ offset: s3, length: o }) => `${s3}-${s3 + o}`).join(",")}`
+        },
+        signal: t2
+      });
+      if (r.ok)
+        if (r.status === 206) {
+          const { type: s3, params: o } = xr(r.getHeader("content-type"));
+          if (s3 === "multipart/byteranges") {
+            const d3 = br2(await r.getData(), o.boundary);
+            return this._fileSize = d3[0].fileSize || null, d3;
+          }
+          const n = await r.getData(), { start: a, end: l3, total: c } = de2(r.getHeader("content-range"));
+          this._fileSize = c || null;
+          const h = [{
+            data: n,
+            offset: a,
+            length: l3 - a
+          }];
+          if (e2.length > 1) {
+            const d3 = await Promise.all(e2.slice(1).map((u) => this.fetchSlice(u, t2)));
+            return h.concat(d3);
+          }
+          return h;
+        } else {
+          if (!this.allowFullFile)
+            throw new Error("Server responded with full file");
+          const s3 = await r.getData();
+          return this._fileSize = s3.byteLength, [{
+            data: s3,
+            offset: 0,
+            length: s3.byteLength
+          }];
+        }
+      else
+        throw new Error("Error fetching data.");
+    }
+    async fetchSlice(e2, t2) {
+      const { offset: r, length: s3 } = e2, o = await this.client.request({
+        headers: {
+          ...this.headers,
+          Range: `bytes=${r}-${r + s3}`
+        },
+        signal: t2
+      });
+      if (o.ok)
+        if (o.status === 206) {
+          const n = await o.getData(), { total: a } = de2(o.getHeader("content-range"));
+          return this._fileSize = a || null, {
+            data: n,
+            offset: r,
+            length: s3
+          };
+        } else {
+          if (!this.allowFullFile)
+            throw new Error("Server responded with full file");
+          const n = await o.getData();
+          return this._fileSize = n.byteLength, {
+            data: n,
+            offset: 0,
+            length: n.byteLength
+          };
+        }
+      else
+        throw new Error("Error fetching data.");
+    }
+    get fileSize() {
+      return this._fileSize;
+    }
+  };
+  Ur = class Ur extends Ce2 {
+    constructor(e2) {
+      super(), this.file = e2;
+    }
+    async fetchSlice(e2, t2) {
+      return new Promise((r, s3) => {
+        const o = this.file.slice(e2.offset, e2.offset + e2.length), n = new FileReader;
+        n.onload = (a) => r(a.target.result), n.onerror = s3, n.onabort = s3, n.readAsArrayBuffer(o), t2 && t2.addEventListener("abort", () => n.abort());
+      });
+    }
+  };
+  ie3 = class ie3 extends Error {
+    constructor(e2) {
+      super(`No image at index ${e2}`), this.index = e2;
+    }
+  };
+  oe2 = class oe2 extends zr {
+    constructor(e2, t2, r, s3, o = {}) {
+      super(), this.source = e2, this.littleEndian = t2, this.bigTiff = r, this.firstIFDOffset = s3, this.cache = o.cache || false, this.ifdRequests = [], this.ghostValues = null;
+    }
+    async getSlice(e2, t2) {
+      const r = this.bigTiff ? 4048 : 1024;
+      return new yr((await this.source.fetch([{
+        offset: e2,
+        length: typeof t2 < "u" ? t2 : r
+      }]))[0], e2, this.littleEndian, this.bigTiff);
+    }
+    async parseFileDirectoryAt(e2) {
+      const t2 = this.bigTiff ? 20 : 12, r = this.bigTiff ? 8 : 2;
+      let s3 = await this.getSlice(e2);
+      const o = this.bigTiff ? s3.readUint64(e2) : s3.readUint16(e2), n = o * t2 + (this.bigTiff ? 16 : 6);
+      s3.covers(e2, n) || (s3 = await this.getSlice(e2, n));
+      const a = {};
+      let l3 = e2 + (this.bigTiff ? 8 : 2);
+      for (let d3 = 0;d3 < o; l3 += t2, ++d3) {
+        const u = s3.readUint16(l3), g2 = s3.readUint16(l3 + 2), f2 = this.bigTiff ? s3.readUint64(l3 + 4) : s3.readUint32(l3 + 4);
+        let y, p2;
+        const w = ge2(g2), m2 = l3 + (this.bigTiff ? 12 : 8);
+        if (w * f2 <= (this.bigTiff ? 8 : 4))
+          y = K3(s3, g2, f2, m2);
+        else {
+          const b = s3.readOffset(m2), T2 = ge2(g2) * f2;
+          if (s3.covers(b, T2))
+            y = K3(s3, g2, f2, b);
+          else {
+            const S2 = await this.getSlice(b, T2);
+            y = K3(S2, g2, f2, b);
+          }
+        }
+        f2 === 1 && Ht2.indexOf(u) === -1 && !(g2 === x3.RATIONAL || g2 === x3.SRATIONAL) ? p2 = y[0] : p2 = y, a[J[u]] = p2;
+      }
+      const c = Nr(a), h = s3.readOffset(e2 + r + t2 * o);
+      return new jr(a, c, h);
+    }
+    async requestIFD(e2) {
+      if (this.ifdRequests[e2])
+        return this.ifdRequests[e2];
+      if (e2 === 0)
+        return this.ifdRequests[e2] = this.parseFileDirectoryAt(this.firstIFDOffset), this.ifdRequests[e2];
+      if (!this.ifdRequests[e2 - 1])
+        try {
+          this.ifdRequests[e2 - 1] = this.requestIFD(e2 - 1);
+        } catch (t2) {
+          throw t2 instanceof ie3 ? new ie3(e2) : t2;
+        }
+      return this.ifdRequests[e2] = (async () => {
+        const t2 = await this.ifdRequests[e2 - 1];
+        if (t2.nextIFDByteOffset === 0)
+          throw new ie3(e2);
+        return this.parseFileDirectoryAt(t2.nextIFDByteOffset);
+      })(), this.ifdRequests[e2];
+    }
+    async getImage(e2 = 0) {
+      const t2 = await this.requestIFD(e2);
+      return new dr2(t2.fileDirectory, t2.geoKeyDirectory, this.dataView, this.littleEndian, this.cache, this.source);
+    }
+    async getImageCount() {
+      let e2 = 0, t2 = true;
+      for (;t2; )
+        try {
+          await this.requestIFD(e2), ++e2;
+        } catch (r) {
+          if (r instanceof ie3)
+            t2 = false;
+          else
+            throw r;
+        }
+      return e2;
+    }
+    async getGhostValues() {
+      const e2 = this.bigTiff ? 16 : 8;
+      if (this.ghostValues)
+        return this.ghostValues;
+      const t2 = "GDAL_STRUCTURAL_METADATA_SIZE=", r = t2.length + 100;
+      let s3 = await this.getSlice(e2, r);
+      if (t2 === K3(s3, x3.ASCII, t2.length, e2)) {
+        const n = K3(s3, x3.ASCII, r, e2).split(`
+`)[0], a = Number(n.split("=")[1].split(" ")[0]) + n.length;
+        a > r && (s3 = await this.getSlice(e2, a));
+        const l3 = K3(s3, x3.ASCII, a, e2);
+        this.ghostValues = {}, l3.split(`
+`).filter((c) => c.length > 0).map((c) => c.split("=")).forEach(([c, h]) => {
+          this.ghostValues[c] = h;
+        });
+      }
+      return this.ghostValues;
+    }
+    static async fromSource(e2, t2, r) {
+      const s3 = (await e2.fetch([{ offset: 0, length: 1024 }], r))[0], o = new gr(s3), n = o.getUint16(0, 0);
+      let a;
+      if (n === 18761)
+        a = true;
+      else if (n === 19789)
+        a = false;
+      else
+        throw new TypeError("Invalid byte order value.");
+      const l3 = o.getUint16(2, a);
+      let c;
+      if (l3 === 42)
+        c = false;
+      else if (l3 === 43) {
+        if (c = true, o.getUint16(4, a) !== 8)
+          throw new Error("Unsupported offset byte-size.");
+      } else
+        throw new TypeError("Invalid magic number.");
+      const h = c ? o.getUint64(8, a) : o.getUint32(4, a);
+      return new oe2(e2, a, c, h, t2);
+    }
+    close() {
+      return typeof this.source.close == "function" ? this.source.close() : false;
+    }
+  };
+  (function(i, e2) {
+    typeof exports_main_8v7k2MJ1 > "u" || typeof i.OpenSeadragon < "u" && e2(i.OpenSeadragon);
+  })(typeof window < "u" ? window : undefined, qr);
+});
+
+// src/static/collection.ts
 var import_openseadragon = __toESM(require_openseadragon(), 1);
+
+// node_modules/geotiff-tilesource/dist/geotiff-tilesource.mjs
+init_main_8v7k2MJ1();
 
 // src/static/util.ts
 function hideLoader() {
@@ -13033,57 +18857,44 @@ function hideLoader() {
   }
 }
 
-// src/static/index.ts
-var rough_max_image_pages = 1000 / 12;
-var random_page = Math.floor(Math.random() * rough_max_image_pages) + 1;
-console.log(`Fetching photos from page ${random_page}`);
-async function fetchPhotos() {
-  let req = {
-    page: random_page
-  };
-  const resp = await fetch("/api/photos", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(req)
+// src/static/collection.ts
+qr(import_openseadragon.default);
+var queryParams = new URLSearchParams(window.location.search);
+var collection = queryParams.get("q");
+async function fetchPhotos(collection2) {
+  const resp = await fetch("/api/collection/" + collection2, {
+    method: "GET"
   });
-  const data = await resp.json();
-  return data;
+  const respJson = await resp.json();
+  return respJson;
 }
-var options = {
-  id: "seadragon-viewer",
-  collectionMode: true,
-  collectionRows: 3,
-  collectionTileSize: 256,
-  collectionTileMargin: 5,
-  crossOriginPolicy: "Anonymous",
-  collectionLayout: window.innerHeight > window.innerWidth ? "vertical" : "horizontal",
-  showNavigator: true,
-  showNavigationControl: false,
-  drawer: "canvas"
-};
-var viewer = import_openseadragon.default(options);
-var imagesOnCanvas = false;
-fetchPhotos().then(async (resp) => {
-  for (const photo of resp.photos) {
-    const source = new import_openseadragon.ImageTileSource({
-      url: photo.url
-    });
-    viewer.addTiledImage({
-      tileSource: source
-    });
-    viewer.viewport.goHome(false);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-  }
-});
-viewer.world.addHandler("add-item", (event) => {
-  if (imagesOnCanvas) {
-    return;
-  }
-  const item = event.item;
-  item.addHandler("fully-loaded-change", (_loadEvent) => {
-    imagesOnCanvas = true;
-    hideLoader();
+async function getTileSources(url) {
+  return import_openseadragon.default.GeoTIFFTileSource.getAllTileSources(url, {
+    logLatency: false
   });
-});
+}
+async function initViewer(collection2) {
+  const photoUrls = await fetchPhotos(collection2);
+  console.log("photoUrls:", photoUrls);
+  const tileSourcesPromises = photoUrls.map((url) => getTileSources(url));
+  const tileSourcesArrays = await Promise.all(tileSourcesPromises);
+  const tileSources = tileSourcesArrays.flat();
+  let options = {
+    id: "seadragon-viewer",
+    tileSources,
+    collectionMode: true,
+    collectionRows: 3,
+    collectionTileSize: 256,
+    collectionTileMargin: 5,
+    crossOriginPolicy: "Anonymous",
+    collectionLayout: window.innerHeight > window.innerWidth ? "vertical" : "horizontal",
+    showNavigator: true,
+    showNavigationControl: false,
+    drawer: "canvas"
+  };
+  let viewer = import_openseadragon.default(options);
+  hideLoader();
+}
+if (collection) {
+  initViewer(collection);
+}

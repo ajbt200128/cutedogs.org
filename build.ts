@@ -1,5 +1,5 @@
 await Bun.build({
-    entrypoints: ["./src/static/index.ts"],
+    entrypoints: ["./src/static/index.ts", "./src/static/collection.ts"],
     outdir: "./public",
 });
 

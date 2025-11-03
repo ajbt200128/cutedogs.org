@@ -20,4 +20,11 @@
     "compatibility_flags": [
         "nodejs_compat"
     ],
+    "r2_buckets": [
+        {
+        "binding": "PHOTO_BUCKET",
+        "bucket_name": "cutedogs-org-prod",
+        "remote": true
+        }
+    ]
 }
