@@ -18894,6 +18894,10 @@ async function initViewer(collection2) {
   };
   let viewer = import_openseadragon.default(options);
   hideLoader();
+  for (let i = 0;i < 100; i++) {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    viewer.viewport.goHome(true);
+  }
 }
 if (collection) {
   initViewer(collection);

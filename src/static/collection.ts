@@ -11,7 +11,7 @@ async function fetchPhotos(collection: String): Promise<Array<String>> {
     const resp = await fetch("/api/collection/" + collection, {
         method: "GET",
     });
-    const respJson = await resp.json();
+    const respJson: Array<String> = await resp.json();
 
     return respJson;
 }
@@ -20,7 +20,17 @@ async function getTileSources(url: String): Promise<Array<TileSource>> {
         logLatency: false,
     });
 }
-
+function areAllFullyLoaded(viewer: Viewer): boolean {
+    var tiledImage;
+    var count = viewer.world.getItemCount();
+    for (var i = 0; i < count; i++) {
+        tiledImage = viewer.world.getItemAt(i);
+        if (!tiledImage.getFullyLoaded()) {
+            return false;
+        }
+    }
+    return true;
+}
 async function initViewer(collection: String) {
     const photoUrls = await fetchPhotos(collection);
     console.log("photoUrls:", photoUrls);
@@ -46,6 +56,11 @@ async function initViewer(collection: String) {
 
     let viewer: Viewer = OpenSeadragon(options);
     hideLoader();
+    // lol wtf
+    for (let i = 0; i < 100; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        viewer.viewport.goHome(true);
+    }
 }
 
 if (collection) {
