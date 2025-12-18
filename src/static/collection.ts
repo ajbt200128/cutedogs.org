@@ -22,7 +22,6 @@ async function getTileSources(url: String): Promise<Array<TileSource>> {
 }
 async function initViewer(collection: String) {
     const photoUrls = await fetchPhotos(collection);
-    console.log("photoUrls:", photoUrls);
     const tileSourcesPromises = photoUrls.map((url) => getTileSources(url));
     const tileSourcesArrays = await Promise.all(tileSourcesPromises);
     const tileSources = tileSourcesArrays.flat();
@@ -32,17 +31,20 @@ async function initViewer(collection: String) {
     const isAndroidDevice =
         /Android/.test(navigator.userAgent) && isPrimaryTouch;
 
+    const windowRatio = window.innerWidth / window.innerHeight;
+    // let's try to fit as close to a rectangle that's the ratio of the window as possible
+    let collectionRows = Math.round(
+        Math.sqrt(tileSources.length / windowRatio),
+    );
+
     let options: Options = {
         id: "seadragon-viewer",
         tileSources: tileSources,
         collectionMode: true,
-        collectionRows: 3,
+        collectionRows,
         collectionTileSize: 256,
         collectionTileMargin: 5,
         crossOriginPolicy: "Anonymous",
-        // vertial layout if we are on a narrow screen
-        collectionLayout:
-            window.innerHeight > window.innerWidth ? "vertical" : "horizontal",
         showNavigator: true,
         showNavigationControl: false,
         drawer: isIOSDevice || isAndroidDevice ? "canvas" : "webgl",

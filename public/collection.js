@@ -18875,22 +18875,22 @@ async function getTileSources(url) {
 }
 async function initViewer(collection2) {
   const photoUrls = await fetchPhotos(collection2);
-  console.log("photoUrls:", photoUrls);
   const tileSourcesPromises = photoUrls.map((url) => getTileSources(url));
   const tileSourcesArrays = await Promise.all(tileSourcesPromises);
   const tileSources = tileSourcesArrays.flat();
   const isPrimaryTouch = window.matchMedia("(pointer: coarse)").matches;
   const isIOSDevice = /iPad|iPhone|iPod|Max/.test(navigator.userAgent) && isPrimaryTouch;
   const isAndroidDevice = /Android/.test(navigator.userAgent) && isPrimaryTouch;
+  const windowRatio = window.innerWidth / window.innerHeight;
+  let collectionRows = Math.round(Math.sqrt(tileSources.length / windowRatio));
   let options = {
     id: "seadragon-viewer",
     tileSources,
     collectionMode: true,
-    collectionRows: 3,
+    collectionRows,
     collectionTileSize: 256,
     collectionTileMargin: 5,
     crossOriginPolicy: "Anonymous",
-    collectionLayout: window.innerHeight > window.innerWidth ? "vertical" : "horizontal",
     showNavigator: true,
     showNavigationControl: false,
     drawer: isIOSDevice || isAndroidDevice ? "canvas" : "webgl"
