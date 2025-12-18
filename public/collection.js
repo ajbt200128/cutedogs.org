@@ -18879,6 +18879,9 @@ async function initViewer(collection2) {
   const tileSourcesPromises = photoUrls.map((url) => getTileSources(url));
   const tileSourcesArrays = await Promise.all(tileSourcesPromises);
   const tileSources = tileSourcesArrays.flat();
+  const isPrimaryTouch = window.matchMedia("(pointer: coarse)").matches;
+  const isIOSDevice = /iPad|iPhone|iPod|Max/.test(navigator.userAgent) && isPrimaryTouch;
+  const isAndroidDevice = /Android/.test(navigator.userAgent) && isPrimaryTouch;
   let options = {
     id: "seadragon-viewer",
     tileSources,
@@ -18890,7 +18893,7 @@ async function initViewer(collection2) {
     collectionLayout: window.innerHeight > window.innerWidth ? "vertical" : "horizontal",
     showNavigator: true,
     showNavigationControl: false,
-    drawer: "canvas"
+    drawer: isIOSDevice || isAndroidDevice ? "canvas" : "webgl"
   };
   let viewer = import_openseadragon.default(options);
   hideLoader();
