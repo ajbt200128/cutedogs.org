@@ -20,17 +20,6 @@ async function getTileSources(url: String): Promise<Array<TileSource>> {
         logLatency: false,
     });
 }
-function areAllFullyLoaded(viewer: Viewer): boolean {
-    var tiledImage;
-    var count = viewer.world.getItemCount();
-    for (var i = 0; i < count; i++) {
-        tiledImage = viewer.world.getItemAt(i);
-        if (!tiledImage.getFullyLoaded()) {
-            return false;
-        }
-    }
-    return true;
-}
 async function initViewer(collection: String) {
     const photoUrls = await fetchPhotos(collection);
     console.log("photoUrls:", photoUrls);

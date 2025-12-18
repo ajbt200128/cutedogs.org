@@ -59,7 +59,7 @@ function buildRouter(env: Env): RouterType {
     router.get("/api/collection/:collectionId", async (request) => {
         // list all objects in the PHOTO_BUCKET with prefix collectionId/
         const { collectionId } = request.params;
-        const prefix = `${collectionId}/`;
+        const prefix = `${collectionId}`;
         const listResponse = await env.PHOTO_BUCKET.list({
             prefix: prefix,
         });
