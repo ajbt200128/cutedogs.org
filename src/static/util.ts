@@ -302,7 +302,8 @@ export async function initViewer(photoUrls: string[]) {
 
     setLoaderProgressText(`Loading ${tileSources.length} photos into viewer`);
     const viewer = OpenSeadragon(options);
-    setupMouseTracker(viewer, photoUrls);
+    // only if not on mobile
+    if (!isIOSDevice && !isAndroidDevice) setupMouseTracker(viewer, photoUrls);
     let item_count = 0;
     const allItemsAddedPromise = new Promise<void>((resolve) => {
         viewer.world.addHandler("add-item", (i: AddItemWorldEvent) => {
