@@ -38938,6 +38938,12 @@ function imageNameToUrl(name) {
   const namePyr = name.replace(".tif", "_pyr.tif");
   return `https://live.cutedogs.org/${namePyr}`;
 }
+function urlToImageName(url) {
+  const parts = url.split("/");
+  const namePyr = parts[parts.length - 1];
+  const name = namePyr.replace("_pyr.tif", ".tif");
+  return name;
+}
 function parseImageName(name) {
   const regex = /^([A-Za-z]+)_(\d+)_(\d+)\.tif$/;
   const match = name.match(regex);
@@ -38974,6 +38980,42 @@ function getPhotosByQuery(db, query, bindParams, sort = true) {
   }
   stmt.free();
   return images.map(imageNameToUrl);
+}
+function setupMouseTracker(viewer, imageUrls = []) {
+  const tracker = new import_openseadragon.default.MouseTracker({
+    element: viewer.container,
+    moveHandler: (event) => {
+      if (!(event.originalEvent instanceof MouseEvent))
+        return;
+      const mouseEvent = event.originalEvent;
+      const webPoint = new import_openseadragon.Point(mouseEvent.clientX, mouseEvent.clientY);
+      const viewportPoint = viewer.viewport.pointFromPixel(webPoint);
+      let index = -1;
+      for (let i2 = 0;i2 < viewer.world.getItemCount(); i2++) {
+        const maybeItem = viewer.world.getItemAt(i2);
+        if (maybeItem.getBounds(true).containsPoint(viewportPoint)) {
+          index = i2;
+          break;
+        }
+      }
+      const overlay = document.getElementById("image-label-overlay");
+      if (index < 0) {
+        console.log("Mouse not over any image");
+        if (overlay) {
+          overlay.style.display = "none";
+        }
+        return;
+      }
+      const imageName = urlToImageName(imageUrls[index]);
+      if (overlay) {
+        overlay.style.display = "block";
+        overlay.style.left = `${mouseEvent.clientX + 10}px`;
+        overlay.style.top = `${mouseEvent.clientY - 10}px`;
+        overlay.innerText = imageName;
+      }
+    }
+  });
+  tracker.setTracking(true);
 }
 async function fetchPhotoDB() {
   setLoaderProgressText("loading photo database");
@@ -39049,15 +39091,8 @@ async function initViewer(photoUrls) {
   };
   setLoaderProgressText(`Loading ${tileSources.length} photos into viewer`);
   const viewer = import_openseadragon.default(options);
+  setupMouseTracker(viewer, photoUrls);
   let item_count = 0;
-  tileSources.forEach((ts2) => {
-    ts2.addOnceHandler("ready", () => {
-      console.log("Tile source ready:", ts2);
-    });
-  });
-  viewer.addHandler("tile-loaded", () => {
-    console.log("Tile drawn");
-  });
   const allItemsAddedPromise = new Promise((resolve2) => {
     viewer.world.addHandler("add-item", (i2) => {
       i2.item.addOnceHandler("fully-loaded-change", () => {

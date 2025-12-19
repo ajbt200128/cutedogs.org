@@ -1,5 +1,10 @@
-import type { AddItemWorldEvent, Options, TileSource } from "openseadragon";
-import OpenSeadragon from "openseadragon";
+import type {
+    AddItemWorldEvent,
+    MouseTrackerEvent,
+    Options,
+    TileSource,
+} from "openseadragon";
+import OpenSeadragon, { Point } from "openseadragon";
 // @ts-ignore
 import { enableGeoTIFFTileSource } from "geotiff-tilesource";
 import initSqlJs, { type BindParams } from "sql.js";
@@ -46,14 +51,22 @@ function imageNameToUrl(name: string): string {
     return `https://live.cutedogs.org/${namePyr}`;
 }
 
-type ImageInfo = {
+function urlToImageName(url: string): string {
+    // reverse of imageNameToUrl
+    const parts = url.split("/");
+    const namePyr = parts[parts.length - 1]!;
+    const name = namePyr.replace("_pyr.tif", ".tif");
+    return name;
+}
+
+type ImageSortInfo = {
     colorKind: string;
     rollNumber: number;
     frame: number;
     originalName: string;
 };
 
-function parseImageName(name: string): ImageInfo | null {
+function parseImageName(name: string): ImageSortInfo | null {
     // name is COLORKIND_ROLLNUMBER_FRAME.tif
     const regex = /^([A-Za-z]+)_(\d+)_(\d+)\.tif$/;
     const match = name.match(regex);
@@ -69,9 +82,9 @@ function parseImageName(name: string): ImageInfo | null {
 function sortImagesByRoll(images: string[]): string[] {
     // all images are COLORKIND_ROLLNUMBER_FRAME_pyr.tif
     // we want to sort by FRAME THEN ROLLNUMBER
-    const parsedImages: ImageInfo[] = images
+    const parsedImages: ImageSortInfo[] = images
         .map(parseImageName)
-        .filter((info): info is ImageInfo => info !== null);
+        .filter((info): info is ImageSortInfo => info !== null);
     parsedImages.sort((a, b) => {
         if (a.rollNumber == b.rollNumber) {
             return a.frame - b.frame;
@@ -79,6 +92,31 @@ function sortImagesByRoll(images: string[]): string[] {
         return a.rollNumber - b.rollNumber;
     });
     return parsedImages.map((info) => info.originalName);
+}
+
+type ImageInfo = {
+    name: string;
+    keywords: string;
+    date_created: string;
+};
+
+function getDataForImage(db: Database, imageName: string): ImageInfo | null {
+    const query =
+        "SELECT name, keywords, date_created FROM images WHERE name = $NAME LIMIT 1";
+    const stmt = db.prepare(query);
+    stmt.bind({ $NAME: imageName });
+    if (stmt.step()) {
+        const row = stmt.getAsObject();
+        stmt.free();
+        return {
+            name: row.name as string,
+            keywords: row.keywords as string,
+            date_created: row.date_created as string,
+        };
+    } else {
+        stmt.free();
+        return null;
+    }
 }
 
 function getPhotosByQuery(
@@ -99,6 +137,48 @@ function getPhotosByQuery(
     }
     stmt.free();
     return images.map(imageNameToUrl);
+}
+
+// setup a mousetracker that tracks which image is under the mouse, and logs it to the console
+function setupMouseTracker(
+    viewer: OpenSeadragon.Viewer,
+    imageUrls: string[] = [],
+) {
+    const tracker = new OpenSeadragon.MouseTracker({
+        element: viewer.container,
+        moveHandler: (event: MouseTrackerEvent<Event>) => {
+            // check if it is a mouse event
+            if (!(event.originalEvent instanceof MouseEvent)) return;
+            const mouseEvent = event.originalEvent as MouseEvent;
+            const webPoint = new Point(mouseEvent.clientX, mouseEvent.clientY);
+            const viewportPoint = viewer.viewport.pointFromPixel(webPoint);
+            let index = -1;
+            for (let i = 0; i < viewer.world.getItemCount(); i++) {
+                const maybeItem = viewer.world.getItemAt(i);
+                if (maybeItem.getBounds(true).containsPoint(viewportPoint)) {
+                    index = i;
+                    break;
+                }
+            }
+            const overlay = document.getElementById("image-label-overlay");
+            if (index < 0) {
+                console.log("Mouse not over any image");
+                if (overlay) {
+                    overlay.style.display = "none";
+                }
+                return;
+            }
+            const imageName = urlToImageName(imageUrls[index]!);
+            // show overlay with image info
+            if (overlay) {
+                overlay.style.display = "block";
+                overlay.style.left = `${mouseEvent.clientX + 10}px`;
+                overlay.style.top = `${mouseEvent.clientY - 10}px`;
+                overlay.innerText = imageName;
+            }
+        },
+    });
+    tracker.setTracking(true);
 }
 
 // exported
@@ -202,15 +282,8 @@ export async function initViewer(photoUrls: string[]) {
 
     setLoaderProgressText(`Loading ${tileSources.length} photos into viewer`);
     const viewer = OpenSeadragon(options);
+    setupMouseTracker(viewer, photoUrls);
     let item_count = 0;
-    tileSources.forEach((ts) => {
-        ts.addOnceHandler("ready", () => {
-            console.log("Tile source ready:", ts);
-        });
-    });
-    viewer.addHandler("tile-loaded", () => {
-        console.log("Tile drawn");
-    });
     const allItemsAddedPromise = new Promise<void>((resolve) => {
         viewer.world.addHandler("add-item", (i: AddItemWorldEvent) => {
             i.item.addOnceHandler("fully-loaded-change", () => {
