@@ -1,59 +1,37 @@
-import type { Options, TileSource, Viewer } from "openseadragon";
-import OpenSeadragon from "openseadragon";
-import { enableGeoTIFFTileSource } from "geotiff-tilesource";
-import { hideLoader } from "./util";
+import {
+    fetchPhotoDB,
+    getAllImages,
+    getImagesWithPrefix,
+    getImageWithTags,
+    initViewer,
+} from "./util";
 
-enableGeoTIFFTileSource(OpenSeadragon);
 const queryParams = new URLSearchParams(window.location.search);
-const collection = queryParams.get("q");
+const tags = queryParams.get("tags")?.split(",") || undefined;
+const prefix = queryParams.get("prefix") || undefined;
 
-async function fetchPhotos(collection: String): Promise<Array<String>> {
-    const resp = await fetch("/api/collection/" + collection, {
-        method: "GET",
-    });
-    const respJson: Array<String> = await resp.json();
+async function collectionPhotos(): Promise<string[]> {
+    console.log("Fetching photo database...");
+    const db = await fetchPhotoDB();
+    console.log("Photo database loaded");
 
-    return respJson;
+    console.log("Querying photos...");
+    // get photo urls
+    let photoUrls: string[] = [];
+    if (prefix) {
+        photoUrls = getImagesWithPrefix(db, prefix);
+    } else if (tags && tags.length > 0) {
+        photoUrls = getImageWithTags(db, tags);
+    } else {
+        // get all images
+        photoUrls = getAllImages(db);
+    }
+    console.log(`Found ${photoUrls.length} photos from query`);
+    return photoUrls;
 }
-async function getTileSources(url: String): Promise<Array<TileSource>> {
-    return OpenSeadragon.GeoTIFFTileSource.getAllTileSources(url, {
-        logLatency: false,
-    });
-}
-async function initViewer(collection: String) {
-    const photoUrls = await fetchPhotos(collection);
-    const tileSourcesPromises = photoUrls.map((url) => getTileSources(url));
-    const tileSourcesArrays = await Promise.all(tileSourcesPromises);
-    const tileSources = tileSourcesArrays.flat();
-    const isPrimaryTouch = window.matchMedia("(pointer: coarse)").matches;
-    const isIOSDevice =
-        /iPad|iPhone|iPod|Max/.test(navigator.userAgent) && isPrimaryTouch;
-    const isAndroidDevice =
-        /Android/.test(navigator.userAgent) && isPrimaryTouch;
+collectionPhotos().then(async (photoUrls) => {
+    console.log("Initializing viewer?...");
+    await initViewer(photoUrls);
 
-    const windowRatio = window.innerWidth / window.innerHeight;
-    // let's try to fit as close to a rectangle that's the ratio of the window as possible
-    let collectionRows = Math.round(
-        Math.sqrt(tileSources.length / windowRatio),
-    );
-
-    let options: Options = {
-        id: "seadragon-viewer",
-        tileSources: tileSources,
-        collectionMode: true,
-        collectionRows,
-        collectionTileSize: 256,
-        collectionTileMargin: 5,
-        crossOriginPolicy: "Anonymous",
-        showNavigator: true,
-        showNavigationControl: false,
-        drawer: isIOSDevice || isAndroidDevice ? "canvas" : "webgl",
-    };
-
-    OpenSeadragon(options);
-    hideLoader();
-}
-
-if (collection) {
-    initViewer(collection);
-}
+    console.log("Viewer initialized.");
+});

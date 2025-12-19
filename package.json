@@ -12,6 +12,7 @@
     "@types/bun": "latest",
     "@types/node": "^24.9.2",
     "@types/openseadragon": "^5.0.1",
+    "@types/sql.js": "^1.4.9",
     "wrangler": "^4.45.3"
   },
   "peerDependencies": {
@@ -21,6 +22,7 @@
     "flickr-sdk": "^7.1.0",
     "geotiff-tilesource": "^2.2.0",
     "itty-router": "^5.0.22",
-    "openseadragon": "^5.0.1"
+    "openseadragon": "^5.0.1",
+    "sql.js": "^1.13.0"
   }
 }

@@ -1,6 +1,7 @@
 import { Router, type RouterType } from "itty-router";
 import { createFlickr, type Flickr } from "flickr-sdk";
 import { type PhotosRequest } from "../shared/types";
+
 export interface Env {
     router?: RouterType;
     FLICKR_KEY: string;
@@ -56,19 +57,17 @@ function buildRouter(env: Env): RouterType {
         });
         return Response.json({ photos });
     });
-    router.get("/api/collection/:collectionId", async (request) => {
-        // list all objects in the PHOTO_BUCKET with prefix collectionId/
-        const { collectionId } = request.params;
-        const prefix = `${collectionId}`;
-        const listResponse = await env.PHOTO_BUCKET.list({
-            prefix: prefix,
+    // expose the photo db file
+    router.get("/api/db", async () => {
+        const obj = await env.PHOTO_BUCKET.get("photos.db");
+        if (!obj || !obj.body) {
+            return new Response("Database not found.", { status: 404 });
+        }
+        return new Response(obj.body, {
+            headers: {
+                "Content-Type": "application/octet-stream",
+            },
         });
-        const photoUrls = listResponse.objects
-            .filter((obj) => !obj.key.endsWith("/"))
-            .map((obj) => {
-                return `https:///live.cutedogs.org/` + obj.key;
-            });
-        return Response.json(photoUrls);
     });
 
     router.all("*", () => new Response("Not Found.", { status: 404 }));
