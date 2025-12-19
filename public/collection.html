@@ -1,42 +1,45 @@
 <!doctype html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>
-      .spinner {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+            .spinner {
+                width: min-content;
+                height: min-content;
+                white-space: nowrap;
+                border-radius: 50%;
+                animation: spin 5s linear infinite;
+            }
 
-      @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
-      }
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
 
-      body {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100vw; /* Centers the spinner horizontally */
-        height: 100vh; /* Centers the spinner vertically */
-        margin: 0;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="spinner" id="loader">loading collection</div>
-    <div
-      id="seadragon-viewer"
-      style="width: 100vw; height: 100vh; display: none"
-    ></div>
-    <div id="nophotos" style="display: none">No photos found :(</div>
-    <script src="./collection.js"></script>
-  </body>
+            body {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 100vw; /* Centers the spinner horizontally */
+                height: 100vh; /* Centers the spinner vertically */
+                margin: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="spinner" id="loader">
+            loading collection:<br /><span id="loaderprogress"></span>
+        </div>
+        <div
+            id="seadragon-viewer"
+            style="width: 100vw; height: 100vh; display: none"
+        ></div>
+        <div id="nophotos" style="display: none">No photos found :(</div>
+        <script src="./collection.js"></script>
+    </body>
 </html>

@@ -38913,6 +38913,12 @@ function hideLoader() {
     canvas.style.display = "block";
   }
 }
+function setLoaderProgressText(text) {
+  const loaderText = document.getElementById("loaderprogress");
+  if (loaderText) {
+    loaderText.innerText = text;
+  }
+}
 function showNotfound() {
   const notfound = document.getElementById("nophotos");
   const loader = document.getElementById("loader");
@@ -38932,19 +38938,45 @@ function imageNameToUrl(name) {
   const namePyr = name.replace(".tif", "_pyr.tif");
   return `https://live.cutedogs.org/${namePyr}`;
 }
-function getPhotosByQuery(db, query, bindParams) {
+function parseImageName(name) {
+  const regex = /^([A-Za-z]+)_(\d+)_(\d+)\.tif$/;
+  const match = name.match(regex);
+  if (!match)
+    return null;
+  return {
+    colorKind: match[1] || "",
+    rollNumber: parseInt(match[2] || "0", 10),
+    frame: parseInt(match[3] || "0", 10),
+    originalName: name
+  };
+}
+function sortImagesByRoll(images) {
+  const parsedImages = images.map(parseImageName).filter((info) => info !== null);
+  parsedImages.sort((a, b) => {
+    if (a.rollNumber == b.rollNumber) {
+      return a.frame - b.frame;
+    }
+    return a.rollNumber - b.rollNumber;
+  });
+  return parsedImages.map((info) => info.originalName);
+}
+function getPhotosByQuery(db, query, bindParams, sort = true) {
   const stmt = db.prepare(query);
   if (bindParams)
     stmt.bind(bindParams);
-  const images = [];
+  let images = [];
   while (stmt.step()) {
     const row = stmt.getAsObject();
-    images.push(imageNameToUrl(row.name));
+    images.push(row.name);
+  }
+  if (sort) {
+    images = sortImagesByRoll(images);
   }
   stmt.free();
-  return images;
+  return images.map(imageNameToUrl);
 }
 async function fetchPhotoDB() {
+  setLoaderProgressText("loading photo database");
   const SQL = await import_sql.default({
     locateFile: (file) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.13.0/${file}`
   });
@@ -38954,23 +38986,30 @@ async function fetchPhotoDB() {
   const arrayBuffer = await resp.arrayBuffer();
   const u8Array = new Uint8Array(arrayBuffer);
   const db = new SQL.Database(u8Array);
+  setLoaderProgressText("Photo database loaded");
   return db;
 }
 function getImageWithTags(db, tags) {
+  setLoaderProgressText(`querying photos with ${tags.length} tags`);
   let query = "SELECT name FROM images WHERE 1=1";
   for (let i2 = 0;i2 < tags.length; i2++) {
     query += ` AND keywords LIKE $TAG${i2}`;
   }
   const tagParams = tags.map((tag) => `%${tag}%`);
+  setLoaderProgressText(`found photos with ${tags.length} tags`);
   return getPhotosByQuery(db, query, tagParams);
 }
 function getImagesWithPrefix(db, prefix) {
+  setLoaderProgressText(`Querying photos with prefix "${prefix}"`);
   const query = "SELECT name FROM images WHERE name LIKE $PREFIX";
   const prefixParams = [`${prefix}%`];
+  setLoaderProgressText(`Found photos with prefix "${prefix}"`);
   return getPhotosByQuery(db, query, prefixParams);
 }
 function getAllImages(db) {
+  setLoaderProgressText("Querying all photos");
   const query = "SELECT name FROM images";
+  setLoaderProgressText("Found all photos");
   return getPhotosByQuery(db, query);
 }
 async function initViewer(photoUrls) {
@@ -38978,14 +39017,21 @@ async function initViewer(photoUrls) {
     showNotfound();
     return;
   }
-  console.log(`Initializing viewer with ${photoUrls.length} photos...`);
+  console.log(`initializing viewer with ${photoUrls.length} photos...`);
   qr(import_openseadragon.default);
   const isPrimaryTouch = window.matchMedia("(pointer: coarse)").matches;
   const isIOSDevice = /iPad|iPhone|iPod|Max/.test(navigator.userAgent) && isPrimaryTouch;
   const isAndroidDevice = /Android/.test(navigator.userAgent) && isPrimaryTouch;
-  const tileSourcesPromises = photoUrls.map((url) => getTileSources(url));
-  const tileSourcesArrays = await Promise.all(tileSourcesPromises);
-  const tileSources = tileSourcesArrays.flat();
+  setLoaderProgressText("Loading tile sources for photos");
+  let tileSourceCounter = 0;
+  setLoaderProgressText(`loaded 0 tile sources of ${photoUrls.length} photos`);
+  const tileSourcesPromises = photoUrls.map(async (url) => {
+    const tileSource = (await getTileSources(url))[0];
+    tileSourceCounter++;
+    setLoaderProgressText(`loaded ${tileSourceCounter} tile sources of ${photoUrls.length} photos`);
+    return tileSource;
+  });
+  const tileSources = await Promise.all(tileSourcesPromises);
   const windowRatio = window.innerWidth / window.innerHeight;
   let collectionRows = Math.round(Math.sqrt(tileSources.length / windowRatio));
   let options = {
@@ -39001,23 +39047,31 @@ async function initViewer(photoUrls) {
     drawer: isIOSDevice || isAndroidDevice ? "canvas" : "webgl",
     immediateRender: isIOSDevice || isAndroidDevice
   };
-  console.log("OpenSeadragon options:", options);
+  setLoaderProgressText(`Loading ${tileSources.length} photos into viewer`);
   const viewer = import_openseadragon.default(options);
   let item_count = 0;
-  const allItemsAddedPromise = new Promise((resolve2) => {
-    viewer.world.addHandler("add-item", () => {
-      item_count++;
-      if (item_count === tileSources.length) {
-        resolve2();
-      }
+  tileSources.forEach((ts2) => {
+    ts2.addOnceHandler("ready", () => {
+      console.log("Tile source ready:", ts2);
     });
   });
-  console.log("Viewer created:", viewer);
+  viewer.addHandler("tile-loaded", () => {
+    console.log("Tile drawn");
+  });
+  const allItemsAddedPromise = new Promise((resolve2) => {
+    viewer.world.addHandler("add-item", (i2) => {
+      i2.item.addOnceHandler("fully-loaded-change", () => {
+        setLoaderProgressText(`Loaded ${item_count + 1} of ${tileSources.length} photos`);
+        item_count++;
+        if (item_count === tileSources.length) {
+          resolve2();
+        }
+      });
+    });
+  });
   await allItemsAddedPromise;
-  for (let i2 = 0;i2 < 100; i2++) {
-    await new Promise((resolve2) => setTimeout(resolve2, 10));
-    viewer.viewport.goHome(true);
-  }
+  setLoaderProgressText("Moving you to a good viewpoint");
+  viewer.viewport.goHome(true);
   hideLoader();
 }
 
