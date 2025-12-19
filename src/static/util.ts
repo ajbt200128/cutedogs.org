@@ -144,17 +144,21 @@ function setupMouseTracker(
     viewer: OpenSeadragon.Viewer,
     imageUrls: string[] = [],
 ) {
+    let lastMousePosition: Point | null = null;
     const tracker = new OpenSeadragon.MouseTracker({
         element: viewer.container,
         moveHandler: (event: MouseTrackerEvent<Event>) => {
+            const mouseMoveTime = Date.now();
             // check if it is a mouse event
             if (!(event.originalEvent instanceof MouseEvent)) return;
             const mouseEvent = event.originalEvent as MouseEvent;
             const webPoint = new Point(mouseEvent.clientX, mouseEvent.clientY);
+            lastMousePosition = webPoint;
             const viewportPoint = viewer.viewport.pointFromPixel(webPoint);
             let index = -1;
             for (let i = 0; i < viewer.world.getItemCount(); i++) {
                 const maybeItem = viewer.world.getItemAt(i);
+
                 if (maybeItem.getBounds(true).containsPoint(viewportPoint)) {
                     index = i;
                     break;
@@ -162,12 +166,28 @@ function setupMouseTracker(
             }
             const overlay = document.getElementById("image-label-overlay");
             if (index < 0) {
-                console.log("Mouse not over any image");
                 if (overlay) {
                     overlay.style.display = "none";
                 }
                 return;
             }
+
+            // if the mouse hasn't moved in more than 3s fade out the overlay
+            new Promise<void>((resolve) => {
+                setTimeout(() => {
+                    resolve();
+                }, 1000);
+            }).then(() => {
+                if (
+                    lastMousePosition &&
+                    lastMousePosition.equals(webPoint) &&
+                    Date.now() - mouseMoveTime >= 1000
+                ) {
+                    if (overlay) {
+                        overlay.style.display = "none";
+                    }
+                }
+            });
             const imageName = urlToImageName(imageUrls[index]!);
             // show overlay with image info
             if (overlay) {

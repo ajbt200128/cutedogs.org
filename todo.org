@@ -1,0 +1,4 @@
+#+title: Todo
+* filter images by date (a la grafan 3 months ago etc.)
+* Show tags/caption on hover
+*

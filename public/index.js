@@ -38982,13 +38982,16 @@ function getPhotosByQuery(db, query, bindParams, sort = true) {
   return images.map(imageNameToUrl);
 }
 function setupMouseTracker(viewer, imageUrls = []) {
+  let lastMousePosition = null;
   const tracker = new import_openseadragon.default.MouseTracker({
     element: viewer.container,
     moveHandler: (event) => {
+      const mouseMoveTime = Date.now();
       if (!(event.originalEvent instanceof MouseEvent))
         return;
       const mouseEvent = event.originalEvent;
       const webPoint = new import_openseadragon.Point(mouseEvent.clientX, mouseEvent.clientY);
+      lastMousePosition = webPoint;
       const viewportPoint = viewer.viewport.pointFromPixel(webPoint);
       let index = -1;
       for (let i2 = 0;i2 < viewer.world.getItemCount(); i2++) {
@@ -39000,12 +39003,22 @@ function setupMouseTracker(viewer, imageUrls = []) {
       }
       const overlay = document.getElementById("image-label-overlay");
       if (index < 0) {
-        console.log("Mouse not over any image");
         if (overlay) {
           overlay.style.display = "none";
         }
         return;
       }
+      new Promise((resolve2) => {
+        setTimeout(() => {
+          resolve2();
+        }, 1000);
+      }).then(() => {
+        if (lastMousePosition && lastMousePosition.equals(webPoint) && Date.now() - mouseMoveTime >= 1000) {
+          if (overlay) {
+            overlay.style.display = "none";
+          }
+        }
+      });
       const imageName = urlToImageName(imageUrls[index]);
       if (overlay) {
         overlay.style.display = "block";
