@@ -133,7 +133,6 @@ export async function initViewer(photoUrls: string[]) {
         immediateRender: isIOSDevice || isAndroidDevice,
     };
 
-    console.log("OpenSeadragon options:", options);
     const viewer = OpenSeadragon(options);
     let item_count = 0;
     const allItemsAddedPromise = new Promise<void>((resolve) => {
@@ -144,7 +143,6 @@ export async function initViewer(photoUrls: string[]) {
             }
         });
     });
-    console.log("Viewer created:", viewer);
     await allItemsAddedPromise;
     for (let i = 0; i < 100; i++) {
         await new Promise((resolve) => setTimeout(resolve, 10));
