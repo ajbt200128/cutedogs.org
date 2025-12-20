@@ -39075,12 +39075,10 @@ async function initViewer(photoUrls) {
     showNotfound();
     return;
   }
-  console.log(`initializing viewer with ${photoUrls.length} photos...`);
   qr(import_openseadragon.default);
   const isPrimaryTouch = window.matchMedia("(pointer: coarse)").matches;
   const isIOSDevice = /iPad|iPhone|iPod|Max/.test(navigator.userAgent) && isPrimaryTouch;
   const isAndroidDevice = /Android/.test(navigator.userAgent) && isPrimaryTouch;
-  setLoaderProgressText("Loading tile sources for photos");
   let tileSourceCounter = 0;
   setLoaderProgressText(`loaded 0 tile sources of ${photoUrls.length} photos`);
   const tileSourcesPromises = photoUrls.map(async (url) => {
@@ -39105,15 +39103,14 @@ async function initViewer(photoUrls) {
     drawer: isIOSDevice || isAndroidDevice ? "canvas" : "webgl",
     immediateRender: isIOSDevice || isAndroidDevice
   };
-  setLoaderProgressText(`Loading ${tileSources.length} photos into viewer`);
+  setLoaderProgressText("initializing viewer");
   const viewer = import_openseadragon.default(options);
-  if (!isIOSDevice && !isAndroidDevice)
-    setupMouseTracker(viewer, photoUrls);
+  setLoaderProgressText(`loaded 0 of ${tileSources.length} photos`);
   let item_count = 0;
   const allItemsAddedPromise = new Promise((resolve2) => {
     viewer.world.addHandler("add-item", (i2) => {
       i2.item.addOnceHandler("fully-loaded-change", () => {
-        setLoaderProgressText(`Loaded ${item_count + 1} of ${tileSources.length} photos`);
+        setLoaderProgressText(`loaded ${item_count + 1} of ${tileSources.length} photos`);
         item_count++;
         if (item_count === tileSources.length) {
           resolve2();
@@ -39122,7 +39119,10 @@ async function initViewer(photoUrls) {
     });
   });
   await allItemsAddedPromise;
-  setLoaderProgressText("Moving you to a good viewpoint");
+  setLoaderProgressText("all photos loaded");
+  if (!isIOSDevice && !isAndroidDevice)
+    setupMouseTracker(viewer, photoUrls);
+  setLoaderProgressText("moving you to a good viewpoint");
   viewer.viewport.goHome(true);
   hideLoader();
 }
