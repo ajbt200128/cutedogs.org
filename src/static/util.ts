@@ -86,37 +86,15 @@ function sortImagesByRoll(images: string[]): string[] {
         .map(parseImageName)
         .filter((info): info is ImageSortInfo => info !== null);
     parsedImages.sort((a, b) => {
-        if (a.rollNumber == b.rollNumber) {
-            return a.frame - b.frame;
+        if (a.colorKind != b.colorKind) {
+            return a.colorKind.localeCompare(b.colorKind);
         }
-        return a.rollNumber - b.rollNumber;
+        if (a.rollNumber != b.rollNumber) {
+            return a.rollNumber - b.rollNumber;
+        }
+        return a.frame - b.frame;
     });
     return parsedImages.map((info) => info.originalName);
-}
-
-type ImageInfo = {
-    name: string;
-    keywords: string;
-    date_created: string;
-};
-
-function getDataForImage(db: Database, imageName: string): ImageInfo | null {
-    const query =
-        "SELECT name, keywords, date_created FROM images WHERE name = $NAME LIMIT 1";
-    const stmt = db.prepare(query);
-    stmt.bind({ $NAME: imageName });
-    if (stmt.step()) {
-        const row = stmt.getAsObject();
-        stmt.free();
-        return {
-            name: row.name as string,
-            keywords: row.keywords as string,
-            date_created: row.date_created as string,
-        };
-    } else {
-        stmt.free();
-        return null;
-    }
 }
 
 function getPhotosByQuery(

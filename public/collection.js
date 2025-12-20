@@ -38959,10 +38959,13 @@ function parseImageName(name) {
 function sortImagesByRoll(images) {
   const parsedImages = images.map(parseImageName).filter((info) => info !== null);
   parsedImages.sort((a, b) => {
-    if (a.rollNumber == b.rollNumber) {
-      return a.frame - b.frame;
+    if (a.colorKind != b.colorKind) {
+      return a.colorKind.localeCompare(b.colorKind);
     }
-    return a.rollNumber - b.rollNumber;
+    if (a.rollNumber != b.rollNumber) {
+      return a.rollNumber - b.rollNumber;
+    }
+    return a.frame - b.frame;
   });
   return parsedImages.map((info) => info.originalName);
 }
@@ -39104,7 +39107,8 @@ async function initViewer(photoUrls) {
   };
   setLoaderProgressText(`Loading ${tileSources.length} photos into viewer`);
   const viewer = import_openseadragon.default(options);
-  setupMouseTracker(viewer, photoUrls);
+  if (!isIOSDevice && !isAndroidDevice)
+    setupMouseTracker(viewer, photoUrls);
   let item_count = 0;
   const allItemsAddedPromise = new Promise((resolve2) => {
     viewer.world.addHandler("add-item", (i2) => {
