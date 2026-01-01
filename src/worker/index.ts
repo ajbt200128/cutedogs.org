@@ -44,7 +44,7 @@ function buildRouter(env: Env): RouterType {
         const flickr = env.flickr!;
         const response = await searchFlickr(
             flickr,
-            undefined,
+            randomInt(1, 50),
             false,
             undefined,
             undefined,
