@@ -1,6 +1,7 @@
 import { Router, type RouterType } from "itty-router";
 import { createFlickr, type Flickr } from "flickr-sdk";
 import { type PhotosRequest } from "../shared/types";
+import { randomInt } from "crypto";
 
 export interface Env {
     router?: RouterType;
@@ -21,23 +22,58 @@ const searchFlickr = async (
     reverse: boolean = false,
     minTakenDate?: Date,
     perPage: number = PER_PAGE,
+    tags: string = "franz",
 ): Promise<any> => {
-    console.log("page:", page);
     return await flickr("flickr.photos.search", {
         user_id: "201682256@N04",
-        tags: "franz",
+        tags: tags,
         sort: reverse ? "date-taken-asc" : "date-taken-desc",
         min_taken_date: minTakenDate
             ? minTakenDate.toISOString().slice(0, 19).replace("T", " ")
             : undefined,
         per_page: `${perPage}`,
         page: page ? `${page}` : undefined,
-        extras: ["url_o", "tags"].join(","),
+        extras: ["url_o", "url_c", "tags"].join(","),
     });
 };
 
 function buildRouter(env: Env): RouterType {
     const router = Router();
+    //  route to get a random bw photo
+    router.get("/api/random-photo.jpeg", async () => {
+        const flickr = env.flickr!;
+        const response = await searchFlickr(
+            flickr,
+            undefined,
+            false,
+            undefined,
+            undefined,
+            "bw",
+        );
+        console.log(response);
+        console.log(response.photos.photo.length);
+        console.log(randomInt(0, response.photos.photo.length - 1));
+        const photo =
+            response.photos.photo[
+                randomInt(0, response.photos.photo.length - 1)
+            ];
+        console.log(photo);
+        if (!photo || !photo.url_c) {
+            return new Response("Photo not found.", { status: 404 });
+        }
+        const photoUrl = photo.url_c;
+
+        const photoResponse = await fetch(photoUrl);
+        if (!photoResponse.ok || !photoResponse.body) {
+            return new Response("Failed to fetch photo.", { status: 500 });
+        }
+
+        const headers = new Headers(photoResponse.headers);
+        headers.set("Content-Type", "image/jpeg");
+        return new Response(photoResponse.body, {
+            headers: headers,
+        });
+    });
     router.post("/api/photos", async (request) => {
         const flickr = env.flickr!;
         const body: PhotosRequest = await request.json();
