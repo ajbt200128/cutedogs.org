@@ -50,14 +50,10 @@ function buildRouter(env: Env): RouterType {
             undefined,
             "bw",
         );
-        console.log(response);
-        console.log(response.photos.photo.length);
-        console.log(randomInt(0, response.photos.photo.length - 1));
         const photo =
             response.photos.photo[
                 randomInt(0, response.photos.photo.length - 1)
             ];
-        console.log(photo);
         if (!photo || !photo.url_c) {
             return new Response("Photo not found.", { status: 404 });
         }
