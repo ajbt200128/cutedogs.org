@@ -1,13 +1,17 @@
+/// <reference types="@cloudflare/workers-types" />
 import { Router, type RouterType } from "itty-router";
 import { createFlickr, type Flickr } from "flickr-sdk";
 import { type PhotosRequest } from "../shared/types";
 import { randomInt } from "crypto";
+import { renderPhotoFrame } from "./photo-frame.ts";
 
 export interface Env {
     router?: RouterType;
     FLICKR_KEY: string;
     FLICKR_SECRET: string;
     PHOTO_BUCKET: R2Bucket;
+    IMAGES: ImagesBinding;
+    ASSETS: Fetcher;
     flickr?: Flickr;
 }
 
@@ -33,43 +37,35 @@ const searchFlickr = async (
             : undefined,
         per_page: `${perPage}`,
         page: page ? `${page}` : undefined,
-        extras: ["url_o", "url_c", "tags"].join(","),
+        extras: ["url_o", "url_c", "url_h", "url_l", "date_taken", "last_update", "tags"].join(","),
     });
 };
 
 function buildRouter(env: Env): RouterType {
     const router = Router();
-    //  route to get a random bw photo
-    router.get("/api/random-photo.jpeg", async () => {
-        const flickr = env.flickr!;
-        const response = await searchFlickr(
-            flickr,
-            randomInt(1, 50),
-            false,
-            undefined,
-            undefined,
-            "bw",
-        );
-        const photo =
-            response.photos.photo[
-                randomInt(0, response.photos.photo.length - 1)
-            ];
-        if (!photo || !photo.url_c) {
-            return new Response("Photo not found.", { status: 404 });
+    const randomPhoto = (tag: "bw" | "color") => async (request: Request) => {
+        try {
+            const first = await searchFlickr(env.flickr!, 1, false, undefined, 1, tag);
+            const total = Number(first.photos.total);
+            if (!Number.isSafeInteger(total) || total < 1) {
+                return new Response("Photo not found.", { status: 404 });
+            }
+            const page = randomInt(total) + 1;
+            const result = page === 1 ? first :
+                await searchFlickr(env.flickr!, page, false, undefined, 1, tag);
+            const photo = result.photos.photo[0];
+            if (!photo) return new Response("Photo not found.", { status: 404 });
+            return await renderPhotoFrame(request, env, photo, tag);
+        } catch (error) {
+            console.error("Random photo failed", error);
+            return new Response("Failed to render photo.", { status: 502 });
         }
-        const photoUrl = photo.url_c;
-
-        const photoResponse = await fetch(photoUrl);
-        if (!photoResponse.ok || !photoResponse.body) {
-            return new Response("Failed to fetch photo.", { status: 500 });
-        }
-
-        const headers = new Headers(photoResponse.headers);
-        headers.set("Content-Type", "image/jpeg");
-        return new Response(photoResponse.body, {
-            headers: headers,
-        });
-    });
+    };
+    router.get("/api/random-photo.jpeg", randomPhoto("bw"));
+    router.get("/api/random-color-photo.jpeg", randomPhoto("color"));
+    // Inkplate's JPEG decoder does not support progressive JPEGs.
+    router.get("/api/random-photo.png", randomPhoto("bw"));
+    router.get("/api/random-color-photo.png", randomPhoto("color"));
     router.post("/api/photos", async (request) => {
         const flickr = env.flickr!;
         const body: PhotosRequest = await request.json();
@@ -106,7 +102,7 @@ function buildRouter(env: Env): RouterType {
     return router;
 }
 export default {
-    async fetch(request, env): Promise<Response> {
+    async fetch(request: Request, env: Env): Promise<Response> {
         if (env.router === undefined) {
             env.router = buildRouter(env);
         }

@@ -8,14 +8,18 @@
 	"compatibility_date": "2025-11-01",
 	"assets": {
 		// The path to the directory containing the `index.html` file to be served at `/`
-		"directory": "./public"
+		"directory": "./public",
+        "binding": "ASSETS"
 	},
 	"observability": {
 		"enabled": true
 	},
     "main": "./src/worker/index.ts",
     "build": {
-        "command": "bun run build.ts",
+        "command": "npx bun run build.ts",
+    },
+    "images": {
+        "binding": "IMAGES"
     },
     "compatibility_flags": [
         "nodejs_compat"
