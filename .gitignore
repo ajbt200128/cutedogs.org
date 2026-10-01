@@ -1,5 +1,6 @@
 # dependencies (bun install)
 node_modules
+.venv
 
 # output
 out
@@ -36,3 +37,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .dev.vars
 
 .wrangler
+
+# Device credentials and compiled firmware
+firmware/**/secrets.h
+firmware/**/build/
