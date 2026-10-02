@@ -4,7 +4,7 @@ import type { Env } from "./index";
 import { renderPhotoFrame } from "./photo-frame";
 
 for (const tag of ["color", "bw"] as const) {
-    test(`${tag} tone correction never affects the matte, border or caption`, async () => {
+    test(`${tag} preserves source tones and does not tone-map the matte or caption`, async () => {
         const transforms: { layer: string; options: any }[] = [];
         let input = 0;
         let cacheUrl = "";
@@ -34,24 +34,15 @@ for (const tag of ["color", "bw"] as const) {
         const source = spyOn(globalThis, "fetch").mockResolvedValue(new Response(new Uint8Array([0])));
         try {
             const response = await renderPhotoFrame(
-                new Request("https://cutedogs.org/api/random-color-photo.png"), env,
+                new Request(`https://cutedogs.org/api/random${tag === "color" ? "-color" : ""}-photo.png`), env,
                 { id: "photo", title: "Color_22_29", url_h: "https://example.com/photo.jpeg" }, tag,
             );
-            const photo = transforms.find(transform => transform.layer === "photo")!.options;
-            if (tag === "color") {
-                expect(photo.contrast).toBe(0.94);
-                expect(photo.gamma).toBe(1.04);
-                expect(response.headers.get("X-Photo-Tone")).toBe("contrast=0.94; gamma=1.04");
-            } else {
-                expect(photo.contrast).toBeUndefined();
-                expect(photo.gamma).toBeUndefined();
-                expect(response.headers.get("X-Photo-Tone")).toBe("unchanged");
-            }
-            for (const transform of transforms.filter(transform => transform.layer !== "photo")) {
+            expect(response.headers.get("X-Photo-Tone")).toBe("unchanged");
+            for (const transform of transforms) {
                 expect(transform.options.contrast).toBeUndefined();
                 expect(transform.options.gamma).toBeUndefined();
             }
-            expect(cacheUrl).toContain("/frame-cache/v3/");
+            expect(cacheUrl).toContain("/frame-cache/v4/");
             expect(response.headers.get("Cache-Control")).toBe("no-store");
         } finally {
             source.mockRestore();

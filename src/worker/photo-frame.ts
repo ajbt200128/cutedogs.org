@@ -6,8 +6,6 @@ const MARGIN_X = FRAME_WIDTH * 0.025;
 const MARGIN_Y = FRAME_HEIGHT * 0.025;
 const CAPTION_HEIGHT = FRAME_HEIGHT * 0.05;
 const BORDER = 1;
-// Conservative starting point for the six-color EL133UF1, not a measured panel profile.
-const COLOR_PHOTO_TONE = { contrast: 0.94, gamma: 1.04 };
 
 export function frameLayout(width: number, height: number) {
     if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
@@ -57,7 +55,7 @@ export async function renderPhotoFrame(
     const origin = requestUrl.origin;
     const format = requestUrl.pathname.endsWith(".png") ? "image/png" : "image/jpeg";
     const fontTime = gnomonTime(new Date());
-    const cacheKey = new Request(`${origin}/frame-cache/v3/${tag}/${encodeURIComponent(photo.id)}?updated=${photo.lastupdate || ""}&format=${format}&fontTime=${fontTime}`);
+    const cacheKey = new Request(`${origin}/frame-cache/v4/${tag}/${encodeURIComponent(photo.id)}?updated=${photo.lastupdate || ""}&format=${format}&fontTime=${fontTime}`);
     const cache = await caches.open("photo-frames");
     const cached = await cache.match(cacheKey);
     if (cached) {
@@ -87,7 +85,6 @@ export async function renderPhotoFrame(
         })
         .draw(env.IMAGES.input(stream()).transform({
             width: layout.width, height: layout.height, fit: "contain",
-            ...(tag === "color" ? COLOR_PHOTO_TONE : {}),
         }), {
             left: layout.left, top: layout.top,
         })
@@ -103,8 +100,7 @@ export async function renderPhotoFrame(
         "X-Photo-Date": photo.datetaken?.slice(0, 10) || "",
         "X-Gnomon-Time": (fontTime / 2).toFixed(1),
         "X-Frame-Timezone": "America/Los_Angeles",
-        "X-Photo-Tone": tag === "color"
-            ? `contrast=${COLOR_PHOTO_TONE.contrast}; gamma=${COLOR_PHOTO_TONE.gamma}` : "unchanged",
+        "X-Photo-Tone": "unchanged",
     } });
     await cache.put(cacheKey, response.clone());
     response.headers.set("Cache-Control", "no-store");
