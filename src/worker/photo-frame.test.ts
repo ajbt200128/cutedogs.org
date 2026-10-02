@@ -1,19 +1,28 @@
 /// <reference types="bun" />
 import { describe, expect, test } from "bun:test";
-import { frameLayout, gnomonTime, photoCaption } from "./photo-frame";
+import { FRAME_SIZES, frameLayout, gnomonTime, photoCaption } from "./photo-frame";
 import worker, { type Env } from "./index";
 
 describe("photo frame", () => {
-    for (const [width, height] of [[6000, 4000], [4000, 6000], [1200, 1200], [16000, 1000], [1, 1000]]) {
-        test(`fits the entire ${width} × ${height} photo above the caption`, () => {
-            const layout = frameLayout(width!, height!);
-            expect(layout.left).toBeGreaterThanOrEqual(40);
-            expect(layout.top).toBeGreaterThanOrEqual(30);
-            expect(layout.left + layout.width).toBeLessThanOrEqual(1560);
-            expect(layout.top + layout.height).toBeLessThanOrEqual(1110);
-            expect(Math.abs(layout.width - layout.height * width! / height!)).toBeLessThanOrEqual(width! / height! + 1);
-        });
+    test("uses native TRMNL and Spectra canvas sizes", () => {
+        expect(FRAME_SIZES.bw).toEqual({ width: 800, height: 480 });
+        expect(FRAME_SIZES.color).toEqual({ width: 1600, height: 1200 });
+    });
+    for (const [tag, frame] of Object.entries(FRAME_SIZES)) {
+        for (const [width, height] of [[6000, 4000], [4000, 6000], [1200, 1200], [16000, 1000], [1, 1000]]) {
+            test(`${tag} fits the entire ${width} × ${height} photo and border above the caption`, () => {
+                const layout = frameLayout(width!, height!, frame);
+                expect(layout.left - 1).toBeGreaterThanOrEqual(frame.width * 0.025);
+                expect(layout.top - 1).toBeGreaterThanOrEqual(frame.height * 0.025);
+                expect(layout.left + layout.width + 1).toBeLessThanOrEqual(frame.width * 0.975);
+                expect(layout.top + layout.height + 1).toBeLessThanOrEqual(frame.height * 0.925);
+                expect(Math.abs(layout.width - layout.height * width! / height!)).toBeLessThanOrEqual(width! / height! + 1);
+            });
+        }
     }
+    test("preserves the existing Spectra layout", () => {
+        expect(frameLayout(6000, 4000)).toEqual({ width: 1518, height: 1012, left: 41, top: 64 });
+    });
     test("rejects invalid dimensions", () => {
         expect(() => frameLayout(0, 100)).toThrow();
         expect(() => frameLayout(100, NaN)).toThrow();
@@ -47,7 +56,7 @@ describe("Gnomon Pacific time", () => {
 });
 
 describe("random endpoints", () => {
-    for (const [path, tag] of [["random-photo.jpeg", "bw"], ["random-color-photo.jpeg", "color"], ["random-color-photo.png", "color"]]) {
+    for (const [path, tag] of [["random-photo.jpeg", "bw"], ["random-color-photo.jpeg", "color"], ["random-photo.png", "bw"], ["random-color-photo.png", "color"]]) {
         test(`${path} searches the ${tag} tag and handles an empty collection`, async () => {
             const flickr = async (_method: string, args: any) => {
                 expect(args.tags).toBe(tag);

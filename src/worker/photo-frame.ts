@@ -1,26 +1,28 @@
 import type { Env } from "./index";
 
-export const FRAME_WIDTH = 1600;
-export const FRAME_HEIGHT = 1200;
-const MARGIN_X = FRAME_WIDTH * 0.025;
-const MARGIN_Y = FRAME_HEIGHT * 0.025;
-const CAPTION_HEIGHT = FRAME_HEIGHT * 0.05;
+export const FRAME_SIZES = {
+    bw: { width: 800, height: 480 }, // TRMNL OG.
+    color: { width: 1600, height: 1200 }, // Inkplate 13SPECTRA.
+};
 const BORDER = 1;
 
-export function frameLayout(width: number, height: number) {
+export function frameLayout(width: number, height: number, frame = FRAME_SIZES.color) {
     if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
         throw new Error("Invalid photo dimensions");
     }
-    const availableWidth = FRAME_WIDTH - 2 * MARGIN_X - 2 * BORDER;
-    const availableHeight = FRAME_HEIGHT - 2 * MARGIN_Y - CAPTION_HEIGHT - 2 * BORDER;
+    const marginX = frame.width * 0.025;
+    const marginY = frame.height * 0.025;
+    const captionHeight = frame.height * 0.05;
+    const availableWidth = frame.width - 2 * marginX - 2 * BORDER;
+    const availableHeight = frame.height - 2 * marginY - captionHeight - 2 * BORDER;
     const scale = Math.min(availableWidth / width, availableHeight / height);
     const photoWidth = Math.max(1, Math.floor(width * scale));
     const photoHeight = Math.max(1, Math.floor(height * scale));
     return {
         width: photoWidth,
         height: photoHeight,
-        left: Math.floor((FRAME_WIDTH - photoWidth) / 2),
-        top: Math.floor(MARGIN_Y + (availableHeight + 2 * BORDER - photoHeight) / 2),
+        left: Math.floor((frame.width - photoWidth) / 2),
+        top: Math.floor(marginY + (availableHeight + 2 * BORDER - photoHeight) / 2),
     };
 }
 
@@ -55,7 +57,11 @@ export async function renderPhotoFrame(
     const origin = requestUrl.origin;
     const format = requestUrl.pathname.endsWith(".png") ? "image/png" : "image/jpeg";
     const fontTime = gnomonTime(new Date());
-    const cacheKey = new Request(`${origin}/frame-cache/v4/${tag}/${encodeURIComponent(photo.id)}?updated=${photo.lastupdate || ""}&format=${format}&fontTime=${fontTime}`);
+    const frame = FRAME_SIZES[tag];
+    const marginX = frame.width * 0.025;
+    const captionHeight = frame.height * 0.05;
+    const captionScale = frame.width / FRAME_SIZES.color.width;
+    const cacheKey = new Request(`${origin}/frame-cache/v4/${tag}/${encodeURIComponent(photo.id)}?updated=${photo.lastupdate || ""}&format=${format}&fontTime=${fontTime}&canvas=${frame.width}x${frame.height}`);
     const cache = await caches.open("photo-frames");
     const cached = await cache.match(cacheKey);
     if (cached) {
@@ -72,7 +78,7 @@ export async function renderPhotoFrame(
     const stream = () => new Response(bytes).body!;
     const info = await env.IMAGES.info(stream());
     if (!("width" in info)) throw new Error("Unsupported image format");
-    const layout = frameLayout(info.width, info.height);
+    const layout = frameLayout(info.width, info.height, frame);
     const [white, black] = await Promise.all([
         env.ASSETS.fetch(`${origin}/frame/white.png`),
         env.ASSETS.fetch(`${origin}/frame/black.png`),
@@ -80,6 +86,7 @@ export async function renderPhotoFrame(
     if (!white.ok || !white.body || !black.ok || !black.body) throw new Error("Frame assets missing");
 
     const result = await env.IMAGES.input(white.body)
+        .transform({ width: frame.width, height: frame.height, fit: "squeeze" })
         .draw(env.IMAGES.input(black.body).transform({ width: layout.width + 2, height: layout.height + 2, fit: "squeeze" }), {
             left: layout.left - BORDER, top: layout.top - BORDER,
         })
@@ -89,9 +96,9 @@ export async function renderPhotoFrame(
             left: layout.left, top: layout.top,
         })
         .draw(env.IMAGES.text(photoCaption(photo), {
-            font: { url: `${origin}/frame/gnomon/time-${fontTime}.ttf` }, size: 24, color: "black",
-        }).transform({ width: FRAME_WIDTH - 2 * MARGIN_X, height: CAPTION_HEIGHT - 12, fit: "scale-down" }), {
-            right: MARGIN_X, bottom: 18,
+            font: { url: `${origin}/frame/gnomon/time-${fontTime}.ttf` }, size: 24 * captionScale, color: "black",
+        }).transform({ width: frame.width - 2 * marginX, height: captionHeight - 12 * captionScale, fit: "scale-down" }), {
+            right: marginX, bottom: 18 * captionScale,
         })
         .output({ format, quality: 95 });
     const response = result.response({ headers: {
@@ -101,6 +108,8 @@ export async function renderPhotoFrame(
         "X-Gnomon-Time": (fontTime / 2).toFixed(1),
         "X-Frame-Timezone": "America/Los_Angeles",
         "X-Photo-Tone": "unchanged",
+        "X-Frame-Width": `${frame.width}`,
+        "X-Frame-Height": `${frame.height}`,
     } });
     await cache.put(cacheKey, response.clone());
     response.headers.set("Cache-Control", "no-store");

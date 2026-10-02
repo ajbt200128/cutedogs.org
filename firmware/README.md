@@ -2,7 +2,9 @@
 
 The frame fetches `https://cutedogs.org/api/random-color-photo.png`. The server provides the complete 1600 × 1200 canvas: uncropped photo, white matte, one-pixel black border, and filename / capture date in Gnomon sans-serif at the bottom right.
 
-The shared renderer also serves `/api/random-photo.jpeg` (tag `bw`) and `/api/random-color-photo.jpeg` (tag `color`). Both have `.png` equivalents. PNG is used by the board because the Inkplate JPEG decoder does not support Cloudflare's progressive JPEG output. Random responses use `Cache-Control: no-store`; completed frames are cached internally for one day per photo/version/format/font-time.
+The shared renderer also serves `/api/random-photo.jpeg` (tag `bw`) and `/api/random-color-photo.jpeg` (tag `color`). Both have `.png` equivalents. BW endpoints render an **800 × 480** canvas for the [TRMNL OG](https://docs.trmnl.com/go/private-plugins/templates); color endpoints remain **1600 × 1200** for the Inkplate. The [TRMNL Image Display plugin](https://help.usetrmnl.com/en/articles/11479051-image-display) uses cover-fit, so sending the old 4:3 canvas to its 5:3 screen cropped the matte and caption. Each frame now uses the target's aspect ratio, with proportional caption sizing and no photo cropping.
+
+PNG is used by the Inkplate because its JPEG decoder does not support Cloudflare's progressive JPEG output. Random responses use `Cache-Control: no-store`; completed frames are cached internally for one day per photo/version/format/font-time/canvas-size. `X-Frame-Width` and `X-Frame-Height` expose the rendered dimensions.
 
 Minimum matte margins total approximately 5% of the canvas width and height, with a 5%-height caption area. Aspect-ratio differences add white space rather than cropping or stretching the photo.
 
