@@ -6,6 +6,7 @@
 #include <HTTPClient.h>
 #include <WiFiClientSecure.h>
 #include <time.h>
+#include <esp_sleep.h>
 #include "secrets.h"
 
 Inkplate display;
@@ -14,6 +15,7 @@ const char *PHOTO_URL = "https://cutedogs.org/frame/calibration.png";
 #else
 const char *PHOTO_URL = "https://cutedogs.org/api/random-color-photo.png";
 #endif
+constexpr gpio_num_t WAKE_BUTTON = GPIO_NUM_18;
 constexpr uint64_t REFRESH_US = 30ULL * 60 * 1000000;
 constexpr uint64_t RETRY_US = 5ULL * 60 * 1000000;
 constexpr size_t MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -107,6 +109,10 @@ bool updatePhoto() {
 
 void setup() {
     Serial.begin(115200);
+    pinMode(WAKE_BUTTON, INPUT_PULLUP);
+    if (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT0) {
+        Serial.println("WAKE button pressed; fetching a new photo.");
+    }
     display.begin();
     display.setRotation(1); // Landscape: 1600 × 1200.
     // ReducedDiffusion discards most error and flattened our calibration ramps.
@@ -122,12 +128,18 @@ void setup() {
         esp_deep_sleep_start(); // No timer: retain the chart for an interactive session.
     }
 #endif
+    // EXT0 is level-triggered: a held button must not immediately wake us again.
+    while (digitalRead(WAKE_BUTTON) == LOW) delay(20);
+    delay(20);
     uint64_t interval = success ? REFRESH_US : RETRY_US;
     uint64_t elapsed = uint64_t(millis()) * 1000;
     uint64_t sleepTime = interval > elapsed ? interval - elapsed : 1000000;
+    esp_sleep_enable_timer_wakeup(sleepTime);
+    esp_err_t wakeStatus = esp_sleep_enable_ext0_wakeup(WAKE_BUTTON, LOW);
+    if (wakeStatus == ESP_OK) Serial.println("WAKE button enabled.");
+    else Serial.printf("WAKE button configuration failed: %d\n", wakeStatus);
     Serial.printf("Sleeping for %llu seconds.\n", sleepTime / 1000000);
     Serial.flush();
-    esp_sleep_enable_timer_wakeup(sleepTime);
     esp_deep_sleep_start();
 }
 

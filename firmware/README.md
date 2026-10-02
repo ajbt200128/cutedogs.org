@@ -66,6 +66,8 @@ Press POWER ON and verify the blue LED before uploading. If the uploader reports
 
 The device verifies HTTPS with the ESP32 certificate bundle after synchronizing its clock via NTP. It refreshes every 30 minutes from boot/wake, then deep-sleeps for the remainder of that interval. Failed connections or downloads retain the previous photo and retry after 5 minutes. Serial logs use 115200 baud and never print credentials.
 
+Press the onboard **WAKE** button (not POWER ON) while the frame is sleeping to immediately fetch another random photo. The active-low GPIO18 button is enabled alongside the timer using [EXT0 wake](https://docs.soldered.com/inkplate/13spectra/low-power/deep-sleep/). Each button wake starts a fresh 30-minute cycle. Firmware waits for button release before sleeping to prevent a held-button refresh loop; presses during an update do not queue another update. Successful calibration mode still holds its canvas without timer/button wake. Serial confirms `WAKE button enabled.`; physical button operation should be checked on the device after flashing.
+
 ## Server checks and deployment
 
 `npx bun test src/worker src/static/browser-bundles.test.ts`
