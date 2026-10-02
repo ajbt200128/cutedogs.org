@@ -16,14 +16,20 @@ The installed library's `ImageColor::begin()` explicitly selects `ReducedDiffusi
 
 ## Chart B — full error diffusion
 
-Same 51 gray patch inputs and the same color ramps. Calibration firmware explicitly selects `ImageColor::FloydSteinberg`, whose kernel weights sum to its divisor (16/16). No photo gamma/contrast adjustment is applied to the chart. Normal photo firmware is unchanged pending comparison.
+Same 51 gray patch inputs and the same color ramps. Calibration firmware explicitly selects `ImageColor::FloydSteinberg`, whose kernel weights sum to its divisor (16/16). No photo gamma/contrast adjustment is applied to the chart. Full Floyd–Steinberg was subsequently selected for normal photo firmware as well.
 
 User result: all T, S, H, red, green, blue and yellow patches are distinguishable. This supports changing the dither kernel before fitting a tone curve, rather than treating chart A's plateaus as physical panel limits.
 
-## Fixed photo comparison — unadjusted version
+## Fixed photo comparison
 
-Current calibration canvas: `/frame/calibration.png` displays a fixed reference captured from the unadjusted color renderer before the provisional contrast/gamma settings were introduced. The frozen original is saved as `/frame/calibration-photo-original.png`; chart B is preserved as `/frame/calibration-chart-b.png`.
+The initial crane photo was too flat for a useful comparison. After several random photos, the user selected `Color_85_30`, capture date 2025-12-03: a sailboat, bright sail and sky, dark cockpit, sea and distant island. Its unadjusted 1600 × 1200 canvas is preserved as `/frame/calibration-photo-original.png`, with frozen Gnomon caption/font time 8.5. The photo interior is x=126, y=31, width=1347, height=1078.
 
-Reference: cranes against a blue sky, Flickr title `Untitled`, capture date 2026-06-21. The original 1600 × 1200 matte, border and Gnomon caption are retained byte-for-byte so subsequent comparisons can keep the same image and caption. Its filename/date/font-time caption is frozen for this comparison, rather than changing with the current clock.
+Both versions used full Floyd–Steinberg dithering:
+- A: unadjusted photo. User reported slightly lacking highlight and shadow detail.
+- B: same image with contrast 0.90, no gamma adjustment. Live PNG comparison verified every matte, border and caption pixel unchanged. Device download confirmed 2,279,221 bytes. User said it looked slightly better but could not really tell.
 
-The calibration firmware still uses full Floyd–Steinberg dithering and holds the image without a timer. No provisional contrast 0.94 or gamma 1.04 adjustment is applied to this version. Normal random-photo endpoints/settings remain unchanged while the user compares the fixed reference.
+## Final choice
+
+The user chose chart B's algorithm rather than continuing subtle photo tone comparisons: full Floyd–Steinberg dithering with no server-side contrast or gamma adjustment. Normal firmware now explicitly selects that kernel, and the provisional contrast 0.94 / gamma 1.04 treatment was removed. Frame-cache v4 prevents reuse of those old adjusted frames.
+
+Normal firmware was rebuilt without the calibration flag and flashed successfully. Serial verified a new random color photo (1,465,071 bytes), successful display, and 1,753 seconds of sleep after the 47-second wake/update: a 30-minute cycle. The live color endpoint reports `X-Photo-Tone: unchanged`; all 20 worker/browser tests and the TypeScript check pass. The active calibration canvas `/frame/calibration.png` has been restored to the raw chart B; `/frame/calibration-chart-b.png` remains its preserved copy. Calibration mode is available only when explicitly compiled with its flag.
