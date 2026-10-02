@@ -109,10 +109,9 @@ void setup() {
     Serial.begin(115200);
     display.begin();
     display.setRotation(1); // Landscape: 1600 × 1200.
-#ifdef PHOTO_FRAME_CALIBRATION
+    // ReducedDiffusion discards most error and flattened our calibration ramps.
     display.image.setDitherKernel(ImageColor::FloydSteinberg);
-    Serial.println("Calibration dithering: full Floyd-Steinberg.");
-#endif
+    Serial.println("Dithering: full Floyd-Steinberg.");
     bool success = connectInternet() && updatePhoto();
     WiFi.disconnect(true);
     WiFi.mode(WIFI_OFF);
