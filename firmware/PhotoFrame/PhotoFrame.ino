@@ -9,7 +9,11 @@
 #include "secrets.h"
 
 Inkplate display;
+#ifdef PHOTO_FRAME_CALIBRATION
+const char *PHOTO_URL = "https://cutedogs.org/frame/calibration.png";
+#else
 const char *PHOTO_URL = "https://cutedogs.org/api/random-color-photo.png";
+#endif
 constexpr uint64_t REFRESH_US = 30ULL * 60 * 1000000;
 constexpr uint64_t RETRY_US = 5ULL * 60 * 1000000;
 constexpr size_t MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -108,6 +112,13 @@ void setup() {
     bool success = connectInternet() && updatePhoto();
     WiFi.disconnect(true);
     WiFi.mode(WIFI_OFF);
+#ifdef PHOTO_FRAME_CALIBRATION
+    if (success) {
+        Serial.println("Calibration chart displayed; photo rotation paused until reset or normal firmware upload.");
+        Serial.flush();
+        esp_deep_sleep_start(); // No timer: retain the chart for an interactive session.
+    }
+#endif
     uint64_t interval = success ? REFRESH_US : RETRY_US;
     uint64_t elapsed = uint64_t(millis()) * 1000;
     uint64_t sleepTime = interval > elapsed ? interval - elapsed : 1000000;

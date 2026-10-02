@@ -14,6 +14,22 @@ These measurements do not specify a photographic gamma curve. The color-photo la
 
 Tone settings are applied server-side before the device dithers the photo into the six-color palette. No firmware update is needed; the next 30-minute refresh downloads the adjusted image. The internal frame-cache version is bumped whenever these settings change so stale images cannot mask the adjustment.
 
+## Interactive calibration
+
+`/frame/calibration.png` shows unadjusted sRGB ramps through the same PNG decoder and dithering used for photos: T (full range, 0–255), S (shadows, 0–64), H (highlights, 191–255), and red/green/blue/yellow ramps. Compare neighboring numbered patch interiors at the normal viewing distance and lighting, not individual dither dots. Human comparisons guide empirical tuning; they are not reflectance measurements.
+
+Compile with `--build-property compiler.cpp.extra_flags=-DPHOTO_FRAME_CALIBRATION` into a separate build directory and upload to temporarily show the chart instead of random photos. On success, calibration firmware deep-sleeps without a timer, retaining the chart. Reset reloads the chart; it does **not** resume random photos. To resume the 30-minute photo cycle, upload the normal firmware built without that flag.
+
+The original normal build is preserved at `/tmp/cutedogs-tools/firmware-build` during this session, and the calibration build is separate at `/tmp/cutedogs-tools/calibration-build`.
+
+The chart generator uses an isolated rendering dependency, never the website's frontend dependencies:
+
+`npm install --prefix /tmp/cutedogs-calibration @resvg/resvg-js --package-lock=false`
+
+`NODE_PATH=/tmp/cutedogs-calibration/node_modules node scripts/calibration-chart.cjs`
+
+Then deploy with `npm run deploy` and reset the calibration firmware to reload the updated chart. The generator uses the system Arial font; the pre-rendered PNG avoids font differences on the device.
+
 ## Time-dependent font
 
 Gnomon's time-of-day axis follows `America/Los_Angeles`, automatically using PST in winter and PDT in summer. It advances in half-hour steps with the display refresh. Nighttime wraps through the 6–18 axis like the original demo at https://indestructibletype.com/Gnomon.html. The date in the caption remains the photo's capture date.
