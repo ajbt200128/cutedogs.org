@@ -6,6 +6,14 @@ The shared renderer also serves `/api/random-photo.jpeg` (tag `bw`) and `/api/ra
 
 Minimum matte margins total approximately 5% of the canvas width and height, with a 5%-height caption area. Aspect-ratio differences add white space rather than cropping or stretching the photo.
 
+## Display tone tuning
+
+[Soldered identifies the panel](https://community.soldered.com/t/inkplate-13spectra-panel-model-number/158) as E Ink's [EL133UF1](https://www.eink.com/product/detail/EL133UF1). The ED2208-NCA (EL133UF1) specification, optical characteristics on pages 23–24, lists six native color states, 34% typical white reflectance and 22:1 typical contrast at 25 °C. A [publicly mirrored specification](https://upbd645.myueeshop.com/u_file/2411/09/file/ED2208-NCAEL133UF1ProductSpecVer10.pdf) was consulted; it bears a confidentiality notice and is not redistributed here.
+
+These measurements do not specify a photographic gamma curve. The color-photo layer currently uses a conservative empirical starting point: `contrast: 0.94` to slightly compress shadows/highlights, and `gamma: 1.04` to slightly darken midtones, using [Cloudflare's documented controls](https://developers.cloudflare.com/images/optimization/features/). This is not a measured ICC profile or a manufacturer-prescribed calibration. Judge it on the physical display under its usual lighting; proper calibration needs on-panel measurements. The white matte, border, caption, BW endpoint and website galleries are unchanged.
+
+Tone settings are applied server-side before the device dithers the photo into the six-color palette. No firmware update is needed; the next 30-minute refresh downloads the adjusted image. The internal frame-cache version is bumped whenever these settings change so stale images cannot mask the adjustment.
+
 ## Time-dependent font
 
 Gnomon's time-of-day axis follows `America/Los_Angeles`, automatically using PST in winter and PDT in summer. It advances in half-hour steps with the display refresh. Nighttime wraps through the 6–18 axis like the original demo at https://indestructibletype.com/Gnomon.html. The date in the caption remains the photo's capture date.
@@ -40,9 +48,9 @@ The device verifies HTTPS with the ESP32 certificate bundle after synchronizing 
 
 ## Server checks and deployment
 
-`npx bun test src/worker/photo-frame.test.ts`
+`npx bun test src/worker src/static/browser-bundles.test.ts`
 
-`npx tsc --noEmit --allowImportingTsExtensions --skipLibCheck --strict --target esnext --module preserve --moduleResolution bundler --types node worker-configuration.d.ts src/worker/index.ts src/worker/photo-frame.ts src/worker/photo-frame.test.ts`
+`npx tsc --noEmit --allowImportingTsExtensions --skipLibCheck --strict --target esnext --module preserve --moduleResolution bundler --types node worker-configuration.d.ts src/worker/index.ts src/worker/photo-frame.ts src/worker/photo-frame.test.ts src/worker/photo-tone.test.ts src/static/browser-bundles.test.ts`
 
 `npm run deploy`
 
