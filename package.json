@@ -4,7 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "deploy": "wrangler deploy",
+    "build": "npx bun install --frozen-lockfile && npx bun run build.ts",
+    "deploy": "npx bun test src/static/browser-bundles.test.ts && wrangler deploy",
     "dev": "wrangler dev",
     "start": "wrangler dev"
   },

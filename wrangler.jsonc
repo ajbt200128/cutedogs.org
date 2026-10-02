@@ -15,9 +15,6 @@
 		"enabled": true
 	},
     "main": "./src/worker/index.ts",
-    "build": {
-        "command": "npx bun run build.ts",
-    },
     "images": {
         "binding": "IMAGES"
     },
