@@ -22,7 +22,7 @@ function patches(label, y, codes, color, height = 120, showNumbers = true) {
         if (showNumbers) text(x + PATCH_WIDTH / 2, y + height + 28, String(code), 18, 'middle');
     });
 }
-text(40, 54, 'TONE CALIBRATION A - RAW INPUT', 36);
+text(40, 54, 'TONE CALIBRATION B - FULL DIFFUSION', 36);
 text(40, 94, 'Compare neighboring patches, not their dither texture. Keep your normal lighting and viewing distance.', 23);
 patches('T  Full range', 185, values, code => [code, code, code]);
 patches('S  Shadows', 400, values.map((_, i) => i * 4), code => [code, code, code]);
@@ -33,10 +33,10 @@ patches('G  Green', 890, values, code => [0, code, 0], 48, false);
 patches('B  Blue', 950, values, code => [0, 0, code], 48, false);
 patches('Y  Yellow', 1010, values, code => [code, code, 0], 48, false);
 text(40, 1130, 'Start with T: which neighboring numbered patches look the same?', 26);
-text(40, 1170, 'No photo tone correction applied. Numbers below gray patches are raw sRGB codes, not measured reflectance.', 20);
+text(40, 1170, 'Same raw input as chart A; full Floyd-Steinberg dithering on device. No photo tone correction applied.', 20);
 svg.push('</svg>');
 const source = svg.join('\n');
 writeFileSync('public/frame/calibration.svg', source);
 const image = new Resvg(source, { font: { loadSystemFonts: true, defaultFontFamily: 'Arial' } });
 writeFileSync('public/frame/calibration.png', image.render().asPng());
-console.log('Created 1600 x 1200 calibration chart A (unadjusted sRGB patches).');
+console.log('Created 1600 x 1200 calibration chart B (same unadjusted sRGB patches).');

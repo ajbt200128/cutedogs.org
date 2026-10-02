@@ -109,12 +109,16 @@ void setup() {
     Serial.begin(115200);
     display.begin();
     display.setRotation(1); // Landscape: 1600 × 1200.
+#ifdef PHOTO_FRAME_CALIBRATION
+    display.image.setDitherKernel(ImageColor::FloydSteinberg);
+    Serial.println("Calibration dithering: full Floyd-Steinberg.");
+#endif
     bool success = connectInternet() && updatePhoto();
     WiFi.disconnect(true);
     WiFi.mode(WIFI_OFF);
 #ifdef PHOTO_FRAME_CALIBRATION
     if (success) {
-        Serial.println("Calibration chart displayed; photo rotation paused until reset or normal firmware upload.");
+        Serial.println("Calibration chart displayed; rotation paused. Reset reloads chart; upload normal firmware to resume photos.");
         Serial.flush();
         esp_deep_sleep_start(); // No timer: retain the chart for an interactive session.
     }

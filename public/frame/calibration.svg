@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200">
 <rect width="1600" height="1200" fill="white"/>
-<text x="40" y="54" font-family="Arial" font-size="36" text-anchor="start" fill="black">TONE CALIBRATION A - RAW INPUT</text>
+<text x="40" y="54" font-family="Arial" font-size="36" text-anchor="start" fill="black">TONE CALIBRATION B - FULL DIFFUSION</text>
 <text x="40" y="94" font-family="Arial" font-size="23" text-anchor="start" fill="black">Compare neighboring patches, not their dither texture. Keep your normal lighting and viewing distance.</text>
 <text x="40" y="245" font-family="Arial" font-size="22" text-anchor="start" fill="black">T  Full range</text>
 <text x="237" y="170" font-family="Arial" font-size="22" text-anchor="middle" fill="black">01</text>
@@ -232,5 +232,5 @@
 <rect x="1372" y="1010" width="70" height="48" fill="rgb(239,239,0)"/>
 <rect x="1450" y="1010" width="70" height="48" fill="rgb(255,255,0)"/>
 <text x="40" y="1130" font-family="Arial" font-size="26" text-anchor="start" fill="black">Start with T: which neighboring numbered patches look the same?</text>
-<text x="40" y="1170" font-family="Arial" font-size="20" text-anchor="start" fill="black">No photo tone correction applied. Numbers below gray patches are raw sRGB codes, not measured reflectance.</text>
+<text x="40" y="1170" font-family="Arial" font-size="20" text-anchor="start" fill="black">Same raw input as chart A; full Floyd-Steinberg dithering on device. No photo tone correction applied.</text>
 </svg>
