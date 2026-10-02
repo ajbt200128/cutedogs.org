@@ -16,13 +16,15 @@ Tone settings are applied server-side before the device dithers the photo into t
 
 ## Interactive calibration
 
-`/frame/calibration.png` shows unadjusted sRGB ramps through the same PNG decoder used for photos: T (full range, 0–255), S (shadows, 0–64), H (highlights, 191–255), and red/green/blue/yellow ramps. Compare neighboring numbered patch interiors at the normal viewing distance and lighting, not individual dither dots. Human comparisons guide empirical tuning; they are not reflectance measurements. Chart B uses full Floyd–Steinberg dithering in calibration firmware only, instead of the library's default ReducedDiffusion. Normal photo firmware remains unchanged pending comparison. Findings and observations are recorded in [calibration-notes.md](calibration-notes.md).
+`/frame/calibration.png` is the active calibration canvas, currently a fixed unadjusted photo for comparison. The preserved `/frame/calibration-chart-b.png` shows unadjusted sRGB ramps through the same PNG decoder used for photos: T (full range, 0–255), S (shadows, 0–64), H (highlights, 191–255), and red/green/blue/yellow ramps. Compare neighboring numbered patch interiors at the normal viewing distance and lighting, not individual dither dots. Human comparisons guide empirical tuning; they are not reflectance measurements. Chart B uses full Floyd–Steinberg dithering in calibration firmware only, instead of the library's default ReducedDiffusion. Normal photo firmware remains unchanged pending comparison. Findings and observations are recorded in [calibration-notes.md](calibration-notes.md).
 
-Compile with `--build-property compiler.cpp.extra_flags=-DPHOTO_FRAME_CALIBRATION` into a separate build directory and upload to temporarily show the chart instead of random photos. On success, calibration firmware deep-sleeps without a timer, retaining the chart. Reset reloads the chart; it does **not** resume random photos. To resume the 30-minute photo cycle, upload the normal firmware built without that flag.
+Compile with `--build-property compiler.cpp.extra_flags=-DPHOTO_FRAME_CALIBRATION` into a separate build directory and upload to temporarily show the calibration canvas instead of random photos. On success, calibration firmware deep-sleeps without a timer, retaining the canvas. Reset reloads the active canvas; it does **not** resume random photos. To resume the 30-minute photo cycle, upload the normal firmware built without that flag.
 
 The original normal build is preserved at `/tmp/cutedogs-tools/firmware-build` during this session, and the active chart-B calibration build is separate at `/tmp/cutedogs-tools/calibration-full-diffusion-build`.
 
-The chart generator uses an isolated rendering dependency, never the website's frontend dependencies:
+The fixed unadjusted photo is preserved as `/frame/calibration-photo-original.png`. Both comparison versions should use the same photo and caption, with tone changes restricted to the photo interior.
+
+The chart generator uses an isolated rendering dependency, never the website's frontend dependencies. Running it replaces the active canvas with the chart:
 
 `npm install --prefix /tmp/cutedogs-calibration @resvg/resvg-js --package-lock=false`
 

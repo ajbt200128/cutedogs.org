@@ -18,4 +18,12 @@ The installed library's `ImageColor::begin()` explicitly selects `ReducedDiffusi
 
 Same 51 gray patch inputs and the same color ramps. Calibration firmware explicitly selects `ImageColor::FloydSteinberg`, whose kernel weights sum to its divisor (16/16). No photo gamma/contrast adjustment is applied to the chart. Normal photo firmware is unchanged pending comparison.
 
-Next comparison: are T01–05 and T13–17 distinguishable now? Then inspect fine S/H ramps and compare perceived spacing of T midtones. Decide whether to enable full diffusion for photos before fitting any tone curve.
+User result: all T, S, H, red, green, blue and yellow patches are distinguishable. This supports changing the dither kernel before fitting a tone curve, rather than treating chart A's plateaus as physical panel limits.
+
+## Fixed photo comparison — unadjusted version
+
+Current calibration canvas: `/frame/calibration.png` displays a fixed reference captured from the unadjusted color renderer before the provisional contrast/gamma settings were introduced. The frozen original is saved as `/frame/calibration-photo-original.png`; chart B is preserved as `/frame/calibration-chart-b.png`.
+
+Reference: cranes against a blue sky, Flickr title `Untitled`, capture date 2026-06-21. The original 1600 × 1200 matte, border and Gnomon caption are retained byte-for-byte so subsequent comparisons can keep the same image and caption. Its filename/date/font-time caption is frozen for this comparison, rather than changing with the current clock.
+
+The calibration firmware still uses full Floyd–Steinberg dithering and holds the image without a timer. No provisional contrast 0.94 or gamma 1.04 adjustment is applied to this version. Normal random-photo endpoints/settings remain unchanged while the user compares the fixed reference.
