@@ -1,6 +1,6 @@
 /// <reference types="bun" />
 import { describe, expect, test } from "bun:test";
-import { FRAME_SIZES, frameLayout, gnomonTime, photoCaption } from "./photo-frame";
+import { FRAME_SIZES, etagMatches, frameEtag, frameLayout, gnomonTime, photoCaption } from "./photo-frame";
 import worker, { type Env } from "./index";
 
 describe("photo frame", () => {
@@ -55,6 +55,29 @@ describe("Gnomon Pacific time", () => {
     });
 });
 
+describe("conditional requests", () => {
+    const etag = frameEtag("123", "1700000000", "image/jpeg", FRAME_SIZES.bw, 20);
+
+    test("changes when any rendering input changes", () => {
+        const variants = [
+            frameEtag("124", "1700000000", "image/jpeg", FRAME_SIZES.bw, 20),
+            frameEtag("123", "1700000001", "image/jpeg", FRAME_SIZES.bw, 20),
+            frameEtag("123", "1700000000", "image/png", FRAME_SIZES.bw, 20),
+            frameEtag("123", "1700000000", "image/jpeg", FRAME_SIZES.color, 20),
+            frameEtag("123", "1700000000", "image/jpeg", FRAME_SIZES.bw, 21),
+        ];
+        expect(new Set([etag, ...variants]).size).toBe(variants.length + 1);
+    });
+    test("matches exact, weak, wildcard and multi-valued If-None-Match", () => {
+        expect(etagMatches(null, etag)).toBe(false);
+        expect(etagMatches(etag, etag)).toBe(true);
+        expect(etagMatches(`W/${etag}`, etag)).toBe(true);
+        expect(etagMatches(`"other", ${etag}`, etag)).toBe(true);
+        expect(etagMatches("*", etag)).toBe(true);
+        expect(etagMatches('"other"', etag)).toBe(false);
+    });
+});
+
 describe("random endpoints", () => {
     for (const [path, tag] of [["random-photo.jpeg", "bw"], ["random-color-photo.jpeg", "color"], ["random-photo.png", "bw"], ["random-color-photo.png", "color"]]) {
         test(`${path} searches the ${tag} tag and handles an empty collection`, async () => {
@@ -68,6 +91,19 @@ describe("random endpoints", () => {
             expect(response.status).toBe(404);
         });
     }
+    test("answers 304 before any rendering work when the validator matches", async () => {
+        const photo = { id: "900", title: "BW_1_1", datetaken: "2025-01-01 00:00:00", lastupdate: "1700000000" };
+        const flickr = async () => ({ photos: { total: "1", photo: [photo] } });
+        const env = { flickr } as unknown as Env;
+        const etag = frameEtag(photo.id, photo.lastupdate, "image/jpeg", FRAME_SIZES.bw, gnomonTime(new Date()));
+        const response = await worker.fetch(
+            new Request("https://cutedogs.org/api/random-photo.jpeg", { headers: { "If-None-Match": etag } }),
+            env,
+        );
+        expect(response.status).toBe(304);
+        expect(response.headers.get("ETag")).toBe(etag);
+        expect(response.body).toBeNull();
+    });
     test("selects a single-photo collection without an invalid random range", async () => {
         let calls = 0;
         const flickr = async (_method: string, args: any) => {

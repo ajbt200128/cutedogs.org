@@ -5,6 +5,8 @@ export const FRAME_SIZES = {
     color: { width: 1600, height: 1200 }, // Inkplate 13SPECTRA.
 };
 const BORDER = 1;
+const DOWNLOAD_ATTEMPTS = 2;
+
 /**
  * TRMNL's Image Display plugin only re-renders when the image's ETag changes.
  * Without a validator it treats the endpoint as unchanged and serves a cached
@@ -18,6 +20,25 @@ export function etagMatches(header: string | null, etag: string): boolean {
     if (!header) return false;
     const bare = (tag: string) => tag.trim().replace(/^W\//, "");
     return header.split(",").some((candidate) => bare(candidate) === "*" || bare(candidate) === bare(etag));
+}
+
+/**
+ * Flickr's size variants are not uniformly available: a photo with an original
+ * can still 404 on `_l`, and Cloudflare egress occasionally trips a transient
+ * upstream failure. Walk the candidates and retry server-side errors.
+ */
+async function downloadPhoto(urls: string[]): Promise<ArrayBuffer> {
+    let lastStatus: number | undefined;
+    for (const url of urls) {
+        for (let attempt = 0; attempt < DOWNLOAD_ATTEMPTS; attempt++) {
+            const source = await fetch(url);
+            if (source.ok && source.body) return source.arrayBuffer();
+            lastStatus = source.status;
+            // A different size may still work, but repeating a plain 4xx will not.
+            if (source.status < 500 && source.status !== 429) break;
+        }
+    }
+    throw new Error(`Photo download failed${lastStatus ? ` (status ${lastStatus})` : ""}`);
 }
 
 export function frameLayout(width: number, height: number, frame = FRAME_SIZES.color) {
@@ -89,11 +110,10 @@ export async function renderPhotoFrame(
         return response;
     }
 
-    const url = photo.url_h || photo.url_l || photo.url_c || photo.url_o;
-    if (!url) throw new Error("Photo has no image URL");
-    const source = await fetch(url);
-    if (!source.ok || !source.body) throw new Error("Photo download failed");
-    const bytes = await source.arrayBuffer();
+    // `_l` is frequently absent even when `_o` is present, so it is only a last resort.
+    const urls = [photo.url_h, photo.url_c, photo.url_o, photo.url_l].filter((url): url is string => Boolean(url));
+    if (urls.length === 0) throw new Error("Photo has no image URL");
+    const bytes = await downloadPhoto(urls);
     const stream = () => new Response(bytes).body!;
     const info = await env.IMAGES.info(stream());
     if (!("width" in info)) throw new Error("Unsupported image format");
