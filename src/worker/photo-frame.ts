@@ -5,6 +5,20 @@ export const FRAME_SIZES = {
     color: { width: 1600, height: 1200 }, // Inkplate 13SPECTRA.
 };
 const BORDER = 1;
+/**
+ * TRMNL's Image Display plugin only re-renders when the image's ETag changes.
+ * Without a validator it treats the endpoint as unchanged and serves a cached
+ * render, so a random-photo URL appears frozen for a day at a time.
+ */
+export function frameEtag(photoId: string, lastupdate: string | undefined, format: string, frame: { width: number; height: number }, fontTime: number): string {
+    return `"${photoId}-${lastupdate || ""}-${format.replace("/", "_")}-${frame.width}x${frame.height}-${fontTime}"`;
+}
+
+export function etagMatches(header: string | null, etag: string): boolean {
+    if (!header) return false;
+    const bare = (tag: string) => tag.trim().replace(/^W\//, "");
+    return header.split(",").some((candidate) => bare(candidate) === "*" || bare(candidate) === bare(etag));
+}
 
 export function frameLayout(width: number, height: number, frame = FRAME_SIZES.color) {
     if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
@@ -58,6 +72,10 @@ export async function renderPhotoFrame(
     const format = requestUrl.pathname.endsWith(".png") ? "image/png" : "image/jpeg";
     const fontTime = gnomonTime(new Date());
     const frame = FRAME_SIZES[tag];
+    const etag = frameEtag(photo.id, photo.lastupdate, format, frame, fontTime);
+    if (etagMatches(request.headers.get("If-None-Match"), etag)) {
+        return new Response(null, { status: 304, headers: { "ETag": etag, "Cache-Control": "no-store" } });
+    }
     const marginX = frame.width * 0.025;
     const captionHeight = frame.height * 0.05;
     const captionScale = frame.width / FRAME_SIZES.color.width;
@@ -66,6 +84,7 @@ export async function renderPhotoFrame(
     const cached = await cache.match(cacheKey);
     if (cached) {
         const response = new Response(cached.body, cached);
+        response.headers.set("ETag", etag);
         response.headers.set("Cache-Control", "no-store");
         return response;
     }
@@ -102,6 +121,7 @@ export async function renderPhotoFrame(
         })
         .output({ format, quality: 95 });
     const response = result.response({ headers: {
+        "ETag": etag,
         "Cache-Control": "public, max-age=86400",
         "X-Photo-Name": encodeURIComponent(photo.title || "Untitled"),
         "X-Photo-Date": photo.datetaken?.slice(0, 10) || "",
