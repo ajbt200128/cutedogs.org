@@ -6,6 +6,7 @@ export const FRAME_SIZES = {
 };
 const BORDER = 1;
 const DOWNLOAD_ATTEMPTS = 2;
+const FRAME_RENDER_VERSION = "v5";
 
 /**
  * TRMNL's Image Display plugin only re-renders when the image's ETag changes.
@@ -13,7 +14,7 @@ const DOWNLOAD_ATTEMPTS = 2;
  * render, so a random-photo URL appears frozen for a day at a time.
  */
 export function frameEtag(photoId: string, lastupdate: string | undefined, format: string, frame: { width: number; height: number }, fontTime: number): string {
-    return `"${photoId}-${lastupdate || ""}-${format.replace("/", "_")}-${frame.width}x${frame.height}-${fontTime}"`;
+    return `"${FRAME_RENDER_VERSION}-${photoId}-${lastupdate || ""}-${format.replace("/", "_")}-${frame.width}x${frame.height}-${fontTime}"`;
 }
 
 export function etagMatches(header: string | null, etag: string): boolean {
@@ -100,7 +101,7 @@ export async function renderPhotoFrame(
     const marginX = frame.width * 0.025;
     const captionHeight = frame.height * 0.05;
     const captionScale = frame.width / FRAME_SIZES.color.width;
-    const cacheKey = new Request(`${origin}/frame-cache/v4/${tag}/${encodeURIComponent(photo.id)}?updated=${photo.lastupdate || ""}&format=${format}&fontTime=${fontTime}&canvas=${frame.width}x${frame.height}`);
+    const cacheKey = new Request(`${origin}/frame-cache/${FRAME_RENDER_VERSION}/${tag}/${encodeURIComponent(photo.id)}?updated=${photo.lastupdate || ""}&format=${format}&fontTime=${fontTime}&canvas=${frame.width}x${frame.height}`);
     const cache = await caches.open("photo-frames");
     const cached = await cache.match(cacheKey);
     if (cached) {
@@ -135,7 +136,7 @@ export async function renderPhotoFrame(
             left: layout.left, top: layout.top,
         })
         .draw(env.IMAGES.text(photoCaption(photo), {
-            font: { url: `${origin}/frame/gnomon/time-${fontTime}.ttf` }, size: 24 * captionScale, color: "black",
+            font: { url: `${origin}/frame/gnomon/time-${fontTime}.ttf?v=${FRAME_RENDER_VERSION}` }, size: 24 * captionScale, color: "black",
         }).transform({ width: frame.width - 2 * marginX, height: captionHeight - 12 * captionScale, fit: "scale-down" }), {
             right: marginX, bottom: 18 * captionScale,
         })

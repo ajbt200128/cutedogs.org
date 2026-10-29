@@ -58,7 +58,11 @@ for (const [tag, format] of [["color", "png"], ["bw", "png"], ["color", "jpeg"],
             expect(outputOptions.format).toBe(`image/${format}`);
             expect(response.headers.get("X-Frame-Width")).toBe(`${width}`);
             expect(response.headers.get("X-Frame-Height")).toBe(`${height}`);
-            expect(cacheUrl).toContain("/frame-cache/v4/");
+            expect(cacheUrl).toContain("/frame-cache/v5/");
+            expect(response.headers.get("ETag")).toStartWith('"v5-');
+            const fontTime = Number(response.headers.get("X-Gnomon-Time")) * 2;
+            expect(textOptions.font.url).toBe(`https://cutedogs.org/frame/gnomon/time-${fontTime}.ttf?v=v5`);
+            expect(new URL(cacheUrl).searchParams.get("fontTime")).toBe(`${fontTime}`);
             expect(cacheUrl).toContain(`canvas=${width}x${height}`);
             expect(response.headers.get("Cache-Control")).toBe("no-store");
         } finally {

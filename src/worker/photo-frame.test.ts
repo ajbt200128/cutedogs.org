@@ -68,6 +68,10 @@ describe("conditional requests", () => {
         ];
         expect(new Set([etag, ...variants]).size).toBe(variants.length + 1);
     });
+    test("does not reuse validators from the old shadow-only render", () => {
+        const oldEtag = '"123-1700000000-image_jpeg-800x480-20"';
+        expect(etagMatches(oldEtag, etag)).toBe(false);
+    });
     test("matches exact, weak, wildcard and multi-valued If-None-Match", () => {
         expect(etagMatches(null, etag)).toBe(false);
         expect(etagMatches(etag, etag)).toBe(true);
